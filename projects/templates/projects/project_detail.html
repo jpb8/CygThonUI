@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ project.name }}</title>
+</head>
+<body>
+<h1>{{ project.name }}</h1>
+{% for d in project.dds_set.all %}
+<p>{{ d.file }} => {{ d.uploaded }}</p>
+{% endfor %}
+</body>
+</html>
