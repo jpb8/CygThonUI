@@ -3,5 +3,8 @@ from django.contrib.auth.models import User
 
 
 # Create your models here.
-class Projects(models.Model):
+class Project(models.Model):
     name = models.CharField(max_length=124)
+
+    def __str__(self):
+        return self.name
