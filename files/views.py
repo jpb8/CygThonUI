@@ -10,20 +10,10 @@ import os
 from cygdevices.device import DeviceDef
 
 
-def handle_uploaded_file(f):
-    relative_path = "dds/{}".format(f.name)
-    full_path = "media/{}".format(relative_path)
-    with open(full_path, 'wb+') as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
-
-
-# Create your views here.
 def dds_upload(request):
     if request.method == 'POST':
         form = DDSForm(request.POST, request.FILES)
         if form.is_valid():
-            # handle_uploaded_file(request.FILES['file'])
             form.save()
             _form = DDSForm
             return render(request, 'files/file_upload.html', {'form': _form})
@@ -70,3 +60,10 @@ def export_dds(request):
             response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
             return response
     raise Http404
+
+
+def dds_add_mapping(request):
+    # Pass Excel file and dtf document to import script, return error logs
+
+    pass
+

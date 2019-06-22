@@ -103,7 +103,7 @@ class DeviceDef:
         return log
 
     def save(self, xml_file):
-        file = open(xml_file, "wb")
+        file = open(self.device_xml_path, "wb")
         file.write(etree.tostring(self.xml, pretty_print=True))
         file.close()
 
@@ -304,6 +304,35 @@ class DeviceDef:
                         orphans['deid'].append(m.get("data_element_id"))
         return orphans
 
+    def dds_excel_import(self, mappings, dtfxml):
+        """
+        Add all mappings supplied in pandas object (create pandas object in method?)
+        :param mappings: pandas dataframe with all mappings
+        :param dtfxml: DTF Object used to check deids
+        :return: List of errors (strings) that occurred while mapping points
+        """
+        devices = mappings.device.unique()
+        errs = []
+        for d in devices:
+            dev_points = mappings.loc[mappings['device'] == d]
+            dev_arr = dev_points.array.unique()
+            facs = []
+            if self.check_device(d) is not None:
+                for da in dev_arr:
+                    arr_points = dev_points.loc[dev_points['array'] == da]
+                    maps = []
+                    for i, p in arr_points.iterrows():
+                        udc, pnt_err = UdcMap.safe_create(dtfxml, p, da)
+                        maps.append(udc) if udc is not None else errs.append(pnt_err)
+                        facs.append(p["facilityid"]) if p["facilityid"] not in facs else None
+                    map_log = self.add_maps(d, da, maps)
+                    fac_log = self.add_facs(facs, d)
+                    errs = errs + map_log + fac_log
+            else:
+                errs.append("Device {} is not in XML".format(d))
+        self.save()
+        return errs
+
     def export_mappings(self, file_name):
         df_pnt = self.export_data()
         df_cmd = self.uis_commands()
@@ -343,3 +372,36 @@ class UdcMap:
         self.udc = udc
         self.data_id = data_id
         self.fac = fac
+
+    @classmethod
+    def safe_create(cls, dtf_xml, row, dev_array):
+        """
+
+        :param dtf_xml: DTF class
+        :param row: Dict of {'facilityid': '','bit':'','uniformdatacode':'','indexed':''}
+        :param dev_array: array we are looking to add a mapping too
+        :return: Tuple of UDC and error bool, (if error, returns Error message)
+        """
+        if row["type"] == "A":
+            deid = dtf_xml.get_analog_deid(dev_array, row["indexed"], str(int(row["bit"])))
+            if deid:
+                _udc, err = UdcMap(row["uniformdatacode"], deid, row["facilityid"]), False
+            else:
+                _udc, err = "*DEID Not found* tagname: {}[{}], Array: {}, UDC: {} FAC: {}".format(
+                    row["indexed"], row["bit"], dev_array,
+                    row["uniformdatacode"],
+                    row["facilityid"]
+                ), True
+        elif row["type"] == "D":
+            if dtf_xml.check_dg_element(row["array"], row["deid"]):
+                _udc, err = cls(row["uniformdatacode"], row["deid"], row["facilityid"]), False
+            else:
+                _udc, err = "*DEID Not found* DEID: {}, Array {}, UDC: {} FAC: {}".format(
+                    row["deid"],
+                    dev_array,
+                    row["uniformdatacode"],
+                    row["facilityid"]
+                ), True
+        else:
+            _udc, err = "Point type is neither A or D", True
+        return _udc, err
