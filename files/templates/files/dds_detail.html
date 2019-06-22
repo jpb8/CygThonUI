@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<p>{{ dds.file }}</p>
+<p>{{ dds.project }}</p>
+<p>{{ dds.uploaded }}</p>
+<p>{{ dds.last_update }}</p>
+<h1>Facs with Incorrect Facilities</h1>
+{% for d in incorrect_dev %}
+<p>{{ d }}</p>
+{% endfor %}
+<h1>Unmapped Facilities</h1>
+{% for d in unmapped %}
+<p>{{ d }}</p>
+{% endfor %}
+<button type="button" id="export-dds" data-id="{{ dds.pk }}">Export</button>
+</body>
+<script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+<script>
+    $(document).ready(function() {
+        $( "#export-dds" ).click(function() {
+            var url = {% url 'files:file_upload' %}
+            $.ajax({
+                url : url,
+                type : 'POST',
+                data : {
+                    'id' : {{ dds.pk }}
+                },
+                dataType:'json',
+                success : function(data) {
+
+                },
+                error : function(request,error)
+                {
+                    alert("Request: "+JSON.stringify(request));
+                }
+            });
+        });
+    });
+</script>
+</html>

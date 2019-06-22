@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+
+</head>
+<body>
+{% if file_strs %}
+{% for f in file_strs %}
+<p>{{ f }}</p>
+{% endfor %}
+{% endif %}
+<pre><code class="xml hljs">{{ code_string }}</code></pre>
+</body>
+
+</html>

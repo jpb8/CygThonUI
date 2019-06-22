@@ -5,13 +5,13 @@ from projects.models import Project
 
 # Create your models here.
 class DDS(models.Model):
-    file = models.FileField(upload_to="dds/")
+    file = models.FileField(upload_to='dds/')
     uploaded = models.DateTimeField(auto_now=True)
-    last_update = models.DateTimeField()
+    last_update = models.DateTimeField(auto_now=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
-    def save(self):
-        self.last_update = timezone.now()
+    def __str__(self):
+        return "{} - {}".format(self.project, self.file)
 
 
 class DTF(models.Model):
@@ -20,5 +20,5 @@ class DTF(models.Model):
     last_update = models.DateTimeField()
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
-    def save(self, *args, **kwargs):
-        self.last_update = timezone.now()
+    def __str__(self):
+        return "{} - {}".format(self.project, self.file)

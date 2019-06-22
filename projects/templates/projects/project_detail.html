@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ project.name }}</title>
+    <link href="themes/prism.css" rel="stylesheet" />
 </head>
 <body>
 <h1>{{ project.name }}</h1>
 {% for d in project.dds_set.all %}
-<p>{{ d.file }} => {{ d.uploaded }}</p>
+<p><a href="files/dds/{{ d.pk }}">{{ d.file }}</a></p>
 {% endfor %}
 </body>
 </html>

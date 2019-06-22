@@ -1,0 +1,27 @@
+<DataGroup>
+    <DataGroupAttributes>
+        <Ordinal>0</Ordinal>
+        <Description></Description>
+        <FacilityId></FacilityId>
+        <BelongsToDevice>0</BelongsToDevice>
+        <TxRetentionType>1</TxRetentionType>
+        <TxFailedMax>10</TxFailedMax>
+        <TxSuccessfulMax>20</TxSuccessfulMax>
+        <TxSuccessfulMin>0</TxSuccessfulMin>
+        <TxSuccessfulDays>7</TxSuccessfulDays>
+        <TxReplicationEnabled>0</TxReplicationEnabled>
+        <DataGroupInstalled>1</DataGroupInstalled>
+        <DataGroupRequired>0</DataGroupRequired>
+        <DataGroupSecurityApp>DDS</DataGroupSecurityApp>
+        <DataGroupSecurityEvent>ACCESS</DataGroupSecurityEvent>
+        <DataGroupSpecific/>
+        <DataGroupType></DataGroupType>
+        <DataGroupVisible>1</DataGroupVisible>
+        <DefaultsFacility>1</DefaultsFacility>
+        <InheritsSecurity>0</InheritsSecurity>
+        <WebEnabled>0</WebEnabled>
+        <SystemFlags>0</SystemFlags>
+        <UserDefined>0</UserDefined>
+    </DataGroupAttributes>
+    <UdcMappings/>
+</DataGroup>
