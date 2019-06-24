@@ -5,18 +5,28 @@
     <title>Title</title>
 </head>
 <body>
-<p>{{ dds.file }}</p>
-<p>{{ dds.project }}</p>
-<p>{{ dds.uploaded }}</p>
-<p>{{ dds.last_update }}</p>
-<h1>Facs with Incorrect Facilities</h1>
-{% for d in incorrect_dev %}
-    <p>{{ d }}</p>
-{% endfor %}
-<h1>Unmapped Facilities</h1>
-{% for d in unmapped %}
-    <p>{{ d }}</p>
-{% endfor %}
+<h1>{{ dds.file }}</h1>
+<ul>
+    <li>Project - {{ dds.project }}</li>
+    <li>Uploaded - {{ dds.uploaded }}</li>
+</ul>
+<h2>Facs with Incorrect Facilities</h2>
+{% if incorrect_dev %}
+<!--should turn into a table-->
+<ul>
+    {% for d in incorrect_dev %}
+    <p><b>Device-</b>{{ d.device }} <b>Array-</b>{{ d.dg_type }} <b>DEID-</b>{{ d.deid }} <b>Point-</b>{{ d.facility }}_{{ d.udc }}</p>
+    {% endfor %}
+</ul>
+{% endif %}
+<h2>Unmapped Facilities</h2>
+{% if unmapped %}
+<ul>
+    {% for d in unmapped %}
+    <li>{{ d }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
 <button type="button" id="export-dds" data-id="{{ dds.pk }}">Export</button>
 <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_add_mappings' %}" id="dds-mapping">
     {% csrf_token %}
@@ -32,7 +42,10 @@
     <input hidden name="dds-id" value="{{ dds.pk }}">
     <button type="submit">Map!</button>
 </form>
-<div id="dds-success"></div>
+<div id="dds-success">
+    <h1>Errors</h1>
+    {% include 'files/snippets/errors.html' %}
+</div>
 </body>
 <script
         src="https://code.jquery.com/jquery-3.4.1.min.js"
