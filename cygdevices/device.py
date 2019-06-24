@@ -102,7 +102,7 @@ class DeviceDef:
                     log.append("Facility {} was linkded to {} device".format(f, device_id))
         return log
 
-    def save(self, xml_file):
+    def save(self):
         file = open(self.device_xml_path, "wb")
         file.write(etree.tostring(self.xml, pretty_print=True))
         file.close()
@@ -304,7 +304,7 @@ class DeviceDef:
                         orphans['deid'].append(m.get("data_element_id"))
         return orphans
 
-    def dds_excel_import(self, mappings, dtfxml):
+    def mapping_excel_import(self, mappings, dtfxml):
         """
         Add all mappings supplied in pandas object (create pandas object in method?)
         :param mappings: pandas dataframe with all mappings
@@ -323,7 +323,7 @@ class DeviceDef:
                     maps = []
                     for i, p in arr_points.iterrows():
                         udc, pnt_err = UdcMap.safe_create(dtfxml, p, da)
-                        maps.append(udc) if udc is not None else errs.append(pnt_err)
+                        maps.append(udc) if not pnt_err else errs.append(udc)
                         facs.append(p["facilityid"]) if p["facilityid"] not in facs else None
                     map_log = self.add_maps(d, da, maps)
                     fac_log = self.add_facs(facs, d)

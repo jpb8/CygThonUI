@@ -1,13 +1,23 @@
 from django.shortcuts import render, redirect
-from .forms import DDSForm
+from django.http import JsonResponse
+from .forms import DDSForm, DTFForm
 from projects.models import Project
 from django.views.generic import DetailView
 from django.http import HttpResponse, Http404
-from .models import DDS
+from .models import DDS, DTF
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 
 import os
 from cygdevices.device import DeviceDef
+
+
+def upload(request):
+    cont_dict = {
+        "dds_form": DDSForm,
+        "dtf_form": DTFForm,
+    }
+    return render(request, 'files/file_upload.html', cont_dict)
 
 
 def dds_upload(request):
@@ -15,13 +25,19 @@ def dds_upload(request):
         form = DDSForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            _form = DDSForm
-            return render(request, 'files/file_upload.html', {'form': _form})
         else:
             print("Error in form")
-    else:
-        form = DDSForm
-    return render(request, 'files/file_upload.html', {'form': form})
+    return redirect('files:upload')
+
+
+def dtf_upload(request):
+    if request.method == 'POST':
+        form = DTFForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+        else:
+            print("Error in form")
+    return redirect('files:upload')
 
 
 def file_print(request):
@@ -47,6 +63,7 @@ class DDSDetailView(DetailView):
         device = DeviceDef("{}/{}".format("media", str(self.object.file)))
         data['incorrect_dev'] = device.correct_dev_check()
         data['unmapped'] = device.mapped_fac_check()
+        data['dtfs'] = DTF.objects.all()
         return data
 
 
@@ -64,6 +81,12 @@ def export_dds(request):
 
 def dds_add_mapping(request):
     # Pass Excel file and dtf document to import script, return error logs
-
-    pass
-
+    if request.method == "POST":
+        mappings = request.FILES["mappings"]
+        try:
+            dtf = DTF.objects.get(pk=int(request.POST.get("dtf-id")))
+            dds = DDS.objects.get(pk=int(request.POST.get("dds-id")))
+            errors = dds.add_mappings(dtf, mappings)
+        except ObjectDoesNotExist:
+            print("DTF or DDS not found")
+    return redirect("files:upload")

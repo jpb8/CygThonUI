@@ -18,12 +18,21 @@
     <p>{{ d }}</p>
 {% endfor %}
 <button type="button" id="export-dds" data-id="{{ dds.pk }}">Export</button>
-<form method="post" enctype="multipart/form-data" action="">
+<form method="post" enctype="multipart/form-data" action="{% url 'files:dds_add_mappings' %}" id="dds-mapping">
     {% csrf_token %}
     <label>Import Mappings</label>
     <input type="file" name="mappings">
+    <select name="dtf-id">
+        {% if dtfs %}
+        {% for d in dtfs %}
+        <option value="{{ d.pk }}">{{ d.file }}</option>
+        {% endfor %}
+        {% endif %}
+    </select>
+    <input hidden name="dds-id" value="{{ dds.pk }}">
     <button type="submit">Map!</button>
 </form>
+<div id="dds-success"></div>
 </body>
 <script
         src="https://code.jquery.com/jquery-3.4.1.min.js"
@@ -31,17 +40,24 @@
         crossorigin="anonymous"></script>
 <script>
     $(document).ready(function () {
-        $("#export-dds").click(function () {
-            var _url = '{% url 'files:dds_export' %}'
+        $("#test").submit(function (event) {
+            event.preventDefault();
+            var _url = $(this).attr("action");
+            var method = "POST";
+            var formData = $(this).serialize();
+            console.log(formData);
             $.ajax({
                 url: _url,
-                type: 'POST',
-                data: {
-                    'id': {{ dds.pk }}
-                },
+                type: method,
+                data: formData,
                 dataType: 'json',
-                success: function (data) {
-
+                success: function (data){
+                    var errs = data.errors;
+                    var text = "";
+                    for (i = 0; i < errs.length; i++) {
+                      text += "<p>" + errs[i] + "</p>";
+                    }
+                    $("#dds-success").html(text);
                 },
                 error: function (request, error) {
                     alert("Request: " + JSON.stringify(request));
