@@ -3,12 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ project.name }}</title>
-    <link href="themes/prism.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
 </head>
 <body>
-<h1>{{ project.name }}</h1>
-{% for d in project.dds_set.all %}
-<p><a href="files/dds/{{ d.pk }}">{{ d.file }}</a></p>
-{% endfor %}
+<div class="container">
+    <h1>{{ project.name }}</h1>
+    <div id="dds-form" style="float: left; width: 45%; margin: 10px;">
+        <h2>Upload DDS</h2>
+        <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_upload' %}">
+            {% csrf_token %}
+            {{ dds_form.as_p }}
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+    <div id="dtf-form" style="float: left; width: 45%; margin: 10px;">
+        <h2>Upload DTF</h2>
+        <form method="post" enctype="multipart/form-data" action="{% url 'files:dtf_upload' %}">
+            {% csrf_token %}
+            {{ dtf_form.as_p }}
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+    <div id="dds-files" style="width: 90%; margin: 10px;">
+        <h2>DDS Files</h2>
+        {% for d in project.dds_set.all %}
+            <p><a href="http://127.0.0.1:8000/files/dds/{{ d.pk }}">{{ d.base_file }}</a></p>
+        {% endfor %}
+    </div>
+    <div id="dtf-files" style="width: 90%; margin: 10px;">
+        <h2>DDS Files</h2>
+        {% for d in project.dtf_set.all %}
+            <p><a href="http://127.0.0.1:8000/files/dds/{{ d.pk }}">{{ d.base_file }}</a></p>
+        {% endfor %}
+    </div>
+</div>
 </body>
+<script
+        src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+        crossorigin="anonymous"></script>
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 </html>

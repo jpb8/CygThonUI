@@ -1,7 +1,7 @@
 from lxml import etree
 from lxml.etree import SubElement
 import pandas as pd
-
+from io import BytesIO
 
 class DeviceDef:
     def __init__(self, device_xml_path):
@@ -333,13 +333,17 @@ class DeviceDef:
         self.save()
         return errs
 
-    def export_mappings(self, file_name):
+    def export_mappings(self):
         df_pnt = self.export_data()
         df_cmd = self.uis_commands()
-        writer = pd.ExcelWriter(file_name, engine="xlsxwriter")
+        sio = BytesIO()
+        writer = pd.ExcelWriter(sio, engine="xlsxwriter")
         df_pnt.to_excel(writer, sheet_name="PNTS")
         df_cmd.to_excel(writer, sheet_name="CMDS")
         writer.save()
+        writer.close()
+        sio.seek(0)
+        return sio.getvalue()
 
 
 class DataGroup:

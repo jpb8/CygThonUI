@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from .forms import DDSForm, DTFForm
 from projects.models import Project
 from django.views.generic import DetailView
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, StreamingHttpResponse
 from .models import DDS, DTF
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -23,21 +23,23 @@ def upload(request):
 def dds_upload(request):
     if request.method == 'POST':
         form = DDSForm(request.POST, request.FILES)
+        next = request.POST.get('next', '/')
         if form.is_valid():
             form.save()
         else:
             print("Error in form")
-    return redirect('files:upload')
+    return redirect(next)
 
 
 def dtf_upload(request):
     if request.method == 'POST':
         form = DTFForm(request.POST, request.FILES)
+        next = request.POST.get('next', '/')
         if form.is_valid():
             form.save()
         else:
             print("Error in form")
-    return redirect('files:upload')
+    return redirect(next)
 
 
 def file_print(request):
@@ -68,13 +70,14 @@ class DDSDetailView(DetailView):
 
 
 def export_dds(request):
-    dds_id = request.POST.get("id")
+    dds_id = request.GET.get("id")
     dds = DDS.objects.get(pk=dds_id)
-    file_path = os.path.join(settings.MEDIA_ROOT, dds.file)
+    file_path = os.path.join(settings.MEDIA_ROOT, str(dds.file))
     if os.path.exists(file_path):
         with open(file_path, 'rb') as fh:
-            response = HttpResponse(fh.read())
-            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+            response = HttpResponse(fh.read(), content_type='application/force-download')
+            response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(file_path)
+            response['X-Sendfile'] = file_path
             return response
     raise Http404
 
@@ -86,7 +89,23 @@ def dds_add_mapping(request):
         try:
             dtf = DTF.objects.get(pk=int(request.POST.get("dtf-id")))
             dds = DDS.objects.get(pk=int(request.POST.get("dds-id")))
-            errors = dds.add_mappings(dtf, mappings)
         except ObjectDoesNotExist:
             print("DTF or DDS not found")
+            return redirect("files:upload")
+        errors = dds.add_mappings(dtf, mappings)
+        if request.is_ajax():
+            return JsonResponse({'errors': errors})
     return redirect("files:upload")
+
+
+def mapping_export(request):
+    dds_id = request.GET.get("id")
+    try:
+        dds = DDS.objects.get(pk=dds_id)
+    except ObjectDoesNotExist:
+        print("DTF or DDS not found")
+        return redirect("files:upload")
+    workbook = dds.xml.export_mappings()
+    response = HttpResponse(workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename={}'.format("text.xlsx")
+    return response

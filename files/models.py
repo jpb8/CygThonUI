@@ -21,6 +21,14 @@ class DDS(models.Model):
         return "{} - {}".format(self.project, self.file)
 
     @property
+    def base_file(self):
+        return os.path.basename(str(self.file))
+
+    @property
+    def export_url(self):
+        return "http://127.0.0.1:8000/files/dds/export/?id={}".format(self.pk)
+
+    @property
     def xml(self):
         return DeviceDef(os.path.join(settings.MEDIA_ROOT, str(self.file)))
 
@@ -45,3 +53,7 @@ class DTF(models.Model):
     @property
     def xml(self):
         return D(os.path.join(settings.MEDIA_ROOT, str(self.file)))
+
+    @property
+    def base_file(self):
+        return os.path.basename(str(self.file))

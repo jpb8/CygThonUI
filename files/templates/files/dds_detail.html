@@ -3,72 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
+
 </head>
 <body>
-<h1>{{ dds.file }}</h1>
-<ul>
-    <li>Project - {{ dds.project }}</li>
-    <li>Uploaded - {{ dds.uploaded }}</li>
-</ul>
-<h2>Facs with Incorrect Facilities</h2>
-{% if incorrect_dev %}
-<!--should turn into a table-->
-<ul>
-    {% for d in incorrect_dev %}
-    <p><b>Device-</b>{{ d.device }} <b>Array-</b>{{ d.dg_type }} <b>DEID-</b>{{ d.deid }} <b>Point-</b>{{ d.facility }}_{{ d.udc }}</p>
-    {% endfor %}
-</ul>
-{% endif %}
-<h2>Unmapped Facilities</h2>
-{% if unmapped %}
-<ul>
-    {% for d in unmapped %}
-    <li>{{ d }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-<button type="button" id="export-dds" data-id="{{ dds.pk }}">Export</button>
-<form method="post" enctype="multipart/form-data" action="{% url 'files:dds_add_mappings' %}" id="dds-mapping">
-    {% csrf_token %}
-    <label>Import Mappings</label>
-    <input type="file" name="mappings">
-    <select name="dtf-id">
-        {% if dtfs %}
-        {% for d in dtfs %}
-        <option value="{{ d.pk }}">{{ d.file }}</option>
-        {% endfor %}
-        {% endif %}
-    </select>
-    <input hidden name="dds-id" value="{{ dds.pk }}">
-    <button type="submit">Map!</button>
-</form>
-<div id="dds-success">
-    <h1>Errors</h1>
-    {% include 'files/snippets/errors.html' %}
-</div>
+<div id="left" class="container">
+    <h1>{{ dds.base_file }}</h1>
+    <ul>
+        <li>Project - {{ dds.project }}</li>
+        <li>Uploaded - {{ dds.uploaded }}</li>
+    </ul>
+    <button onclick="window.location.href = '{{ dds.export_url }}';">Export File!</button>
+    <button onclick="window.location.href = 'http://127.0.0.1:8000/files/dds/dds_mappings_export/?id={{ dds.pk }}';">Export File!</button>
+    <h2>Facs with Incorrect Facilities</h2>
+    {% if incorrect_dev %}
+        <!--should turn into a table-->
+        <ul>
+            {% for d in incorrect_dev %}
+                <p><b>Device-</b>{{ d.device }} <b>Array-</b>{{ d.dg_type }} <b>DEID-</b>{{ d.deid }}
+                    <b>Point-</b>{{ d.facility }}_{{ d.udc }}</p>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <h2>Unmapped Facilities</h2>
+    {% if unmapped %}
+        <ul>
+            {% for d in unmapped %}
+                <li>{{ d }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_add_mappings' %}" id="dds-mapping">
+        {% csrf_token %}
+        <label>Import Mappings</label>
+        <input type="file" name="mappings">
+        <select name="dtf-id">
+            {% if dtfs %}
+                {% for d in dtfs %}
+                    <option value="{{ d.pk }}">{{ d.file }}</option>
+                {% endfor %}
+            {% endif %}
+        </select>
+        <input hidden name="dds-id" value="{{ dds.pk }}">
+        <button type="submit">Map!</button>
+    </form>
+    <div id="dds-success">
+    </div>
 </body>
+
+
 <script
         src="https://code.jquery.com/jquery-3.4.1.min.js"
         integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
         crossorigin="anonymous"></script>
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 <script>
     $(document).ready(function () {
-        $("#test").submit(function (event) {
+        $("#dds-mapping").submit(function (event) {
             event.preventDefault();
+            var formData = new FormData($(this)[0]);
             var _url = $(this).attr("action");
             var method = "POST";
-            var formData = $(this).serialize();
             console.log(formData);
             $.ajax({
                 url: _url,
                 type: method,
                 data: formData,
-                dataType: 'json',
-                success: function (data){
+                contentType: false,
+                processData: false,
+                success: function (data) {
                     var errs = data.errors;
                     var text = "";
                     for (i = 0; i < errs.length; i++) {
-                      text += "<p>" + errs[i] + "</p>";
+                        text += "<h2>Upload Errors</h2>";
+                        text += "<p>" + errs[i] + "</p>";
                     }
                     $("#dds-success").html(text);
                 },
