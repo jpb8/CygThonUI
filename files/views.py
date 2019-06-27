@@ -7,6 +7,7 @@ from django.http import HttpResponse, Http404, StreamingHttpResponse
 from .models import DDS, DTF
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.views.decorators.csrf import csrf_exempt
 
 import os
 from cygdevices.device import DeviceDef
@@ -109,3 +110,40 @@ def mapping_export(request):
     response = HttpResponse(workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename={}'.format("text.xlsx")
     return response
+
+
+@csrf_exempt
+def correct_device_check(request):
+    dds_id = request.POST.get("id")
+    try:
+        dds = DDS.objects.get(pk=dds_id)
+    except ObjectDoesNotExist:
+        print("DTF or DDS not found")
+        return redirect("files:upload")
+    non_matches = dds.xml.correct_dev_check()
+    if request.is_ajax():
+        data = {
+            "responseData": non_matches,
+            "header": "Non Mapped Facilities"
+        }
+        return JsonResponse(data)
+    return redirect("files:upload")
+
+
+@csrf_exempt
+def unmapped_facs(request):
+    dds_id = request.GET.get("id")
+    try:
+        dds = DDS.objects.get(pk=dds_id)
+    except ObjectDoesNotExist:
+        print("DTF or DDS not found")
+        return redirect("files:upload")
+    unmapped = dds.xml.mapped_fac_check()
+    if request.is_ajax():
+        data = {
+            "responseData": unmapped,
+            "header": "Unmapped Facilities"
+        }
+        return JsonResponse(data)
+    print(unmapped)
+    return redirect("files:upload")

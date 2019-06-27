@@ -16,25 +16,34 @@
         <li>Uploaded - {{ dds.uploaded }}</li>
     </ul>
     <button onclick="window.location.href = '{{ dds.export_url }}';">Export File!</button>
-    <button onclick="window.location.href = 'http://127.0.0.1:8000/files/dds/dds_mappings_export/?id={{ dds.pk }}';">Export File!</button>
-    <h2>Facs with Incorrect Facilities</h2>
-    {% if incorrect_dev %}
-        <!--should turn into a table-->
+    <button onclick="window.location.href = '{% url 'files:dds_mappings_export' %}';">Export Mappings
+    </button>
+    <div>
+        <h2>All Functions</h2>
         <ul>
-            {% for d in incorrect_dev %}
-                <p><b>Device-</b>{{ d.device }} <b>Array-</b>{{ d.dg_type }} <b>DEID-</b>{{ d.deid }}
-                    <b>Point-</b>{{ d.facility }}_{{ d.udc }}</p>
-            {% endfor %}
+            <li>Find Orphans</li>
+            <li>
+                <div class="dds-util" data-type="unmapped" data-id="{{ dds.pk }}"
+                     data-url="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">
+                    Correct Device Check
+                </div>
+            </li>
+            <li>Check All Facilities Exist (Excel Import)</li>
+            <li>
+                <div class="dds-util" data-type="unmapped" data-id="{{ dds.pk }}"
+                     data-url="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">
+                    Correct Device Check
+                </div>
+                <a href="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">Check All Facilities Match Device</a>
+            </li>
+            <li>
+                <div class="dds-util" data-type="unmapped" data-id="{{ dds.pk }}"
+                     data-url="{% url 'files:unmapped_facs' %}">
+                    Check Missing Facilities
+                </div>
+            </li>
         </ul>
-    {% endif %}
-    <h2>Unmapped Facilities</h2>
-    {% if unmapped %}
-        <ul>
-            {% for d in unmapped %}
-                <li>{{ d }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+    </div>
     <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_add_mappings' %}" id="dds-mapping">
         {% csrf_token %}
         <label>Import Mappings</label>
@@ -49,8 +58,25 @@
         <input hidden name="dds-id" value="{{ dds.pk }}">
         <button type="submit">Map!</button>
     </form>
-    <div id="dds-success">
+    <div class="modal fade" id="response-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Response Data</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 </body>
 
 
@@ -88,6 +114,33 @@
                 }
             });
         });
+
+        $(".dds-util").click(function () {
+            var _url = $(this).data("url");
+            var _data = {id: $(this).data("id")};
+            var method = "POST";
+            $.ajax({
+                url: _url,
+                type: method,
+                data: _data,
+                success: function (data) {
+                    var responseData = data.responseData;
+                    var text = "<h2>" + data.header + "</h2>";
+                    for (i = 0; i < responseData.length; i++) {
+                        text += "<p>" + responseData[i].facility + "</p>";
+                    }
+                    $("#modal-body").html(text);
+                    $('#response-modal').modal('show');
+                },
+                error: function (request, error) {
+                    alert("Request: " + JSON.stringify(request));
+                }
+            })
+
+
+        })
+
+
     });
 </script>
 </html>

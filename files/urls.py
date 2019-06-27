@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import upload, file_print, DDSDetailView, export_dds, dds_upload, dtf_upload, dds_add_mapping,mapping_export
+from .views import *
 
 app_name = 'files'
 
@@ -12,4 +12,6 @@ urlpatterns = [
     path('dds/export/', export_dds, name="dds_export"),
     path('dds/dds_mappings_export/', mapping_export, name="dds_mappings_export"),
     path('dds/dds_add_mappings/', dds_add_mapping, name="dds_add_mappings"),
+    path('dds/correct_dec_check/', correct_device_check, name="correct_dec_check"),
+    path('dds/unmapped_facs/', unmapped_facs, name="unmapped_facs"),
 ]
