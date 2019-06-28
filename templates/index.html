@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block body_block %}
+<body>
+    {% if projects %}
+    {% for p in projects %}
+    <h1>{{ p }}</h1>
+    {% endfor %}
+    {% endif %}
+</body>
+{% endblock %}

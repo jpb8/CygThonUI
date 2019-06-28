@@ -241,7 +241,6 @@ class DeviceDef:
             dev_id = elem.get("device_id")
             for data_group in elem.find("DataGroups"):
                 for m in data_group.find("UdcMappings"):
-                    print(m)
                     f = m.get("facility")
                     facs.append({
                         "facility": f,

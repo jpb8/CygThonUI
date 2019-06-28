@@ -2,6 +2,14 @@ from django.utils import timezone
 from django.views.generic import DetailView
 from .models import Project
 from files.forms import DDSForm, DTFForm
+from django.shortcuts import render
+
+
+def index(request):
+    cont_dict = {
+        "projects": Project.objects.all()
+    }
+    return render(request, 'index.html', cont_dict)
 
 
 class ProjectDetailView(DetailView):
