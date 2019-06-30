@@ -63,10 +63,13 @@ class DDSDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        device = DeviceDef("{}/{}".format("media", str(self.object.file)))
-        data['incorrect_dev'] = device.correct_dev_check()
-        data['unmapped'] = device.mapped_fac_check()
         data['dtfs'] = DTF.objects.all()
+        try:
+            device = DeviceDef("{}/{}".format("media", str(self.object.file)))
+            data['incorrect_dev'] = device.correct_dev_check()
+            data['unmapped'] = device.mapped_fac_check()
+        except:
+            return data
         return data
 
 
@@ -124,7 +127,7 @@ def correct_device_check(request):
     if request.is_ajax():
         data = {
             "responseData": non_matches,
-            "header": "Non Mapped Facilities"
+            "header": "Wrong Device"
         }
         return JsonResponse(data)
     return redirect("files:upload")
@@ -145,5 +148,42 @@ def unmapped_facs(request):
             "header": "Unmapped Facilities"
         }
         return JsonResponse(data)
-    print(unmapped)
+    return redirect("files:upload")
+
+
+def find_orphans(request):
+    if request.method == "POST":
+        print(request.POST)
+        try:
+            dtf = DTF.objects.get(pk=int(request.POST.get("dtf-id")))
+            dds = DDS.objects.get(pk=int(request.POST.get("dds-id")))
+        except ObjectDoesNotExist:
+            print("DTF or DDS not found")
+            return redirect("files:upload")
+        orphans = dds.xml.find_orphans(dtf.xml)
+        if request.is_ajax():
+            if request.is_ajax():
+                data = {
+                    "responseData": orphans,
+                    "header": "Orphans"
+                }
+                return JsonResponse(data)
+    return redirect("files:upload")
+
+
+def facs_dne(request):
+    if request.method == "POST":
+        facs = request.FILES["facs"]
+        try:
+            dds = DDS.objects.get(pk=int(request.POST.get("dds-id")))
+        except ObjectDoesNotExist:
+            print("DTF or DDS not found")
+            return redirect("files:upload")
+        dne = dds.check_facilities(facs)
+        if request.is_ajax():
+            data = {
+                "responseData": dne,
+                "header": "Non Existent Facs"
+            }
+            return JsonResponse(data)
     return redirect("files:upload")

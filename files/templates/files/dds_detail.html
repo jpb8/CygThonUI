@@ -21,25 +21,46 @@
     <div>
         <h2>All Functions</h2>
         <ul>
-            <li>Find Orphans</li>
             <li>
-                <div class="dds-util" data-type="unmapped" data-id="{{ dds.pk }}"
+                <form method="POST" action="{% url 'files:orphans' %}" id="dds-orphans">
+                    {% csrf_token %}
+                    <label>Import Mappings</label>
+                    <select name="dtf-id">
+                        {% if dtfs %}
+                            {% for d in dtfs %}
+                                <option value="{{ d.pk }}">{{ d.file }}</option>
+                            {% endfor %}
+                        {% endif %}
+                    </select>
+                    <input hidden name="dds-id" value="{{ dds.pk }}">
+                    <button type="submit">Find Orphans</button>
+                </form>
+            </li>
+            <li>
+                <div class="dds-util" data-id="{{ dds.pk }}"
                      data-url="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">
-                    Correct Device Check
+                    <button>Correct Device Check</button>
                 </div>
             </li>
-            <li>Check All Facilities Exist (Excel Import)</li>
             <li>
-                <div class="dds-util" data-type="unmapped" data-id="{{ dds.pk }}"
-                     data-url="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">
-                    Correct Device Check
-                </div>
-                <a href="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">Check All Facilities Match Device</a>
+                <form method="post" enctype="multipart/form-data" action="{% url 'files:fac_exist' %}" id="dds-facs">
+                    {% csrf_token %}
+                    <label>Import Mappings</label>
+                    <input type="file" name="facs">
+                    <input hidden name="dds-id" value="{{ dds.pk }}">
+                    <button type="submit">Check All Facilities Exist</button>
+                </form>
             </li>
             <li>
-                <div class="dds-util" data-type="unmapped" data-id="{{ dds.pk }}"
-                     data-url="{% url 'files:unmapped_facs' %}">
-                    Check Missing Facilities
+                <div class="dds-util" data-id="{{ dds.pk }}"
+                     data-url="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">
+                    <button>Correct Device Check</button>
+                </div>
+            </li>
+            <li>
+                <div class="dds-util" data-id="{{ dds.pk }}"
+                     data-url="{% url 'files:unmapped_facs' %}?id={{ dds.pk }}">
+                    <button>Check Missing Facilities</button>
                 </div>
             </li>
         </ul>
@@ -88,12 +109,21 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 <script>
     $(document).ready(function () {
+
+        function createResponseHTML(data) {
+            var responseData = data.responseData;
+            var text = "<h2>" + data.header + "</h2>";
+            for (i = 0; i < responseData.length; i++) {
+                text += "<p>" + responseData[i].facility + "</p>";
+            }
+            return text
+        }
+
         $("#dds-mapping").submit(function (event) {
             event.preventDefault();
             var formData = new FormData($(this)[0]);
             var _url = $(this).attr("action");
             var method = "POST";
-            console.log(formData);
             $.ajax({
                 url: _url,
                 type: method,
@@ -115,6 +145,48 @@
             });
         });
 
+        $("#dds-orphans").submit(function (event) {
+            event.preventDefault();
+            var formData = $("#dds-orphans").serialize();
+            var _url = $(this).attr("action");
+            var method = "POST";
+            $.ajax({
+                url: _url,
+                type: method,
+                data: formData,
+                success: function (data) {
+                    var text = createResponseHTML(data);
+                    $("#modal-body").html(text);
+                    $('#response-modal').modal('show');
+                },
+                error: function (request, error) {
+                    alert("Request: " + JSON.stringify(request));
+                }
+            });
+        });
+
+        $("#dds-facs").submit(function (event) {
+            event.preventDefault();
+            var formData = new FormData($(this)[0]);
+            var _url = $(this).attr("action");
+            var method = "POST";
+            $.ajax({
+                url: _url,
+                type: method,
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    var text = createResponseHTML(data);
+                    $("#modal-body").html(text);
+                    $('#response-modal').modal('show');
+                },
+                error: function (request, error) {
+                    alert("Request: " + JSON.stringify(request));
+                }
+            });
+        });
+
         $(".dds-util").click(function () {
             var _url = $(this).data("url");
             var _data = {id: $(this).data("id")};
@@ -124,11 +196,7 @@
                 type: method,
                 data: _data,
                 success: function (data) {
-                    var responseData = data.responseData;
-                    var text = "<h2>" + data.header + "</h2>";
-                    for (i = 0; i < responseData.length; i++) {
-                        text += "<p>" + responseData[i].facility + "</p>";
-                    }
+                    var text = createResponseHTML(data);
                     $("#modal-body").html(text);
                     $('#response-modal').modal('show');
                 },

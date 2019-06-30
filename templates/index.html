@@ -3,7 +3,7 @@
 <body>
     {% if projects %}
     {% for p in projects %}
-    <h1>{{ p }}</h1>
+    <a href="{{ p.get_absolute_url }}"><h1>{{ p }}</h1></a>
     {% endfor %}
     {% endif %}
 </body>

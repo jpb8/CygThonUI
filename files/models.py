@@ -38,6 +38,12 @@ class DDS(models.Model):
         error_log = self.xml.mapping_excel_import(mappings, dtf_xml)
         return error_log
 
+    def check_facilities(self, excel):
+        facs_df = pd.read_excel(excel, sheet_name="Sheet1")
+        facs = facs_df["facility"].to_list()
+        dne = self.xml.fac_exists_check(facs)
+        return dne
+
     def save_document(self):
         self.xml.save()
 
