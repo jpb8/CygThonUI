@@ -3,6 +3,7 @@ from lxml.etree import SubElement
 import pandas as pd
 from io import BytesIO
 
+
 class DeviceDef:
     def __init__(self, device_xml_path):
         self.xml = None
@@ -87,6 +88,7 @@ class DeviceDef:
         return errs
 
     def add_facs(self, facs, device_id):
+        # TODO: Check for ordinals
         """
         Addes all facs to the device's FacilityLinks Element
         :param facs: List of Facility names
@@ -100,7 +102,28 @@ class DeviceDef:
                 if fac_elem.find("./FacilityLink[@id='{}']".format(f)) is None:
                     SubElement(fac_elem, "FacilityLink", {"id": f, "ordinal": str(len(fac_elem))})
                     log.append("Facility {} was linkded to {} device".format(f, device_id))
+        else:
+            log.append("Device {} was not found to add facilities".format(device_id))
         return log
+
+    def add_facility(self, facility, device_id):
+        # TODO: Check for Ordinals
+        """
+        Adds a facility to the device's FacilityLinks Element
+        :param facility: Facility to be added
+        :param device_id: Device the facilities should be mapped too
+        :return: Any errors
+        """
+        fac_elem = self.device_facs_element(device_id)
+        if fac_elem is not None:
+            if fac_elem.find("./FacilityLink[@id='{}']".format(facility)) is None:
+                SubElement(fac_elem, "FacilityLink", {"id": facility, "ordinal": str(len(fac_elem))})
+                outcome = "Facility {} was linkded to {} device".format(facility, device_id)
+            else:
+                outcome = "{} is already linked in device {}".format(facility, device_id)
+        else:
+            outcome = "Device {} was not found to add facilities".format(device_id)
+        return outcome
 
     def save(self):
         file = open(self.device_xml_path, "wb")
@@ -145,6 +168,7 @@ class DeviceDef:
         Every component will have single line
         :return: Pandas DataFrame of all components in the xml
         """
+
         def _dg_type(s_cmd):
             s_cmd["dev_id"] = dev_id
             s_cmd["comm_id"] = comm_id
@@ -237,12 +261,11 @@ class DeviceDef:
         """
         unmapped = []
         for elem in self.xml:
-            facs = []
             dev_id = elem.get("device_id")
             for data_group in elem.find("DataGroups"):
                 for m in data_group.find("UdcMappings"):
                     f = m.get("facility")
-                    facs.append({
+                    unmapped.append({
                         "facility": f,
                         "device": dev_id
                     }) if elem.find("FacilityLinks/FacilityLink[@id='{}']".format(f)) is None else None

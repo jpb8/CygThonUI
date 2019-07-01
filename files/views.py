@@ -115,7 +115,7 @@ def mapping_export(request):
         return redirect("files:upload")
     workbook = dds.xml.export_mappings()
     response = HttpResponse(workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename={}'.format("text.xlsx")
+    response['Content-Disposition'] = 'attachment; filename={}'.format("dds_mappings_export.xlsx")
     return response
 
 
@@ -136,16 +136,32 @@ def correct_device_check(request):
 
 @csrf_exempt
 def unmapped_facs(request):
-    dds_id = request.GET.get("id")
-    try:
-        dds = DDS.objects.get(pk=dds_id)
-    except ObjectDoesNotExist:
-        print("DTF or DDS not found")
-        return redirect("files:upload")
-    unmapped = dds.xml.mapped_fac_check()
-    if request.is_ajax():
-        data = build_ajax_response_dict(unmapped, "Unmapped Facilities")
-        return JsonResponse(data)
+    if request.method == "POST":
+        dds_xml = DDS.objects.get(pk=int(request.POST.get("id"))).xml
+        map_facs = request.POST.get("map")
+        unmapped = dds_xml.mapped_fac_check()
+        if map_facs:
+            log = []
+            for f in unmapped:
+                outcome = dds_xml.add_facility(f["facility"], f["device"])
+                log.append({"outcome": outcome})
+            data = build_ajax_response_dict(log, "Facility Added Outcomes")
+            dds_xml.save()
+            return JsonResponse(data)
+        else:
+            data = build_ajax_response_dict(unmapped, "Unmapped Facilities")
+            return JsonResponse(data)
+    if request.method == "GET":
+        dds_id = request.GET.get("id")
+        try:
+            dds = DDS.objects.get(pk=dds_id)
+        except ObjectDoesNotExist:
+            print("DTF or DDS not found")
+            return redirect("files:upload")
+        unmapped = dds.xml.mapped_fac_check()
+        if request.is_ajax():
+            data = build_ajax_response_dict(unmapped, "Unmapped Facilities")
+            return JsonResponse(data)
     return redirect("files:upload")
 
 

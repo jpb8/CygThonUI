@@ -16,7 +16,7 @@
         <li>Uploaded - {{ dds.uploaded }}</li>
     </ul>
     <button onclick="window.location.href = '{{ dds.export_url }}';">Export File!</button>
-    <button onclick="window.location.href = '{% url 'files:dds_mappings_export' %}';">Export Mappings
+    <button onclick="window.location.href = '{% url 'files:dds_mappings_export' %}?id={{ dds.pk }}';">Export Mappings
     </button>
     <div>
         <h2>All Functions</h2>
@@ -45,7 +45,7 @@
             <li>
                 <form method="post" enctype="multipart/form-data" action="{% url 'files:fac_exist' %}" id="dds-facs">
                     {% csrf_token %}
-                    <label>Import Mappings</label>
+                    <label>Excel facility upload</label>
                     <input type="file" name="facs">
                     <input hidden name="dds-id" value="{{ dds.pk }}">
                     <button type="submit">Check All Facilities Exist</button>
@@ -61,6 +61,10 @@
                 <div class="dds-util" data-id="{{ dds.pk }}"
                      data-url="{% url 'files:unmapped_facs' %}?id={{ dds.pk }}">
                     <button>Check Missing Facilities</button>
+                </div>
+                <div id="map-unmapped" data-id="{{ dds.pk }}" data-map="True"
+                     data-url="{% url 'files:unmapped_facs' %}">
+                    <button>Check and Map Missing Facilities</button>
                 </div>
             </li>
         </ul>
@@ -224,8 +228,28 @@
                     alert("Request: " + JSON.stringify(request));
                 }
             })
+        })
 
-
+        $("#map-unmapped").click(function () {
+            var _url = $(this).data("url");
+            var _data = {
+                id: $(this).data("id"),
+                map: $(this).data("map")
+            };
+            var method = "POST";
+            $.ajax({
+                url: _url,
+                type: method,
+                data: _data,
+                success: function (data) {
+                    var text = createResponseHTML(data);
+                    $("#modal-body").html(text);
+                    $('#response-modal').modal('show');
+                },
+                error: function (request, error) {
+                    alert("Request: " + JSON.stringify(request));
+                }
+            })
         })
 
 
