@@ -110,12 +110,32 @@
 <script>
     $(document).ready(function () {
 
-        function createResponseHTML(data) {
-            var responseData = data.responseData;
-            var text = "<h2>" + data.header + "</h2>";
-            for (i = 0; i < responseData.length; i++) {
-                text += "<p>" + responseData[i].facility + "</p>";
+        function createPointTable(points, rows) {
+            var table = "<table style='width:100%'>" + buildHeaders(rows);
+            for (i = 0; i < points.length; i++) {
+                table += "<tr>";
+                for (j = 0; j < rows.length; j++) {
+                    table += "<td>" + points[i][rows[j]] + "</td>";
+                }
+                table += "</tr>";
             }
+            table += "</table>";
+            return table
+        }
+
+        function buildHeaders(rows) {
+            var headerHTML = "<tr>";
+            for (i = 0; i < rows.length; i++) {
+                headerHTML += "<th>" + rows[i] + "</th>";
+            }
+            headerHTML += "</tr>";
+            return headerHTML
+        }
+
+        function createResponseHTML(data) {
+            var text = "<h2>" + data.header + "</h2>";
+            var table = createPointTable(data.responseData, data.rows);
+            text += table;
             return text
         }
 

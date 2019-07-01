@@ -287,11 +287,7 @@ class DeviceDef:
         return non_matches
 
     def find_orphans(self, dtf):
-        orphans = {
-            "device": [],
-            "array": [],
-            "deid": []
-        }
+        orphans = []
         for elem in self.xml:
             dev_id = elem.get("device_id")
             for data_group in elem.find("DataGroups"):
@@ -299,9 +295,11 @@ class DeviceDef:
                 for m in data_group.find("UdcMappings"):
                     chck = dtf.check_dg_element(dg_type, m.get("data_element_id"))
                     if not chck:
-                        orphans['device'].append(dev_id)
-                        orphans['array'].append(dg_type)
-                        orphans['deid'].append(m.get("data_element_id"))
+                        orphans.append({
+                            "device": dev_id,
+                            "array": dg_type,
+                            "deid": m.get("data_element_id")
+                        })
         return orphans
 
     def mapping_excel_import(self, mappings, dtfxml):

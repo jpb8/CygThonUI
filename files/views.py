@@ -1,13 +1,17 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from .forms import DDSForm, DTFForm
+
 from projects.models import Project
 from django.views.generic import DetailView
 from django.http import HttpResponse, Http404, StreamingHttpResponse
-from .models import DDS, DTF
+
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.csrf import csrf_exempt
+
+from .models import DDS, DTF
+from .forms import DDSForm, DTFForm
+from .utils import build_ajax_response_dict
 
 import os
 from cygdevices.device import DeviceDef
@@ -125,10 +129,7 @@ def correct_device_check(request):
         return redirect("files:upload")
     non_matches = dds.xml.correct_dev_check()
     if request.is_ajax():
-        data = {
-            "responseData": non_matches,
-            "header": "Wrong Device"
-        }
+        data = build_ajax_response_dict(non_matches, "Wrong Device")
         return JsonResponse(data)
     return redirect("files:upload")
 
@@ -143,17 +144,13 @@ def unmapped_facs(request):
         return redirect("files:upload")
     unmapped = dds.xml.mapped_fac_check()
     if request.is_ajax():
-        data = {
-            "responseData": unmapped,
-            "header": "Unmapped Facilities"
-        }
+        data = build_ajax_response_dict(unmapped, "Unmapped Facilities")
         return JsonResponse(data)
     return redirect("files:upload")
 
 
 def find_orphans(request):
     if request.method == "POST":
-        print(request.POST)
         try:
             dtf = DTF.objects.get(pk=int(request.POST.get("dtf-id")))
             dds = DDS.objects.get(pk=int(request.POST.get("dds-id")))
@@ -163,27 +160,21 @@ def find_orphans(request):
         orphans = dds.xml.find_orphans(dtf.xml)
         if request.is_ajax():
             if request.is_ajax():
-                data = {
-                    "responseData": orphans,
-                    "header": "Orphans"
-                }
+                data = build_ajax_response_dict(orphans, "Orphans")
                 return JsonResponse(data)
     return redirect("files:upload")
 
 
 def facs_dne(request):
     if request.method == "POST":
-        facs = request.FILES["facs"]
         try:
             dds = DDS.objects.get(pk=int(request.POST.get("dds-id")))
+            facs = request.FILES["facs"]
         except ObjectDoesNotExist:
             print("DTF or DDS not found")
             return redirect("files:upload")
         dne = dds.check_facilities(facs)
         if request.is_ajax():
-            data = {
-                "responseData": dne,
-                "header": "Non Existent Facs"
-            }
+            data = build_ajax_response_dict(dne, "Non Existent Facs")
             return JsonResponse(data)
     return redirect("files:upload")
