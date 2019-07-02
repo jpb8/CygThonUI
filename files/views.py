@@ -1,10 +1,8 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-
-from projects.models import Project
+from django.template.loader import render_to_string
 from django.views.generic import DetailView
-from django.http import HttpResponse, Http404, StreamingHttpResponse
-
+from django.http import HttpResponse, Http404
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.csrf import csrf_exempt
@@ -12,6 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import DDS, DTF
 from .forms import DDSForm, DTFForm
 from .utils import build_ajax_response_dict
+
+from projects.models import Project
 
 import os
 from cygdevices.device import DeviceDef
@@ -47,21 +47,6 @@ def dtf_upload(request):
     return redirect(next)
 
 
-def file_print(request):
-    p = Project.objects.get(pk=1)
-    files = p.dds_set.all()
-    file_strs = []
-    code_string = ""
-    for dds in files:
-        device = DeviceDef("{}/{}".format("media", str(dds.file)))
-        file_strs.append(device.all_unique_arrays())
-    cont_dict = {
-        "file_strs": file_strs,
-        "code_string": code_string,
-    }
-    return render(request, 'files/dds.html', cont_dict)
-
-
 class DDSDetailView(DetailView):
     queryset = DDS.objects.all()
 
@@ -70,8 +55,7 @@ class DDSDetailView(DetailView):
         data['dtfs'] = DTF.objects.all()
         try:
             device = DeviceDef("{}/{}".format("media", str(self.object.file)))
-            data['incorrect_dev'] = device.correct_dev_check()
-            data['unmapped'] = device.mapped_fac_check()
+            data['devices'] = device.all_devices()
         except:
             return data
         return data
@@ -103,7 +87,9 @@ def dds_add_mapping(request):
             return redirect("files:upload")
         errors = dds.add_mappings(dtf, mappings, deid_only)
         if request.is_ajax():
-            return JsonResponse({'errors': errors})
+            devices = dds.xml.all_devices()
+            devices_html = render_to_string("files/snippets/device_accord.html", {"devices": devices})
+            return JsonResponse({'errors': errors, "devices_html": devices_html})
     return redirect("files:upload")
 
 
@@ -147,7 +133,10 @@ def unmapped_facs(request):
                 outcome = dds_xml.add_facility(f["facility"], f["device"])
                 log.append({"outcome": outcome})
             data = build_ajax_response_dict(log, "Facility Added Outcomes")
+            devices = dds_xml.all_devices()
             dds_xml.save()
+            devices_html = render_to_string("files/snippets/device_accord.html", {"devices": devices})
+            data["devices_html"] = devices_html
             return JsonResponse(data)
         else:
             data = build_ajax_response_dict(unmapped, "Unmapped Facilities")
@@ -184,9 +173,11 @@ def find_orphans(request):
 
 def facs_dne(request):
     if request.method == "POST":
+        if "facs" not in request.FILES:
+            return JsonResponse({"error": True})
+        facs = request.FILES["facs"] if "facs" in request.FILES else None
         try:
             dds = DDS.objects.get(pk=int(request.POST.get("dds-id")))
-            facs = request.FILES["facs"]
         except ObjectDoesNotExist:
             print("DTF or DDS not found")
             return redirect("files:upload")

@@ -1,89 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-
-
-</head>
-<body>
-<div id="left" class="container">
-    <h1>{{ dds.base_file }}</h1>
-    <ul>
-        <li>Project - {{ dds.project }}</li>
-        <li>Uploaded - {{ dds.uploaded }}</li>
-    </ul>
-    <button onclick="window.location.href = '{{ dds.export_url }}';">Export File!</button>
-    <button onclick="window.location.href = '{% url 'files:dds_mappings_export' %}?id={{ dds.pk }}';">Export Mappings
-    </button>
-    <div>
-        <h2>All Functions</h2>
-        <ul>
-            <li>
-                <form method="POST" action="{% url 'files:orphans' %}" id="dds-orphans">
-                    {% csrf_token %}
-                    <label>Import Mappings</label>
-                    <select name="dtf-id">
-                        {% if dtfs %}
-                            {% for d in dtfs %}
+{% extends 'base.html' %}
+{% block body_block %}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h1>{{ dds.base_file }}</h1>
+            <ul>
+                <li>Project - {{ dds.project }}</li>
+                <li>Uploaded - {{ dds.uploaded }}</li>
+            </ul>
+            <button onclick="window.location.href = '{{ dds.export_url }}';">Export File!</button>
+            <button onclick="window.location.href = '{% url 'files:dds_mappings_export' %}?id={{ dds.pk }}';">Export
+                Mappings
+            </button>
+            <div>
+                <h2>All Functions</h2>
+                <ul>
+                    <li>
+                        <form method="POST" action="{% url 'files:orphans' %}" id="dds-orphans">
+                            {% csrf_token %}
+                            <label>Import Mappings</label>
+                            <select name="dtf-id">
+                                {% if dtfs %}
+                                {% for d in dtfs %}
                                 <option value="{{ d.pk }}">{{ d.file }}</option>
-                            {% endfor %}
-                        {% endif %}
-                    </select>
-                    <input hidden name="dds-id" value="{{ dds.pk }}">
-                    <button type="submit">Find Orphans</button>
-                </form>
-            </li>
-            <li>
-                <div class="dds-util" data-id="{{ dds.pk }}"
-                     data-url="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">
-                    <button>Correct Device Check</button>
-                </div>
-            </li>
-            <li>
-                <form method="post" enctype="multipart/form-data" action="{% url 'files:fac_exist' %}" id="dds-facs">
-                    {% csrf_token %}
-                    <label>Excel facility upload</label>
-                    <input type="file" name="facs">
-                    <input hidden name="dds-id" value="{{ dds.pk }}">
-                    <button type="submit">Check All Facilities Exist</button>
-                </form>
-            </li>
-            <li>
-                <div class="dds-util" data-id="{{ dds.pk }}"
-                     data-url="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">
-                    <button>Correct Device Check</button>
-                </div>
-            </li>
-            <li>
-                <div class="dds-util" data-id="{{ dds.pk }}"
-                     data-url="{% url 'files:unmapped_facs' %}?id={{ dds.pk }}">
-                    <button>Check Missing Facilities</button>
-                </div>
-                <div id="map-unmapped" data-id="{{ dds.pk }}" data-map="True"
-                     data-url="{% url 'files:unmapped_facs' %}">
-                    <button>Check and Map Missing Facilities</button>
-                </div>
-            </li>
-        </ul>
-    </div>
-    <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_add_mappings' %}" id="dds-mapping">
-        {% csrf_token %}
-        <label>Import Mappings</label>
-        <input type="file" name="mappings">
-        <input type="checkbox" name="died-only">DEID Only<br>
-        <select name="dtf-id">
-            {% if dtfs %}
-                {% for d in dtfs %}
+                                {% endfor %}
+                                {% endif %}
+                            </select>
+                            <input hidden name="dds-id" value="{{ dds.pk }}">
+                            <button type="submit">Find Orphans</button>
+                        </form>
+                    </li>
+                    <li>
+                        <div class="dds-util" data-id="{{ dds.pk }}"
+                             data-url="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">
+                            <button>Correct Device Check</button>
+                        </div>
+                    </li>
+                    <li>
+                        <form method="post" enctype="multipart/form-data" action="{% url 'files:fac_exist' %}"
+                              id="dds-facs">
+                            {% csrf_token %}
+                            <label>Excel facility upload</label>
+                            <input type="file" name="facs">
+                            <input hidden name="dds-id" value="{{ dds.pk }}">
+                            <button type="submit">Check All Facilities Exist</button>
+                        </form>
+                    </li>
+                    <li>
+                        <div class="dds-util" data-id="{{ dds.pk }}"
+                             data-url="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">
+                            <button>Correct Device Check</button>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="dds-util" data-id="{{ dds.pk }}"
+                             data-url="{% url 'files:unmapped_facs' %}?id={{ dds.pk }}">
+                            <button>Check Missing Facilities</button>
+                        </div>
+                        <div id="map-unmapped" data-id="{{ dds.pk }}" data-map="True"
+                             data-url="{% url 'files:unmapped_facs' %}">
+                            <button>Check and Map Missing Facilities</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_add_mappings' %}"
+                  id="dds-mapping">
+                {% csrf_token %}
+                <h3>Import Mappings</h3>
+                <label>Mappings Excel</label>
+                <input type="file" name="mappings"><br>
+                <input type="checkbox" name="died-only">DEID Only<br>
+                <select name="dtf-id">
+                    {% if dtfs %}
+                    {% for d in dtfs %}
                     <option value="{{ d.pk }}">{{ d.file }}</option>
-                {% endfor %}
+                    {% endfor %}
+                    {% endif %}
+                </select><br>
+                <input hidden name="dds-id" value="{{ dds.pk }}">
+                <button type="submit">Map!</button>
+            </form>
+        </div>
+        <div class="col" id="device-info">
+            {% if devices %}
+            {% include 'files/snippets/device_accord.html' with devices=devices %}
             {% endif %}
-        </select>
-        <input hidden name="dds-id" value="{{ dds.pk }}">
-        <button type="submit">Map!</button>
-    </form>
+        </div>
+    </div>
     <div class="modal fade" id="response-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"
          aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -103,13 +107,8 @@
         </div>
     </div>
 </div>
+
 </body>
-<script
-        src="https://code.jquery.com/jquery-3.4.1.min.js"
-        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
-        crossorigin="anonymous"></script>
-<!-- Latest compiled JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 <script>
     $(document).ready(function () {
 
@@ -136,6 +135,9 @@
         }
 
         function createResponseHTML(data) {
+            if (data.error) {
+                return "<h1>ERROR</h1>"
+            }
             var text = "<h2>" + data.header + "</h2>";
             var table = createPointTable(data.responseData, data.rows);
             text += table;
@@ -160,6 +162,7 @@
                         text += "<p>" + errs[i] + "</p>";
                     }
                     $("#modal-body").html(text);
+                    $("#device-info").html(data.devices_html);
                     $('#response-modal').modal('show');
                 },
                 error: function (request, error) {
@@ -243,6 +246,7 @@
                 success: function (data) {
                     var text = createResponseHTML(data);
                     $("#modal-body").html(text);
+                    $("#device-info").html(data.devices_html);
                     $('#response-modal').modal('show');
                 },
                 error: function (request, error) {
@@ -254,4 +258,4 @@
 
     });
 </script>
-</html>
+{% endblock %}

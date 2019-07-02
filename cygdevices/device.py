@@ -58,6 +58,23 @@ class DeviceDef:
             # print("appended {} {} DataGroup".format(device_id, array_type))
         return dgs.find('./DataGroup/DataGroupAttributes/[DataGroupType="{}"].../UdcMappings'.format(array_type)), ""
 
+    def all_devices(self):
+        devices = []
+        for d in self.xml:
+            dev_id = d.get("device_id")
+            facs = []
+            dgs = []
+            for f in d.find("FacilityLinks"):
+                facs.append(f.get("id"))
+            for dg in d.find("DataGroups"):
+                dgs.append(dg.find("DataGroupAttributes/DataGroupType").text)
+            devices.append({
+                "device_id": dev_id,
+                "facility_links": facs,
+                "data_groups": dgs,
+            })
+        return devices
+
     def add_maps(self, device_id, array_type, maps):
         """
         Maps all supplied UDCs the given Device's Array.
@@ -264,6 +281,7 @@ class DeviceDef:
         return pd.DataFrame(data=cmd_dict)
 
     def mapped_fac_check(self):
+        # TODO: return just a list of facilities, not every mapping.
         """
         :return: A list and their devices that are not mapped correctly
         """
@@ -409,10 +427,10 @@ class UdcMap:
     @classmethod
     def safe_create(cls, dtf_xml, row, dev_array, deid_only):
         """
-
         :param dtf_xml: DTF class
         :param row: Dict of {'facilityid': '','bit':'','uniformdatacode':'','indexed':''}
         :param dev_array: array we are looking to add a mapping too
+        :param deid_only: bool that tells whether or not to build UDC from
         :return: Tuple of UDC and error bool, (if error, returns Error message)
         """
         if row["type"] == "A" and not deid_only:

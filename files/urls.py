@@ -7,7 +7,6 @@ urlpatterns = [
     path('upload', upload, name='upload'),
     path('dds_upload', dds_upload, name='dds_upload'),
     path('dtf_upload', dtf_upload, name='dtf_upload'),
-    path('dds', file_print, name='dds'),
     path('dds/<int:pk>/', DDSDetailView.as_view()),
     path('dds/export/', export_dds, name="dds_export"),
     path('dds/dds_mappings_export/', mapping_export, name="dds_mappings_export"),

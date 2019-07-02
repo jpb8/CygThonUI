@@ -4,23 +4,17 @@
     <meta charset="UTF-8">
     <title>CygNet Utility</title>
     {% include 'base/css.html' %}
+    {% include 'base/js.html' %}
 </head>
 <body>
 <nav class="navbar navbar-light bg-light">
-  <span class="navbar-brand mb-0 h1">Navbar</span>
+  <span class="navbar-brand mb-0 h1">{{ dds.project }}</span>
 </nav>
-
-
-
-
 {% block body_block %}
 
 
 
 {% endblock %}
-
-{% include 'base/js.html' %}
-
-
 </body>
+
 </html>

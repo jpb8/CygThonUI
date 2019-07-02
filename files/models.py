@@ -1,12 +1,11 @@
 from django.db import models
-from django.utils import timezone
 from django.conf import settings
 from projects.models import Project
 import pandas as pd
 
 import os
 
-from cygdevices.device import DeviceDef, UdcMap
+from cygdevices.device import DeviceDef
 from cygdevices.dtf import DTF as D
 
 
