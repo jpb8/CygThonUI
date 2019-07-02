@@ -32,10 +32,10 @@ class DDS(models.Model):
     def xml(self):
         return DeviceDef(os.path.join(settings.MEDIA_ROOT, str(self.file)))
 
-    def add_mappings(self, dtf_obj, excel):
+    def add_mappings(self, dtf_obj, excel, deid_only):
         dtf_xml = dtf_obj.xml
         mappings = pd.read_excel(excel, sheet_name="Sheet1")
-        error_log = self.xml.mapping_excel_import(mappings, dtf_xml)
+        error_log = self.xml.mapping_excel_import(mappings, dtf_xml, deid_only)
         return error_log
 
     def check_facilities(self, excel):

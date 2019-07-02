@@ -94,13 +94,14 @@ def dds_add_mapping(request):
     # Pass Excel file and dtf document to import script, return error logs
     if request.method == "POST":
         mappings = request.FILES["mappings"]
+        deid_only = True if "deid-only" in request.POST else False
         try:
             dtf = DTF.objects.get(pk=int(request.POST.get("dtf-id")))
             dds = DDS.objects.get(pk=int(request.POST.get("dds-id")))
         except ObjectDoesNotExist:
             print("DTF or DDS not found")
             return redirect("files:upload")
-        errors = dds.add_mappings(dtf, mappings)
+        errors = dds.add_mappings(dtf, mappings, deid_only)
         if request.is_ajax():
             return JsonResponse({'errors': errors})
     return redirect("files:upload")

@@ -87,8 +87,17 @@ class DeviceDef:
                 errs.append("{} {} {} mapping already exists".format(m.udc, m.data_id, m.fac))
         return errs
 
+    @staticmethod
+    def _ordinal_finder(fac_elem):
+        first = len(fac_elem)
+        while True:
+            if fac_elem.find("./FacilityLink[@ordinal='{}']".format(str(first))) is not None:
+                first += 1
+            else:
+                break
+        return str(first)
+
     def add_facs(self, facs, device_id):
-        # TODO: Check for ordinals
         """
         Addes all facs to the device's FacilityLinks Element
         :param facs: List of Facility names
@@ -100,14 +109,13 @@ class DeviceDef:
         if fac_elem is not None:
             for f in facs:
                 if fac_elem.find("./FacilityLink[@id='{}']".format(f)) is None:
-                    SubElement(fac_elem, "FacilityLink", {"id": f, "ordinal": str(len(fac_elem))})
+                    SubElement(fac_elem, "FacilityLink", {"id": f, "ordinal": self._ordinal_finder(fac_elem)})
                     log.append("Facility {} was linkded to {} device".format(f, device_id))
         else:
             log.append("Device {} was not found to add facilities".format(device_id))
         return log
 
     def add_facility(self, facility, device_id):
-        # TODO: Check for Ordinals
         """
         Adds a facility to the device's FacilityLinks Element
         :param facility: Facility to be added
@@ -117,7 +125,7 @@ class DeviceDef:
         fac_elem = self.device_facs_element(device_id)
         if fac_elem is not None:
             if fac_elem.find("./FacilityLink[@id='{}']".format(facility)) is None:
-                SubElement(fac_elem, "FacilityLink", {"id": facility, "ordinal": str(len(fac_elem))})
+                SubElement(fac_elem, "FacilityLink", {"id": facility, "ordinal": self._ordinal_finder(fac_elem)})
                 outcome = "Facility {} was linkded to {} device".format(facility, device_id)
             else:
                 outcome = "{} is already linked in device {}".format(facility, device_id)
@@ -325,7 +333,7 @@ class DeviceDef:
                         })
         return orphans
 
-    def mapping_excel_import(self, mappings, dtfxml):
+    def mapping_excel_import(self, mappings, dtfxml, deid_only):
         """
         Add all mappings supplied in pandas object (create pandas object in method?)
         :param mappings: pandas dataframe with all mappings
@@ -343,7 +351,7 @@ class DeviceDef:
                     arr_points = dev_points.loc[dev_points['array'] == da]
                     maps = []
                     for i, p in arr_points.iterrows():
-                        udc, pnt_err = UdcMap.safe_create(dtfxml, p, da)
+                        udc, pnt_err = UdcMap.safe_create(dtfxml, p, da, deid_only)
                         maps.append(udc) if not pnt_err else errs.append(udc)
                         facs.append(p["facilityid"]) if p["facilityid"] not in facs else None
                     map_log = self.add_maps(d, da, maps)
@@ -399,7 +407,7 @@ class UdcMap:
         self.fac = fac
 
     @classmethod
-    def safe_create(cls, dtf_xml, row, dev_array):
+    def safe_create(cls, dtf_xml, row, dev_array, deid_only):
         """
 
         :param dtf_xml: DTF class
@@ -407,7 +415,7 @@ class UdcMap:
         :param dev_array: array we are looking to add a mapping too
         :return: Tuple of UDC and error bool, (if error, returns Error message)
         """
-        if row["type"] == "A":
+        if row["type"] == "A" and not deid_only:
             deid = dtf_xml.get_analog_deid(dev_array, row["indexed"], str(int(row["bit"])))
             if deid:
                 _udc, err = UdcMap(row["uniformdatacode"], deid, row["facilityid"]), False

@@ -73,6 +73,7 @@
         {% csrf_token %}
         <label>Import Mappings</label>
         <input type="file" name="mappings">
+        <input type="checkbox" name="died-only">DEID Only<br>
         <select name="dtf-id">
             {% if dtfs %}
                 {% for d in dtfs %}
@@ -103,8 +104,6 @@
     </div>
 </div>
 </body>
-
-
 <script
         src="https://code.jquery.com/jquery-3.4.1.min.js"
         integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
@@ -156,12 +155,12 @@
                 processData: false,
                 success: function (data) {
                     var errs = data.errors;
-                    var text = "";
+                    var text = "<h2>Upload Errors</h2>";
                     for (i = 0; i < errs.length; i++) {
-                        text += "<h2>Upload Errors</h2>";
                         text += "<p>" + errs[i] + "</p>";
                     }
-                    $("#dds-success").html(text);
+                    $("#modal-body").html(text);
+                    $('#response-modal').modal('show');
                 },
                 error: function (request, error) {
                     alert("Request: " + JSON.stringify(request));
