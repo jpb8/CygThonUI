@@ -29,12 +29,21 @@ class DDS(models.Model):
 
     @property
     def xml(self):
-        return DeviceDef(os.path.join(settings.MEDIA_ROOT, str(self.file)))
+        try:
+            dds_xml = DeviceDef(os.path.join(settings.MEDIA_ROOT, str(self.file)))
+        except:
+            print("DDS File not found at: {}".format(os.path.join(settings.MEDIA_ROOT, str(self.file))))
+            return None
+        return dds_xml
 
     def add_mappings(self, dtf_obj, excel, deid_only):
         dtf_xml = dtf_obj.xml
-        mappings = pd.read_excel(excel, sheet_name="Sheet1")
-        error_log = self.xml.mapping_excel_import(mappings, dtf_xml, deid_only)
+        dds_xml = self.xml
+        if dtf_xml is not None and dds_xml is not None:
+            mappings = pd.read_excel(excel, sheet_name="Sheet1")
+            error_log = dds_xml.mapping_excel_import(mappings, dtf_xml, deid_only)
+        else:
+            error_log = ["DDS or DTF File not found"]
         return error_log
 
     def check_facilities(self, excel):
@@ -57,7 +66,12 @@ class DTF(models.Model):
 
     @property
     def xml(self):
-        return D(os.path.join(settings.MEDIA_ROOT, str(self.file)))
+        try:
+            dtf_xml = D(os.path.join(settings.MEDIA_ROOT, str(self.file)))
+        except:
+            print("DTF File not found at: {}".format(os.path.join(settings.MEDIA_ROOT, str(self.file))))
+            return None
+        return dtf_xml
 
     @property
     def base_file(self):

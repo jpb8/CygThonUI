@@ -24,15 +24,23 @@
     <div id="dds-files" style="width: 90%; margin: 10px;">
         <h2>DDS Files</h2>
         {% for d in project.dds_set.all %}
-            <p><a href="http://127.0.0.1:8000/files/dds/{{ d.pk }}">{{ d.base_file }}</a></p>
+        <p><a href="http://127.0.0.1:8000/files/dds/{{ d.pk }}">{{ d.base_file }}</a></p>
         {% endfor %}
     </div>
     <div id="dtf-files" style="width: 90%; margin: 10px;">
         <h2>DDS Files</h2>
         {% for d in project.dtf_set.all %}
-            <p><a href="http://127.0.0.1:8000/files/dds/{{ d.pk }}">{{ d.base_file }}</a></p>
+        <p><a href="http://127.0.0.1:8000/files/dds/{{ d.pk }}">{{ d.base_file }}</a></p>
         {% endfor %}
     </div>
+    <form method="POST" enctype="multipart/form-data" action="{% url 'projects:long_desc' %}">
+        {% csrf_token %}
+        <h3>Long Description Change</h3>
+        <label>Points Excel</label>
+        <input type="file" name="points"><br>
+        <input hidden name="dds-id" value="{{ dds.pk }}">
+        <button type="submit">Update Long Descriptions</button>
+    </form>
 </div>
 </body>
 {% endblock %}

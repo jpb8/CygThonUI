@@ -53,9 +53,6 @@ class DeviceDef:
             return None, "Device {} Not Found".format(device_id)
         if dgs.find('./DataGroup/DataGroupAttributes/[DataGroupType="{}"].../UdcMappings'.format(array_type)) is None:
             return None, "Array {} not found in Device {}".format(device_id, array_type)
-            # dg = DataGroup(device_id, device_id, array_type)
-            # dgs.append(dg.dg_element)
-            # print("appended {} {} DataGroup".format(device_id, array_type))
         return dgs.find('./DataGroup/DataGroupAttributes/[DataGroupType="{}"].../UdcMappings'.format(array_type)), ""
 
     def all_devices(self):
@@ -74,6 +71,20 @@ class DeviceDef:
                 "data_groups": dgs,
             })
         return devices
+
+    def device_mappings(self, device, data_group):
+        maps = []
+        mappings, error = self.device_dg_mappings(device, data_group)
+        if mappings is not None:
+            for m in mappings:
+                maps.append({
+                    "DEID": m.get("data_element_id"),
+                    "facility": m.get("facility"),
+                    "UDC": m.get("UDC")
+                })
+        else:
+            maps.append({"ERROR": error})
+        return maps
 
     def add_maps(self, device_id, array_type, maps):
         """

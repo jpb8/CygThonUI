@@ -87,9 +87,14 @@ def dds_add_mapping(request):
             return redirect("files:upload")
         errors = dds.add_mappings(dtf, mappings, deid_only)
         if request.is_ajax():
+            errs =[]
+            for e in errors:
+                errs.append({"Log": e})
+            data = build_ajax_response_dict(errs, "Import Log")
             devices = dds.xml.all_devices()
             devices_html = render_to_string("files/snippets/device_accord.html", {"devices": devices})
-            return JsonResponse({'errors': errors, "devices_html": devices_html})
+            data["devices_html"] = devices_html
+            return JsonResponse(data)
     return redirect("files:upload")
 
 
@@ -158,12 +163,15 @@ def unmapped_facs(request):
 def find_orphans(request):
     if request.method == "POST":
         try:
-            dtf = DTF.objects.get(pk=int(request.POST.get("dtf-id")))
-            dds = DDS.objects.get(pk=int(request.POST.get("dds-id")))
+            dtf = DTF.objects.get(pk=int(request.POST.get("dtf-id"))).xml
+            dds = DDS.objects.get(pk=int(request.POST.get("dds-id"))).xml
         except ObjectDoesNotExist:
             print("DTF or DDS not found")
             return redirect("files:upload")
-        orphans = dds.xml.find_orphans(dtf.xml)
+        if dtf is not None and dds is not None:
+            orphans = dds.find_orphans(dtf)
+        else:
+            orphans = [{"ERROR": "DDS or DTF file not found"}]
         if request.is_ajax():
             if request.is_ajax():
                 data = build_ajax_response_dict(orphans, "Orphans")

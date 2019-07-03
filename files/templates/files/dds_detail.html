@@ -113,11 +113,11 @@
     $(document).ready(function () {
 
         function createPointTable(points, rows) {
-            var table = "<table style='width:100%'>" + buildHeaders(rows);
+            var table = "<table style='width:100%>" + buildHeaders(rows);
             for (i = 0; i < points.length; i++) {
                 table += "<tr>";
                 for (j = 0; j < rows.length; j++) {
-                    table += "<td>" + points[i][rows[j]] + "</td>";
+                    table += "<td style='font-size: 7pt'>" + points[i][rows[j]] + "</td>";
                 }
                 table += "</tr>";
             }
@@ -156,13 +156,8 @@
                 contentType: false,
                 processData: false,
                 success: function (data) {
-                    var errs = data.errors;
-                    var text = "<h2>Upload Errors</h2>";
-                    for (i = 0; i < errs.length; i++) {
-                        text += "<p>" + errs[i] + "</p>";
-                    }
+                    var text = createResponseHTML(data);
                     $("#modal-body").html(text);
-                    $("#device-info").html(data.devices_html);
                     $('#response-modal').modal('show');
                 },
                 error: function (request, error) {
