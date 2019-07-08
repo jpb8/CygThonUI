@@ -54,6 +54,9 @@ class DTF:
             "type": data_type
         })
 
+    def create_digital_deid(self, array_type, died, desc, ref, b_pos, data_type="bool"):
+        pass
+
     def create_array_excel(self, array_file_name, deid_file_name):
         """
         Exports all the of Arrays and DEID for a supplied DTF

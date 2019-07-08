@@ -437,6 +437,7 @@ class UdcMap:
 
     @classmethod
     def safe_create(cls, dtf_xml, row, dev_array, deid_only):
+        # TODO: Scrub udc data. (None for bit)
         """
         :param dtf_xml: DTF class
         :param row: Dict of {'facilityid': '','bit':'','uniformdatacode':'','indexed':''}
