@@ -5,7 +5,11 @@ from django.shortcuts import render, redirect
 from .models import Project
 from files.forms import DDSForm, DTFForm
 
+from cygdevices.substitutions import Substitutions
 from cygdevices.points import Points
+from django.conf import settings
+
+import os
 
 
 def index(request):
@@ -40,3 +44,17 @@ def update_long_descriptions(reqeust):
         )
         return response
     return redirect("home")
+
+
+def create_substitutions(request):
+    if request.method == "POST":
+        file = request.FILES.get("subs")
+        name = file.name.split(".")[0]
+        s = Substitutions(file)
+        s.build_rules()
+        response = HttpResponse(s.pretty_print(), content_type='application/force-download')
+        response['Content-Disposition'] = 'attachment; filename={}.xml'.format(name)
+        response['X-Sendfile'] = "{}.xml".format(name)
+    else:
+        return redirect("home")
+    return response

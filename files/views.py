@@ -87,7 +87,7 @@ def dds_add_mapping(request):
             return redirect("files:upload")
         errors = dds.add_mappings(dtf, mappings, deid_only)
         if request.is_ajax():
-            errs =[]
+            errs = []
             for e in errors:
                 errs.append({"Log": e})
             data = build_ajax_response_dict(errs, "Import Log")
@@ -194,3 +194,20 @@ def facs_dne(request):
             data = build_ajax_response_dict(dne, "Non Existent Facs")
             return JsonResponse(data)
     return redirect("files:upload")
+
+
+@csrf_exempt
+def get_mappings(request):
+    if request.method == "POST":
+        data_group = request.POST.get("data_group")
+        device = request.POST.get("device")
+        try:
+            dds = DDS.objects.get(pk=int(request.POST.get("id"))).xml
+        except ObjectDoesNotExist:
+            print("DTF or DDS not found")
+            return redirect("files:upload")
+        maps = dds.all_mappings(device, data_group)
+        if request.is_ajax():
+            data = build_ajax_response_dict(maps, "All Mappings")
+            return JsonResponse(data)
+    return redirect("home")

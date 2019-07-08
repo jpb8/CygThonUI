@@ -1,4 +1,7 @@
 import pandas as pd
+from lxml.etree import Element, SubElement
+from lxml import etree
+
 
 class Substitutions:
     def __init__(self, excel, conds=None, actions=None):
@@ -8,27 +11,18 @@ class Substitutions:
         self.act_headers = list(self.actions)
         self.cond_headers = list(self.conditions)
         self.sub_dict = {"Set": []}
+        self.xml = Element("Set")
 
     def build_rules(self):
         # TODO: Build with lxml
         for index, row in self.conditions.iterrows():
-            rule = {
-                "Rule": {
-                    "Conditions": {},
-                    "Actions": {}
-                }
-            }
-            for c in self.cond_headers:
-                rule["Rule"]["Conditions"][c] = row[c]
-            self.sub_dict["Set"].append(rule)
-            for a in self.act_headers:
-                rule["Rule"]["Actions"][a] = self.actions.at[index, a]
+            rule = SubElement(self.xml, "Rule")
+            conditions = SubElement(rule, "Conditions")
+            actions = SubElement(rule, "Actions")
+            for cond in self.cond_headers:
+                SubElement(conditions, cond).text = row[cond]
+            for act in self.act_headers:
+                SubElement(actions, act).text = self.actions.at[index, act]
 
-    def export_xml(self, filename="dict.xml"):
-        self.build_rules()
-        xml = dicttoxml(self.sub_dict, custom_root="Substitutions", attr_type=False, item_func=lambda x: None)
-        xml = xml.decode()
-        xml = xml.replace('<None>', '').replace('</None>', '')
-        xmlfile = open(filename, "w")
-        xmlfile.write(xml)
-        xmlfile.close()
+    def pretty_print(self):
+        return etree.tostring(self.xml, pretty_print=True)

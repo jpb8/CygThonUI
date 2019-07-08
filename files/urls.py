@@ -15,4 +15,5 @@ urlpatterns = [
     path('dds/unmapped_facs/', unmapped_facs, name="unmapped_facs"),
     path('dds/orphans/', find_orphans, name="orphans"),
     path('dds/fac_exist/', facs_dne, name="fac_exist"),
+    path('dds/get_mappings/', get_mappings, name="get_mappings"),
 ]

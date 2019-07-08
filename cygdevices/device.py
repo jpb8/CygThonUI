@@ -72,7 +72,7 @@ class DeviceDef:
             })
         return devices
 
-    def device_mappings(self, device, data_group):
+    def all_mappings(self, device, data_group):
         maps = []
         mappings, error = self.device_dg_mappings(device, data_group)
         if mappings is not None:

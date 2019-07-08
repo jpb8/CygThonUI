@@ -41,6 +41,13 @@
         <input hidden name="dds-id" value="{{ dds.pk }}">
         <button type="submit">Update Long Descriptions</button>
     </form>
+    <form method="POST" enctype="multipart/form-data" action="{% url 'projects:create_subs' %}">
+        {% csrf_token %}
+        <h3>Long Description Change</h3>
+        <label>Substitutions Excel</label>
+        <input type="file" name="subs"><br>
+        <button type="submit">Create Substitutions</button>
+    </form>
 </div>
 </body>
 {% endblock %}

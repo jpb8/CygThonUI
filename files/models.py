@@ -76,3 +76,16 @@ class DTF(models.Model):
     @property
     def base_file(self):
         return os.path.basename(str(self.file))
+
+
+class ScreenSubstitutions(models.Model):
+    file = models.FileField(upload_to="dtf/")
+    uploaded = models.DateTimeField(auto_now=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "{} - {}".format(self.project, self.file)
+
+    @property
+    def base_file(self):
+        return os.path.basename(str(self.file))

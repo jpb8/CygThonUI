@@ -1,30 +1,33 @@
 {% for d in devices %}
-<p>
-{{ d.device_id }}
-<a class="btn btn-primary btn-sm" data-toggle="collapse" href="#{{ d.device_id }}-facs" role="button"
-   aria-expanded="false" aria-controls="{{ d.device_id }}-facs">Show Facilities</a>
-<button class="btn btn-primary btn-sm" type="button" data-toggle="collapse" data-target="#{{ d.device_id }}-dgs"
-        aria-expanded="false" aria-controls="{{ d.device_id }}-dgs">Data Groups
-</button>
-</p>
-<div class="row">
-    <div class="col">
-        <div class="collapse multi-collapse" id="{{ d.device_id }}-facs">
-            <div class="card card-body">
-                {% for f in d.facility_links %}
-                <p>{{ f }}</p>
-                {% endfor %}
+    <p>
+        {{ d.device_id }}
+        <a class="btn btn-primary btn-sm" data-toggle="collapse" href="#{{ d.device_id }}-facs" role="button"
+           aria-expanded="false" aria-controls="{{ d.device_id }}-facs">Show Facilities</a>
+        <button class="btn btn-primary btn-sm" type="button" data-toggle="collapse" data-target="#{{ d.device_id }}-dgs"
+                aria-expanded="false" aria-controls="{{ d.device_id }}-dgs">Data Groups
+        </button>
+    </p>
+    <div class="row">
+        <div class="col">
+            <div class="collapse multi-collapse" id="{{ d.device_id }}-facs">
+                <div class="card card-body">
+                    {% for f in d.facility_links %}
+                        <p>{{ f }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="collapse multi-collapse" id="{{ d.device_id }}-dgs">
+                <div class="card card-body">
+                    {% for dg in d.data_groups %}
+                        <div class="dg-mappings" data-group="{{ dg }}" data-device="{{ d.device_id }}"
+                             data-url="{% url 'files:get_mappings' %}">
+                            <button class="btn btn-primary btn-sm">{{ dg }}</button>
+                        </div><br>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
-    <div class="col">
-        <div class="collapse multi-collapse" id="{{ d.device_id }}-dgs">
-            <div class="card card-body">
-                {% for dg in d.data_groups %}
-                <p>{{ dg }}</p>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-</div>
 {% endfor %}
