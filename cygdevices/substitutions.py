@@ -11,12 +11,22 @@ class Substitutions:
         self.act_headers = list(self.actions)
         self.cond_headers = list(self.conditions)
         self.sub_dict = {"Set": []}
-        self.xml = Element("Set")
+        self.xml = self.build_xml()
+
+    @staticmethod
+    def build_xml():
+        root = Element("Substitutions")
+        SubElement(root, "Set", {"Label": "XML_Substitution"})
+        return root
+
+    @property
+    def xml_set(self):
+        return self.xml.find("Set")
 
     def build_rules(self):
         # TODO: Build with lxml
         for index, row in self.conditions.iterrows():
-            rule = SubElement(self.xml, "Rule")
+            rule = SubElement(self.xml_set, "Rule")
             conditions = SubElement(rule, "Conditions")
             actions = SubElement(rule, "Actions")
             for cond in self.cond_headers:
