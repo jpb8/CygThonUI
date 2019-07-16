@@ -18,6 +18,10 @@ class DTF:
         root = tree.getroot()
         self.xml = root
 
+    @property
+    def data_groups(self):
+        return self.xml.find("dataGroups")
+
     def find_dg_element(self, array_type, element):
         """
         Finds the DEID in an array
@@ -44,18 +48,32 @@ class DTF:
     def get_discrete_deid(self, array_name, index, index2=None):
         pass
 
-    def create_ai_deid(self, array_type, deid, index, reg, data_type="r4"):
+    def create_ai_deid(self, array_type, deid, tagname, data_type="r4"):
         dg_elem = self.xml.find('dataGroups/{}/dgElements'.format(array_type))
-        nice_name = "{} {}".format(index, reg)
         SubElement(dg_elem, deid, {
-            "niceName": nice_name,
-            "desc": nice_name,
-            "tagname": "{}[{}]".format(index, reg),
+            "niceName": tagname,
+            "desc": tagname,
+            "tagname": tagname,
             "type": data_type
         })
 
     def create_digital_deid(self, array_type, died, desc, ref, b_pos, data_type="bool"):
         pass
+
+    def create_array(self, name, nice_name):
+        new_dg = SubElement(self.data_groups, name, {
+            "niceName": nice_name,
+            "udcCat": "UDCALL",
+            "canSend": "false",
+            "canRecv": "true",
+            "uccSend": "false",
+            "uccRecv": "true",
+            "udcDefFac": "true",
+            "devDG": "false",
+            "baseOrd": "0",
+            "maxCnt": "1"
+        })
+        return new_dg
 
     def create_array_excel(self, array_file_name, deid_file_name):
         """
@@ -81,7 +99,7 @@ class DTF:
         df.to_excel(array_file_name)
         df2.to_excel(deid_file_name)
 
-    def save(self, xml_file):
-        file = open(xml_file, "wb")
+    def save(self):
+        file = open(self.device_xml_path, "wb")
         file.write(etree.tostring(self.xml, pretty_print=True))
         file.close()

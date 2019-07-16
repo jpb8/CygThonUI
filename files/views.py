@@ -16,6 +16,8 @@ from projects.models import Project
 import os
 from cygdevices.device import DeviceDef
 
+import pandas as pd
+
 
 def upload(request):
     cont_dict = {
@@ -211,3 +213,35 @@ def get_mappings(request):
             data = build_ajax_response_dict(maps, "All Mappings")
             return JsonResponse(data)
     return redirect("home")
+
+
+####################### DTF #######################
+
+def import_dtf(request):
+    dtf_id = request.POST.get("id")
+    try:
+        dtf = DTF.objects.get(pk=int(dtf_id)).xml
+    except ObjectDoesNotExist:
+        return redirect("files:upload")
+    pnts = request.FILES["pnts"] if "pnts" in request.FILES else None
+    if pnts:
+        anologs = pd.read_excel(pnts, sheet_name="anolog")
+        digitals = pd.read_excel(pnts, sheet_name="digital")
+        devices = anologs.rtu.unique()
+        for d in devices:
+            array_type = "{}_A".format(d)
+            array_nice_name = "{} Analog Points Array".format(d)
+            arr = dtf.create_array(name=array_type, nice_name=array_nice_name)
+            for pnt in anologs.loc[d['rtu'] == d]:
+                index = pnt["anain.iospec.external"]
+                bit = index.split()[-1]
+                if len(bit) == 1:
+                    deid = "00" + bit
+                elif len(bit) == 2:
+                    deid = "0" + bit
+                else:
+                    deid = bit
+                dtf.create_ai_deid(array_type, deid, index, data_type=pnt["anain.type"])
+        dtf.save()
+
+
