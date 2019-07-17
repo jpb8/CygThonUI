@@ -75,6 +75,16 @@ class DTF:
         })
         return new_dg
 
+    def unused_deids(self, dds):
+        unused = []
+        for dg in self.data_groups:
+            array_name = dg.tag
+            deids = [deid.tag for deid in dg.find("dgElements")]
+            unused_deids = dds.deid_exists(array_name, deids)
+            for u in unused_deids:
+                unused.append({"ARRAY": array_name, "DEID": u})
+        return unused
+
     def create_array_excel(self, array_file_name, deid_file_name):
         """
         Exports all the of Arrays and DEID for a supplied DTF
@@ -98,6 +108,7 @@ class DTF:
         df2 = pd.DataFrame(data=dg_elems)
         df.to_excel(array_file_name)
         df2.to_excel(deid_file_name)
+
 
     def save(self):
         file = open(self.device_xml_path, "wb")

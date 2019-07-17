@@ -77,6 +77,9 @@ class DTF(models.Model):
     def base_file(self):
         return os.path.basename(str(self.file))
 
+    @property
+    def export_url(self):
+        return "http://127.0.0.1:8000/files/dds/export/?id={}".format(self.pk)
 
 class ScreenSubstitutions(models.Model):
     file = models.FileField(upload_to="dtf/")

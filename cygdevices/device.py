@@ -317,7 +317,7 @@ class DeviceDef:
         for elem in self.xml:
             dev_id = elem.get("device_id")
             for f in elem.find("FacilityLinks"):
-                if f not in facs:
+                if f.get("id") not in facs:
                     dne.append({
                         "device": dev_id,
                         "facility": f.get("id")
@@ -355,12 +355,23 @@ class DeviceDef:
                 for m in data_group.find("UdcMappings"):
                     chck = dtf.check_dg_element(dg_type, m.get("data_element_id"))
                     if not chck:
+                        print(m.get("data_element_id"), m.get("facility"), m.get("UDC"))
                         orphans.append({
                             "device": dev_id,
                             "array": dg_type,
                             "deid": m.get("data_element_id")
                         })
         return orphans
+
+    def deid_exists(self, array_name, deids):
+        mappings = self.xml.findall(
+            "./Device/DataGroups/DataGroup/DataGroupAttributes/[DataGroupType='{}']../UdcMappings".format(
+                array_name)
+        )
+        for a in mappings:
+            a_deieds = [d.get("data_element_id") for d in a]
+            deids = list(set(deids) - set(a_deieds))
+        return deids
 
     def mapping_excel_import(self, mappings, dtfxml, deid_only):
         """
@@ -390,6 +401,31 @@ class DeviceDef:
                 errs.append("Device {} is not in XML".format(d))
         self.save()
         return errs
+
+    @classmethod
+    def mappings_template(cls):
+        sheet = {
+            'device': ["ABIL_DEV", "ANDW_DEV"],
+            'type': ['D', 'A'],
+            'facilityid': ['ABIL_PUMP1', 'ANDW_A_PSTATION'],
+            'uniformdatacode': ['PSTATUS', 'FSPFB'],
+            'bits': [2, 1],
+            'array': ['N40', 'AI_ARRAY'],
+            'deid': ['MB000405', 'N4X00'],
+            'indexed': ['N40', 'AI_MT_TK_N4X'],
+            'bit': [0, 0],
+            'bit12': [4, 0],
+            'bit22': [5, None]
+        }
+        df = pd.DataFrame(data=sheet)
+        sio = BytesIO()
+        writer = pd.ExcelWriter(sio, engine="xlsxwriter")
+        df.to_excel(writer, sheet_name="Sheet1", index=False)
+        writer.save()
+        writer.close()
+        sio.seek(0)
+        return sio.getvalue()
+
 
     def export_mappings(self):
         df_pnt = self.export_data()

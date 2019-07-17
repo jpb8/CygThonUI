@@ -3,20 +3,30 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 
 from .models import Project
+from .forms import ProjectForm
+
 from files.forms import DDSForm, DTFForm
 
 from cygdevices.substitutions import Substitutions
 from cygdevices.points import Points
-from django.conf import settings
-
-import os
 
 
 def index(request):
     cont_dict = {
-        "projects": Project.objects.all()
+        "projects": Project.objects.all(),
+        "form": ProjectForm
     }
     return render(request, 'index.html', cont_dict)
+
+
+def project_add(request):
+    if request.method == 'POST':
+        form = ProjectForm(request.POST)
+        if form.is_valid():
+            form.save()
+        else:
+            print("Error in Form")
+    return redirect("home")
 
 
 class ProjectDetailView(DetailView):
@@ -39,9 +49,7 @@ def update_long_descriptions(reqeust):
         workbook = pnts.export()
         response = HttpResponse(workbook,
                                 content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename={}'.format(
-            "{}_Updated.xlsx".format(file_name.split(".")[0])
-        )
+        response['Content-Disposition'] = 'attachment; filename={}_updated'.format(file_name.split(".")[0])
         return response
     return redirect("home")
 
@@ -55,6 +63,17 @@ def create_substitutions(request):
         response = HttpResponse(s.pretty_print(), content_type='application/force-download')
         response['Content-Disposition'] = 'attachment; filename={}.xml'.format(name)
         response['X-Sendfile'] = "{}.xml".format(name)
-    else:
-        return redirect("home")
-    return response
+        return response
+    return redirect("home")
+
+
+def export_template(request):
+    file_type = request.GET.get("file") if 'file' in request.GET else None
+    if file_type is not None:
+        if file_type == "subs":
+            workbook = Substitutions.template()
+            response = HttpResponse(workbook,
+                                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename=Excel2XML_substitions_template.xlsx'
+            return response
+    return redirect("home")

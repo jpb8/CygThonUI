@@ -27,7 +27,7 @@
                                 {% endif %}
                             </select>
                             <input hidden name="dds-id" value="{{ dds.pk }}">
-                            <button type="submit">Find Orphans</button>
+                            <button class="btn-sm btn-primary" type="submit">Find Orphans</button>
                         </form>
                     </li>
                     <li>
@@ -67,7 +67,8 @@
             <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_add_mappings' %}"
                   id="dds-mapping">
                 {% csrf_token %}
-                <h3>Import Mappings</h3>
+                <h3>Import Mappings</h3><br>
+                <a href="{% url 'files:mapping_template' %}">Download Template</a><br>
                 <label>Mappings Excel</label>
                 <input type="file" name="mappings"><br>
                 <input type="checkbox" name="died-only">DEID Only<br>
@@ -83,6 +84,7 @@
             </form>
         </div>
         <div class="col" id="device-info">
+            <h1>All Devices</h1>
             {% if devices %}
             {% include 'files/snippets/device_accord.html' with devices=devices %}
             {% endif %}

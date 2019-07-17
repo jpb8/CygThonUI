@@ -55,6 +55,7 @@ class DDSDetailView(DetailView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['dtfs'] = DTF.objects.all()
+        data['project'] = self.object.project
         try:
             device = DeviceDef("{}/{}".format("media", str(self.object.file)))
             data['devices'] = device.all_devices()
@@ -87,7 +88,10 @@ def dds_add_mapping(request):
         except ObjectDoesNotExist:
             print("DTF or DDS not found")
             return redirect("files:upload")
-        errors = dds.add_mappings(dtf, mappings, deid_only)
+        try:
+            errors = dds.add_mappings(dtf, mappings, deid_only)
+        except:
+            errors = ["Error Handling Excel File. Please use template file", ]
         if request.is_ajax():
             errs = []
             for e in errors:
@@ -215,7 +219,56 @@ def get_mappings(request):
     return redirect("home")
 
 
+def mapping_template(reqeust):
+    workbook = DeviceDef.mappings_template()
+    response = HttpResponse(workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename={}'.format("Excel2XML_substitions_template.xlsx")
+    return response
+
+
 ####################### DTF #######################
+
+
+class DTFDetailView(DetailView):
+    queryset = DTF.objects.all()
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['ddss'] = DDS.objects.all()
+        data['project'] = self.object.project
+        return data
+
+
+def export_dtf(request):
+    dtf_id = request.GET.get("id")
+    dtf = DTF.objects.get(pk=dtf_id)
+    file_path = os.path.join(settings.MEDIA_ROOT, str(dtf.file))
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type='application/force-download')
+            response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(file_path)
+            response['X-Sendfile'] = file_path
+            return response
+    raise Http404
+
+
+def unmapped_dieds(request):
+    if request.method == "POST":
+        print(request.POST)
+        dds_id = int(request.POST.get("dds-id"))
+        dtf_id = int(request.POST.get("dtf-id"))
+        try:
+            dds = DDS.objects.get(pk=dds_id).xml
+            dtf = DTF.objects.get(pk=dtf_id).xml
+        except ObjectDoesNotExist:
+            print("DTF or DDS not found")
+            return redirect("files:upload")
+        unused = dtf.unused_deids(dds)
+        if request.is_ajax():
+            data = build_ajax_response_dict(unused, "Unused ")
+            return JsonResponse(data)
+    return redirect("files:upload")
+
 
 def import_dtf(request):
     dtf_id = request.POST.get("id")
@@ -243,5 +296,3 @@ def import_dtf(request):
                     deid = bit
                 dtf.create_ai_deid(array_type, deid, index, data_type=pnt["anain.type"])
         dtf.save()
-
-

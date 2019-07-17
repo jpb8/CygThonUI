@@ -1,6 +1,7 @@
 import pandas as pd
 from lxml.etree import Element, SubElement
 from lxml import etree
+from io import BytesIO
 
 
 class Substitutions:
@@ -22,6 +23,24 @@ class Substitutions:
     @property
     def xml_set(self):
         return self.xml.find("Set")
+
+    @classmethod
+    def template(cls):
+        conditions = {
+            'ToolType': ["TextTool", "TextTool", "TextTool", "TextTool"],
+            'Text': ['psi', 'bbl', 'f', 'api']
+        }
+        actions = {"Text": ['PSI', 'BBL', 'F', 'API']}
+        cond_df = pd.DataFrame(data=conditions)
+        actions_df = pd.DataFrame(data=actions)
+        sio = BytesIO()
+        writer = pd.ExcelWriter(sio, engine="xlsxwriter")
+        cond_df.to_excel(writer, sheet_name="Conditions", index=False)
+        actions_df.to_excel(writer, sheet_name="Actions", index=False)
+        writer.save()
+        writer.close()
+        sio.seek(0)
+        return sio.getvalue()
 
     def build_rules(self):
         # TODO: Build with lxml
