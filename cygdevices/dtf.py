@@ -1,10 +1,14 @@
 from lxml import etree
 from lxml.etree import SubElement
 import pandas as pd
+from io import BytesIO
+from backend.custom_azure import MEDIA_ACCOUNT_KEY
 
+from azure.storage.blob.blockblobservice import BlockBlobService
+
+from django.conf import settings
 
 class DTF:
-    # TODO : Create Parent class that parses supplied xml
     def __init__(self, dtf_filepath):
         self.xml = None
         self.device_xml_path = dtf_filepath
@@ -14,7 +18,10 @@ class DTF:
         """
         Sets the xml prop to an ETREE root with the supplied xml file
         """
-        tree = etree.parse(self.device_xml_path)
+        block_blob_service = BlockBlobService(account_name=settings.AZURE_ACCOUNT_NAME, account_key=MEDIA_ACCOUNT_KEY)
+        file = block_blob_service.get_blob_to_bytes("media", self.device_xml_path)
+        parser = etree.XMLParser(remove_blank_text=True)
+        tree = etree.parse(BytesIO(file.content), parser)
         root = tree.getroot()
         self.xml = root
 
@@ -44,6 +51,15 @@ class DTF:
         tag = "{}[{}]".format(index, reg)
         deid = self.xml.find("dataGroups/{}/dgElements/*[@tagname='{}']".format(array_name, tag))
         return deid.tag if deid is not None else False
+
+    def all_arrays(self):
+        arrays = []
+        for dg in self.data_groups:
+            arrays.append({
+                "name": dg.tag,
+                "niceName": dg.get("niceName")
+            })
+        return arrays
 
     def get_discrete_deid(self, array_name, index, index2=None):
         pass
@@ -111,6 +127,7 @@ class DTF:
 
 
     def save(self):
+        # TODO: Setup save with azure
         file = open(self.device_xml_path, "wb")
         file.write(etree.tostring(self.xml, pretty_print=True))
         file.close()

@@ -49,7 +49,7 @@ def update_long_descriptions(reqeust):
         workbook = pnts.export()
         response = HttpResponse(workbook,
                                 content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename={}_updated'.format(file_name.split(".")[0])
+        response['Content-Disposition'] = 'attachment; filename={}_updated.xlsx'.format(file_name.split(".")[0])
         return response
     return redirect("home")
 

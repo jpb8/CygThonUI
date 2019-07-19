@@ -43,7 +43,6 @@ class Substitutions:
         return sio.getvalue()
 
     def build_rules(self):
-        # TODO: Build with lxml
         for index, row in self.conditions.iterrows():
             rule = SubElement(self.xml_set, "Rule")
             conditions = SubElement(rule, "Conditions")

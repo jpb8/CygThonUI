@@ -1,5 +1,16 @@
 {% extends 'base.html' %}
 {% block body_block %}
+<style>
+    .file-function {
+        margin: 25px;
+        text-align: center;
+    }
+
+    .file-function-desc {
+
+    }
+
+</style>
 <div class="container">
     <div class="row">
         <div class="col">
@@ -15,11 +26,14 @@
             <div>
                 <h2>All Functions</h2>
                 <ul>
-                    <li>
+                    <li class="file-function">
+                        <div class="file-function-desc">
+                            Find all Mapped points without a matching DEID in the DTF
+                        </div>
                         <form method="POST" action="{% url 'files:orphans' %}" id="dds-orphans">
                             {% csrf_token %}
-                            <label>Import Mappings</label>
-                            <select name="dtf-id">
+                            <label for="dtf-id">Import Mappings</label>
+                            <select name="dtf-id" id="dtf-id">
                                 {% if dtfs %}
                                 {% for d in dtfs %}
                                 <option value="{{ d.pk }}">{{ d.file }}</option>
@@ -30,13 +44,13 @@
                             <button class="btn-sm btn-primary" type="submit">Find Orphans</button>
                         </form>
                     </li>
-                    <li>
+                    <li class="file-function">
                         <div class="dds-util" data-id="{{ dds.pk }}"
                              data-url="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">
                             <button>Correct Device Check</button>
                         </div>
                     </li>
-                    <li>
+                    <li class="file-function">
                         <form method="post" enctype="multipart/form-data" action="{% url 'files:fac_exist' %}"
                               id="dds-facs">
                             {% csrf_token %}
@@ -46,13 +60,13 @@
                             <button type="submit">Check All Facilities Exist</button>
                         </form>
                     </li>
-                    <li>
+                    <li class="file-function">
                         <div class="dds-util" data-id="{{ dds.pk }}"
                              data-url="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">
                             <button>Correct Device Check</button>
                         </div>
                     </li>
-                    <li>
+                    <li class="file-function">
                         <div class="dds-util" data-id="{{ dds.pk }}"
                              data-url="{% url 'files:unmapped_facs' %}?id={{ dds.pk }}">
                             <button>Check Missing Facilities</button>

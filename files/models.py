@@ -30,9 +30,10 @@ class DDS(models.Model):
     @property
     def xml(self):
         try:
-            dds_xml = DeviceDef(os.path.join(settings.MEDIA_ROOT, str(self.file)))
+
+            dds_xml = DeviceDef(self.file)
         except:
-            print("DDS File not found at: {}".format(os.path.join(settings.MEDIA_ROOT, str(self.file))))
+            print("DDS File not found at: {}".format(os.path.join(settings.MEDIA_URL, str(self.file))))
             return None
         return dds_xml
 
@@ -67,9 +68,9 @@ class DTF(models.Model):
     @property
     def xml(self):
         try:
-            dtf_xml = D(os.path.join(settings.MEDIA_ROOT, str(self.file)))
+            dtf_xml = D(self.file)
         except:
-            print("DTF File not found at: {}".format(os.path.join(settings.MEDIA_ROOT, str(self.file))))
+            print("DTF File not found at: {}".format(os.path.join(settings.MEDIA_URL, str(self.file))))
             return None
         return dtf_xml
 

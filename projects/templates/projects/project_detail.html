@@ -45,8 +45,7 @@
             <form method="POST" enctype="multipart/form-data" action="{% url 'projects:long_desc' %}">
                 {% csrf_token %}
                 <h3>Long Description Change</h3><br>
-                <a href="{% url 'projects:templates' %}?file=subs">Download Template</a><br>
-                <label>Points Excel</label>
+                <label>Points Export as ".xlsx" file</label><br>
                 <input type="file" name="points"><br>
                 <input hidden name="dds-id" value="{{ dds.pk }}">
                 <button type="submit">Update Long Descriptions</button>
@@ -56,7 +55,8 @@
             <form method="POST" enctype="multipart/form-data" action="{% url 'projects:create_subs' %}">
                 {% csrf_token %}
                 <h3>Create Substitution XML</h3>
-                <label>Substitutions Excel</label>
+                <a href="{% url 'projects:templates' %}?file=subs">Download Template</a><br>
+                <label>Substitutions Excel</label><br>
                 <input type="file" name="subs"><br>
                 <button type="submit">Create Substitutions</button>
             </form>

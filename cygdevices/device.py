@@ -2,7 +2,11 @@ from lxml import etree
 from lxml.etree import SubElement
 import pandas as pd
 from io import BytesIO
+from backend.custom_azure import MEDIA_ACCOUNT_KEY
 
+from azure.storage.blob.blockblobservice import BlockBlobService
+
+from django.conf import settings
 
 class DeviceDef:
     def __init__(self, device_xml_path):
@@ -15,8 +19,11 @@ class DeviceDef:
         Sets the xml prop to an ETREE root with the supplied xml file
         :return:
         """
+
+        block_blob_service = BlockBlobService(account_name=settings.AZURE_ACCOUNT_NAME, account_key=MEDIA_ACCOUNT_KEY)
+        file = block_blob_service.get_blob_to_bytes("media", self.device_xml_path)
         parser = etree.XMLParser(remove_blank_text=True)
-        tree = etree.parse(self.device_xml_path, parser)
+        tree = etree.parse(BytesIO(file.content), parser)
         root = tree.getroot()
         self.xml = root
 
@@ -162,6 +169,7 @@ class DeviceDef:
         return outcome
 
     def save(self):
+        # TODO: Setup save for Azure
         file = open(self.device_xml_path, "wb")
         file.write(etree.tostring(self.xml, pretty_print=True))
         file.close()
@@ -425,7 +433,6 @@ class DeviceDef:
         writer.close()
         sio.seek(0)
         return sio.getvalue()
-
 
     def export_mappings(self):
         df_pnt = self.export_data()

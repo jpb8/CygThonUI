@@ -15,6 +15,7 @@ from projects.models import Project
 
 import os
 from cygdevices.device import DeviceDef
+from cygdevices.dtf import DTF as D
 
 import pandas as pd
 
@@ -54,11 +55,11 @@ class DDSDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['dtfs'] = DTF.objects.all()
-        data['project'] = self.object.project
+        proj = self.object.project
+        data['dtfs'] = DTF.objects.filter(project=proj)
+        data['project'] = proj
         try:
-            device = DeviceDef("{}/{}".format("media", str(self.object.file)))
-            data['devices'] = device.all_devices()
+            data['devices'] = self.object.xml.all_devices()
         except:
             return data
         return data
@@ -234,8 +235,10 @@ class DTFDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['ddss'] = DDS.objects.all()
-        data['project'] = self.object.project
+        proj = self.object.project
+        data['ddss'] = DDS.objects.filter(project=proj)
+        data['project'] = proj
+        data["arrays"] = self.object.xml.all_arrays()
         return data
 
 

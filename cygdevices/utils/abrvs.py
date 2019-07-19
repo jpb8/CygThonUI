@@ -141,5 +141,6 @@ WORDS_UPPER = {
     "VP": "Vapor Pressure",
     "UPSTRM": "Upstream",
     "DNSTRM": "Downstream",
-    "PRES": "Pressure"
+    "PRES": "Pressure",
+    "VSP": "Variable Setpoint"
 }
