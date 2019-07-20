@@ -1,0 +1,28 @@
+<div class="row">
+    <div class="col file-name">
+        File Name
+    </div>
+    <div class="col">
+        Uploaded
+    </div>
+    <div class="col">
+        Delete
+    </div>
+</div>
+{% if files %}
+{% for d in files %}
+<div class="file-selector" onclick="location.href='{{ d.get_absolute_url }}';">
+    <div class="row">
+        <div class="col file-name">
+            {{ d.base_file }}
+        </div>
+        <div class="col">
+            {{ d.uploaded }}
+        </div>
+        <div class="col">
+            <a class="file-delete" href="#">Delete</a>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}

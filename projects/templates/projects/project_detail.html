@@ -1,41 +1,76 @@
 {% extends 'base.html' %}
 {% block body_block %}
-<body>
-<div class="container">
+<style>
+
+    .file-selector {
+        width: 100%;
+        border: 1px solid transparent;
+        border-color: #605e5c;
+        text-align: center;
+        text-color: black;
+        padding: 2px 4px 2px 4px;
+        cursor: pointer;
+    }
+
+    .file-selector:hover {
+        background: #cde2ff;
+    }
+
+    .file-name {
+        padding
+    }
+
+    .file-container {
+        text-align: center;
+        background: #e0e0e0;
+        margin: 25px;
+        padding: 15px;
+    }
+
+    .file-delete {
+        color: black;
+    }
+
+    a.file-delete:hover {
+        color: red;
+    }
+
+
+</style>
+
+<div class="container" style="width: 100%; margin: 0px; max-width: 100%">
     <h1>{{ project.name }}</h1>
     <div class="row">
-        <div class="col">
+        <div class="col file-container">
+            <h2>DDS</h2>
             <div id="dds-form" style="float: left; width: 100%; margin: 10px;">
-                <h2>Upload DDS</h2>
+                <h4>Upload DDS</h4>
                 <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_upload' %}">
                     {% csrf_token %}
-                    {{ dds_form.as_p }}
+                    {{ dds_form }}
                     <input type="hidden" name="next" value="{{ request.path }}">
                     <button type="submit">Upload</button>
                 </form>
             </div>
-            <div id="dds-files" style="width: 90%; margin-top: 50px;">
-                <h2>DDS Files</h2>
-                {% for d in project.dds_set.all %}
-                <p><a href="http://127.0.0.1:8000/files/dds/{{ d.pk }}">{{ d.base_file }}</a></p>
-                {% endfor %}
+            <div style="width: 90%; margin-top: 50px;">
+                <h4>Files</h4>
+                {% include 'projects/snippets/file_table.html' with files=project.dds_set.all %}
             </div>
         </div>
-        <div class="col">
+        <div class="col file-container">
+            <h2>DTF</h2>
             <div id="dtf-form" style="float: left; width: 100%; margin: 10px;">
-                <h2>Upload DTF</h2>
+                <h4>Upload DTF</h4>
                 <form method="post" enctype="multipart/form-data" action="{% url 'files:dtf_upload' %}">
                     {% csrf_token %}
-                    {{ dtf_form.as_p }}
+                    {{ dtf_form }}
                     <input type="hidden" name="next" value="{{ request.path }}">
                     <button type="submit">Upload</button>
                 </form>
             </div><br>
-            <div id="dtf-files" style="width: 90%; margin-top: 50px;">
-                <h2>DFT Files</h2>
-                {% for d in project.dtf_set.all %}
-                <p><a href="http://127.0.0.1:8000/files/dtf/{{ d.pk }}">{{ d.base_file }}</a></p>
-                {% endfor %}
+            <div style="width: 90%; margin-top: 50px;">
+                <h4>Files</h4>
+                {% include 'projects/snippets/file_table.html' with files=project.dtf_set.all %}
             </div>
         </div>
     </div>
@@ -63,5 +98,10 @@
         </div>
     </div>
 </div>
-</body>
+
+<script>
+    $(document).ready(function () {
+
+    }
+</script>
 {% endblock %}

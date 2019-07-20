@@ -89,10 +89,10 @@ def dds_add_mapping(request):
         except ObjectDoesNotExist:
             print("DTF or DDS not found")
             return redirect("files:upload")
-        try:
-            errors = dds.add_mappings(dtf, mappings, deid_only)
-        except:
-            errors = ["Error Handling Excel File. Please use template file", ]
+        # try:
+        errors = dds.add_mappings(dtf, mappings, deid_only)
+        # except:
+        #     errors = ["Error Handling Excel File. Please use template file", ]
         if request.is_ajax():
             errs = []
             for e in errors:

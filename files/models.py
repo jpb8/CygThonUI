@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from django.shortcuts import reverse
+
 from projects.models import Project
 import pandas as pd
 
@@ -30,12 +32,14 @@ class DDS(models.Model):
     @property
     def xml(self):
         try:
-
             dds_xml = DeviceDef(self.file)
         except:
             print("DDS File not found at: {}".format(os.path.join(settings.MEDIA_URL, str(self.file))))
             return None
         return dds_xml
+
+    def get_absolute_url(self):
+        return reverse('files:dds', args=[str(self.pk)])
 
     def add_mappings(self, dtf_obj, excel, deid_only):
         dtf_xml = dtf_obj.xml
@@ -81,6 +85,9 @@ class DTF(models.Model):
     @property
     def export_url(self):
         return "http://127.0.0.1:8000/files/dds/export/?id={}".format(self.pk)
+
+    def get_absolute_url(self):
+        return reverse('files:dtf', args=[str(self.pk)])
 
 class ScreenSubstitutions(models.Model):
     file = models.FileField(upload_to="dtf/")
