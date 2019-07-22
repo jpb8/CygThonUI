@@ -2,17 +2,20 @@
 {% block body_block %}
 <style>
 
+    .file-header {
+        margin: 25px;
+    }
+
+    .function-container {
+        text-align: center;
+    }
+
     .file-function {
         height: 120px;
         width: 100%;
         border: 1px solid transparent;
         border-color: #605e5c;
         padding: 10px;
-        text-align: center;
-    }
-
-    .file-function:hover {
-        background: #cde2ff;
     }
 
     .file-function-desc {
@@ -25,21 +28,22 @@
         width: 70%
     }
 
-
 </style>
 <div class="container">
+    <div class="row file-header">
+        <h2>{{ dds.base_file }}</h2>
+        <ul>
+            <li>Project - {{ dds.project }}</li>
+            <li>Uploaded - {{ dds.uploaded }}</li>
+        </ul>
+        <button onclick="window.location.href = '{{ dds.export_url }}';">Export File!</button>
+        <button onclick="window.location.href = '{% url 'files:dds_mappings_export' %}?id={{ dds.pk }}';">Export
+            Mappings
+        </button>
+    </div>
     <div class="row">
         <div class="col">
-            <h2>{{ dds.base_file }}</h2>
-            <ul>
-                <li>Project - {{ dds.project }}</li>
-                <li>Uploaded - {{ dds.uploaded }}</li>
-            </ul>
-            <button onclick="window.location.href = '{{ dds.export_url }}';">Export File!</button>
-            <button onclick="window.location.href = '{% url 'files:dds_mappings_export' %}?id={{ dds.pk }}';">Export
-                Mappings
-            </button>
-            <div>
+            <div class="function-container">
                 <h2>Validation Functions</h2>
                 <div class="file-function">
                     <div class="file-function-desc">
@@ -47,71 +51,80 @@
                     </div>
                     <div class="file-fuction-body">
                         <form method="POST" action="{% url 'files:orphans' %}" id="dds-orphans">
-                        {% csrf_token %}
-                        <label for="dtf-id">Import Mappings</label>
-                        <select name="dtf-id" id="dtf-id">
-                            {% if dtfs %}
-                            {% for d in dtfs %}
-                            <option value="{{ d.pk }}">{{ d.file }}</option>
-                            {% endfor %}
-                            {% endif %}
-                        </select>
-                        <input hidden name="dds-id" value="{{ dds.pk }}">
-                        <button class="btn-sm btn-primary" type="submit">Find Orphans</button>
-                    </form>
+                            {% csrf_token %}
+                            <label for="dtf-id">Import Mappings</label>
+                            <select name="dtf-id" id="dtf-id">
+                                {% if dtfs %}
+                                {% for d in dtfs %}
+                                <option value="{{ d.pk }}">{{ d.file }}</option>
+                                {% endfor %}
+                                {% endif %}
+                            </select>
+                            <input hidden name="dds-id" value="{{ dds.pk }}">
+                            <button class="btn-sm btn-primary" type="submit">Find Orphans</button>
+                        </form>
                     </div>
                 </div>
                 <div class="file-function">
-                    <div class="dds-util" data-id="{{ dds.pk }}"
+                    <div class="file-function-desc">
+                        Validate first 4 letters in facility match device
+                    </div>
+                    <div class="dds-util, file-function-body" data-id="{{ dds.pk }}"
                          data-url="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">
-                        <button>Correct Device Check</button>
+                        <button>GO</button>
                     </div>
                 </div>
                 <div class="file-function">
-                    <form method="post" enctype="multipart/form-data" action="{% url 'files:fac_exist' %}"
-                          id="dds-facs">
-                        {% csrf_token %}
-                        <label>Excel facility upload</label>
-                        <input type="file" name="facs">
-                        <input hidden name="dds-id" value="{{ dds.pk }}">
-                        <button type="submit">Check All Facilities Exist</button>
-                    </form>
-                </div>
-                <div class="file-function">
-                    <div class="dds-util" data-id="{{ dds.pk }}"
-                         data-url="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">
-                        <button>Correct Device Check</button>
+                    <div class="file-function-desc">
+                        Validate all mapped facilities exist in facilities export
+                    </div>
+                    <div class="file-function-body">
+                        <form method="post" enctype="multipart/form-data" action="{% url 'files:fac_exist' %}"
+                              id="dds-facs">
+                            {% csrf_token %}
+                            <label>Excel facility upload</label>
+                            <input type="file" name="facs"><br>
+                            <input hidden name="dds-id" value="{{ dds.pk }}">
+                            <button type="submit">GO</button>
+                        </form>
                     </div>
                 </div>
                 <div class="file-function">
-                    <div class="dds-util" data-id="{{ dds.pk }}"
-                         data-url="{% url 'files:unmapped_facs' %}?id={{ dds.pk }}">
-                        <button>Check Missing Facilities</button>
+                    <div class="file-function-desc">
+                        File all unmapped facilities
+                    </div>
+                    <div class="file-function-body">
+                        <div class="dds-util" data-id="{{ dds.pk }}"
+                             data-url="{% url 'files:unmapped_facs' %}?id={{ dds.pk }}">
+                            <button>Check Missing Facilities</button>
+                        </div>
                     </div>
                     <div id="map-unmapped" data-id="{{ dds.pk }}" data-map="True"
                          data-url="{% url 'files:unmapped_facs' %}">
-                        <button>Check and Map Missing Facilities</button>
+                        <button>Check and map</button>
                     </div>
                 </div>
             </div>
-            <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_add_mappings' %}"
-                  id="dds-mapping">
-                {% csrf_token %}
-                <h3>Import Mappings</h3><br>
-                <a href="{% url 'files:mapping_template' %}">Download Template</a><br>
-                <label>Mappings Excel</label>
-                <input type="file" name="mappings"><br>
-                <input type="checkbox" name="died-only">DEID Only<br>
-                <select name="dtf-id">
-                    {% if dtfs %}
-                    {% for d in dtfs %}
-                    <option value="{{ d.pk }}">{{ d.file }}</option>
-                    {% endfor %}
-                    {% endif %}
-                </select><br>
-                <input hidden name="dds-id" value="{{ dds.pk }}">
-                <button type="submit">Map!</button>
-            </form>
+            <div class="file-function-container">
+                <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_add_mappings' %}"
+                      id="dds-mapping">
+                    {% csrf_token %}
+                    <h3>Import Mappings</h3><br>
+                    <a href="{% url 'files:mapping_template' %}">Download Template</a><br>
+                    <label>Mappings Excel</label>
+                    <input type="file" name="mappings"><br>
+                    <input type="checkbox" name="died-only">DEID Only<br>
+                    <select name="dtf-id">
+                        {% if dtfs %}
+                        {% for d in dtfs %}
+                        <option value="{{ d.pk }}">{{ d.file }}</option>
+                        {% endfor %}
+                        {% endif %}
+                    </select><br>
+                    <input hidden name="dds-id" value="{{ dds.pk }}">
+                    <button type="submit">Map!</button>
+                </form>
+            </div>
         </div>
         <div class="col" id="device-info">
             <h1>All Devices</h1>
@@ -306,6 +319,11 @@
 
 
     });
+
+
+
+
+
 
 </script>
 {% endblock %}

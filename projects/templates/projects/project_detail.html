@@ -35,6 +35,23 @@
         color: red;
     }
 
+    .util-container {
+        text-align: center;
+
+    }
+
+    .project-util {
+        margin: 7px;
+        padding: 5px;
+        border: 1px solid transparent;
+        border-color: #605e5c;
+        width: 50%;
+        display: inline-block;
+    }
+
+
+
+
 
 </style>
 
@@ -67,34 +84,36 @@
                     <input type="hidden" name="next" value="{{ request.path }}">
                     <button type="submit">Upload</button>
                 </form>
-            </div><br>
+            </div>
+            <br>
             <div style="width: 90%; margin-top: 50px;">
                 <h4>Files</h4>
                 {% include 'projects/snippets/file_table.html' with files=project.dtf_set.all %}
             </div>
         </div>
     </div>
-
     <div class="row">
-        <div class="project-util" style="width: 90%; margin-top: 50px;">
-            <form method="POST" enctype="multipart/form-data" action="{% url 'projects:long_desc' %}">
-                {% csrf_token %}
-                <h3>Long Description Change</h3><br>
-                <label>Points Export as ".xlsx" file</label><br>
-                <input type="file" name="points"><br>
-                <input hidden name="dds-id" value="{{ dds.pk }}">
-                <button type="submit">Update Long Descriptions</button>
-            </form>
-        </div>
-        <div class="project-util" style="width: 90%; margin-top: 50px;">
-            <form method="POST" enctype="multipart/form-data" action="{% url 'projects:create_subs' %}">
-                {% csrf_token %}
-                <h3>Create Substitution XML</h3>
-                <a href="{% url 'projects:templates' %}?file=subs">Download Template</a><br>
-                <label>Substitutions Excel</label><br>
-                <input type="file" name="subs"><br>
-                <button type="submit">Create Substitutions</button>
-            </form>
+        <div class="col util-container">
+            <div class="project-util">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'projects:long_desc' %}">
+                    {% csrf_token %}
+                    <h3>Long Description Change</h3><br>
+                    <label>Points Export as ".xlsx" file</label><br>
+                    <input type="file" name="points"><br>
+                    <input hidden name="dds-id" value="{{ dds.pk }}">
+                    <button type="submit">Update Long Descriptions</button>
+                </form>
+            </div>
+            <div class="project-util">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'projects:create_subs' %}">
+                    {% csrf_token %}
+                    <h3>Create Substitution XML</h3>
+                    <a href="{% url 'projects:templates' %}?file=subs">Download Template</a><br>
+                    <label>Substitutions Excel</label><br>
+                    <input type="file" name="subs"><br>
+                    <button type="submit">Create Substitutions</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -103,5 +122,6 @@
     $(document).ready(function () {
 
     }
+
 </script>
 {% endblock %}

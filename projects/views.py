@@ -34,8 +34,8 @@ class ProjectDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['dds_form'] = DDSForm
-        data['dtf_form'] = DTFForm
+        data['dds_form'] = DDSForm(initial={"project": self.object.pk})
+        data['dtf_form'] = DTFForm(initial={"project": self.object.pk})
         return data
 
 
