@@ -86,11 +86,11 @@ DATABASES = {
         'ENGINE': 'sql_server.pyodbc',
         'NAME': 'cygnet-util',
         'USER': 'jpb8@encore-db',
-        'PASSWORD': "Bowser33",
+        'PASSWORD': 'Bowser33',
         'HOST': 'encore-db.database.windows.net',
         'PORT': '1433',
         'OPTIONS': {
-            'driver': 'ODBC Driver 13 for SQL Server',
+            'driver': 'SQL Server Native Client 11.0',
         },
     },
 }
