@@ -86,7 +86,7 @@ DATABASES = {
         'ENGINE': 'sql_server.pyodbc',
         'NAME': 'cygnet-util',
         'USER': 'jpb8@encore-db',
-        'PASSWORD': os.environ['DB_PASSWORD'],
+        'PASSWORD': "Bowser33",
         'HOST': 'encore-db.database.windows.net',
         'PORT': '1433',
         'OPTIONS': {
