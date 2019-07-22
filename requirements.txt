@@ -86,7 +86,8 @@ certifi==2019.6.16
 cffi==1.12.3
 chardet==3.0.4
 cryptography==2.7
-Django==2.2.3
+Django==2.1.10
+django-pyodbc-azure==2.1.0.0
 django-storages==1.7.1
 idna==2.8
 isodate==0.6.0
@@ -98,6 +99,7 @@ oauthlib==3.0.2
 pandas==0.24.2
 pycparser==2.19
 PyJWT==1.7.1
+pyodbc==4.0.26
 python-dateutil==2.8.0
 pytz==2019.1
 requests==2.22.0
