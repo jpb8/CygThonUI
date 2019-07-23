@@ -223,7 +223,7 @@ def get_mappings(request):
 def mapping_template(reqeust):
     workbook = DeviceDef.mappings_template()
     response = HttpResponse(workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename={}'.format("Excel2XML_substitions_template.xlsx")
+    response['Content-Disposition'] = 'attachment; filename={}'.format("Mappings_import_template.xlsx")
     return response
 
 
