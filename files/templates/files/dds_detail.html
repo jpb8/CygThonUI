@@ -1,34 +1,5 @@
 {% extends 'base.html' %}
 {% block body_block %}
-<style>
-
-    .file-header {
-        margin: 25px;
-    }
-
-    .function-container {
-        text-align: center;
-    }
-
-    .file-function {
-        height: 120px;
-        width: 100%;
-        border: 1px solid transparent;
-        border-color: #605e5c;
-        padding: 10px;
-    }
-
-    .file-function-desc {
-        float: left;
-        width: 30%;
-    }
-
-    .file-function-body {
-        float: left;
-        width: 70%
-    }
-
-</style>
 <div class="container">
     <div class="row file-header">
         <h2>{{ dds.base_file }}</h2>
@@ -36,9 +7,9 @@
             <li>Project - {{ dds.project }}</li>
             <li>Uploaded - {{ dds.uploaded }}</li>
         </ul>
-        <button onclick="window.location.href = '{{ dds.export_url }}';">Export File!</button>
+        <button onclick="window.location.href = '{% url 'files:dds_export' %}?id={{ dds.pk }}';">Export File!</button>
         <button onclick="window.location.href = '{% url 'files:dds_mappings_export' %}?id={{ dds.pk }}';">Export
-            Mappings
+            Mappings to Excel
         </button>
     </div>
     <div class="row">
@@ -69,10 +40,13 @@
                     <div class="file-function-desc">
                         Validate first 4 letters in facility match device
                     </div>
-                    <div class="dds-util, file-function-body" data-id="{{ dds.pk }}"
-                         data-url="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">
-                        <button>GO</button>
+                    <div class="file-function-body">
+                        <div class="dds-util btn btn-primary" data-id="{{ dds.pk }}"
+                             data-url="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">
+                            GO
+                        </div>
                     </div>
+
                 </div>
                 <div class="file-function">
                     <div class="file-function-desc">
@@ -85,7 +59,7 @@
                             <label>Excel facility upload</label>
                             <input type="file" name="facs"><br>
                             <input hidden name="dds-id" value="{{ dds.pk }}">
-                            <button type="submit">GO</button>
+                            <button class="btn btn-primary" type="submit">GO</button>
                         </form>
                     </div>
                 </div>
@@ -94,14 +68,14 @@
                         Find all unmapped facilities
                     </div>
                     <div class="file-function-body">
-                        <div class="dds-util" data-id="{{ dds.pk }}"
+                        <div class="dds-util btn btn-primary" data-id="{{ dds.pk }}"
                              data-url="{% url 'files:unmapped_facs' %}?id={{ dds.pk }}">
-                            <button>Check Missing Facilities</button>
+                            Check Missing Facilities
                         </div>
                     </div>
-                    <div id="map-unmapped" data-id="{{ dds.pk }}" data-map="True"
+                    <div class="btn btn-primary" id="map-unmapped" data-id="{{ dds.pk }}" data-map="True"
                          data-url="{% url 'files:unmapped_facs' %}">
-                        <button>Check and map</button>
+                        Check and map
                     </div>
                 </div>
             </div>
@@ -122,7 +96,7 @@
                         {% endif %}
                     </select><br>
                     <input hidden name="dds-id" value="{{ dds.pk }}">
-                    <button type="submit">Map!</button>
+                    <button class="btn btn-primary" type="submit">Map!</button>
                 </form>
             </div>
         </div>
@@ -152,178 +126,4 @@
         </div>
     </div>
 </div>
-
-<script>
-    $(document).ready(function () {
-
-        function createPointTable(points, rows) {
-            var table = "<table style='width:100%'>" + buildHeaders(rows);
-            for (i = 0; i < points.length; i++) {
-                table += "<tr>";
-                for (j = 0; j < rows.length; j++) {
-                    table += "<td style='font-size:8pt'>" + points[i][rows[j]] + "</td>";
-                }
-                table += "</tr>";
-            }
-            table += "</table>";
-            return table
-        }
-
-        function buildHeaders(rows) {
-            var headerHTML = "<tr>";
-            for (i = 0; i < rows.length; i++) {
-                headerHTML += "<th>" + rows[i] + "</th>";
-            }
-            headerHTML += "</tr>";
-            return headerHTML
-        }
-
-        function createResponseHTML(data) {
-            if (data.error) {
-                return "<h1>ERROR</h1>"
-            }
-            var text = "<h2>" + data.header + "</h2>";
-            var table = createPointTable(data.responseData, data.rows);
-            text += table;
-            return text
-        }
-
-        $("#dds-mapping").submit(function (event) {
-            event.preventDefault();
-            var formData = new FormData($(this)[0]);
-            var _url = $(this).attr("action");
-            var method = "POST";
-            $.ajax({
-                url: _url,
-                type: method,
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function (data) {
-                    var text = createResponseHTML(data);
-                    $("#modal-body").html(text);
-                    $('#response-modal').modal('show');
-                },
-                error: function (request, error) {
-                    alert("Request: " + JSON.stringify(request));
-                }
-            });
-        });
-
-        $("#dds-orphans").submit(function (event) {
-            event.preventDefault();
-            var formData = $("#dds-orphans").serialize();
-            var _url = $(this).attr("action");
-            var method = "POST";
-            $.ajax({
-                url: _url,
-                type: method,
-                data: formData,
-                success: function (data) {
-                    var text = createResponseHTML(data);
-                    $("#modal-body").html(text);
-                    $('#response-modal').modal('show');
-                },
-                error: function (request, error) {
-                    alert("Request: " + JSON.stringify(request));
-                }
-            });
-        });
-
-        $("#dds-facs").submit(function (event) {
-            event.preventDefault();
-            var formData = new FormData($(this)[0]);
-            var _url = $(this).attr("action");
-            var method = "POST";
-            $.ajax({
-                url: _url,
-                type: method,
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function (data) {
-                    var text = createResponseHTML(data);
-                    $("#modal-body").html(text);
-                    $('#response-modal').modal('show');
-                },
-                error: function (request, error) {
-                    alert("Request: " + JSON.stringify(request));
-                }
-            });
-        });
-
-        $(".dds-util").click(function () {
-            var _url = $(this).data("url");
-            var _data = {id: $(this).data("id")};
-            var method = "POST";
-            $.ajax({
-                url: _url,
-                type: method,
-                data: _data,
-                success: function (data) {
-                    var text = createResponseHTML(data);
-                    $("#modal-body").html(text);
-                    $('#response-modal').modal('show');
-                },
-                error: function (request, error) {
-                    alert("Request: " + JSON.stringify(request));
-                }
-            })
-        });
-
-        $("#map-unmapped").click(function () {
-            var _url = $(this).data("url");
-            var _data = {
-                id: $(this).data("id"),
-                map: $(this).data("map")
-            };
-            var method = "POST";
-            $.ajax({
-                url: _url,
-                type: method,
-                data: _data,
-                success: function (data) {
-                    var text = createResponseHTML(data);
-                    $("#modal-body").html(text);
-                    $("#device-info").html(data.devices_html);
-                    $('#response-modal').modal('show');
-                },
-                error: function (request, error) {
-                    alert("Request: " + JSON.stringify(request));
-                }
-            })
-        });
-
-        $(".dg-mappings").click(function () {
-            var _url = $(this).data("url");
-            var _data = {
-                data_group: $(this).data("group"),
-                device: $(this).data("device"),
-                id: {{ dds.pk }}
-            };
-            var method = "POST";
-            $.ajax({
-                url: _url,
-                type: method,
-                data: _data,
-                success: function (data) {
-                    var text = createResponseHTML(data);
-                    $("#modal-body").html(text);
-                    $('#response-modal').modal('show');
-                },
-                error: function (request, error) {
-                    alert("Request: " + JSON.stringify(request));
-                }
-            })
-        });
-
-
-    });
-
-
-
-
-
-
-</script>
 {% endblock %}

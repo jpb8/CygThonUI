@@ -2,3 +2,76 @@
     margin: 10px;
     text-align: center;
 }
+
+.file-header {
+    margin: 25px;
+}
+
+.function-container {
+    text-align: center;
+}
+
+.file-function {
+    height: 120px;
+    width: 100%;
+    border: 1px solid transparent;
+    border-color: #605e5c;
+    padding: 10px;
+}
+
+.file-function-desc {
+    float: left;
+    width: 30%;
+}
+
+.file-function-body {
+    float: left;
+    width: 70%;
+    text-align: center;
+}
+
+.file-selector {
+    width: 100%;
+    border: 1px solid transparent;
+    border-color: #605e5c;
+    text-align: center;
+    text-color: black;
+    padding: 2px 4px 2px 4px;
+    cursor: pointer;
+}
+
+.file-selector:hover {
+    background: #cde2ff;
+}
+
+.file-name {
+    padding
+}
+
+.file-container {
+    text-align: center;
+    background: #e0e0e0;
+    margin: 25px;
+    padding: 15px;
+}
+
+.file-delete {
+    color: black;
+}
+
+a.file-delete:hover {
+    color: red;
+}
+
+.util-container {
+    text-align: center;
+}
+
+.project-util {
+    margin: 7px;
+    padding: 5px;
+    border: 1px solid transparent;
+    border-color: #605e5c;
+    width: 50%;
+    display: inline-block;
+}

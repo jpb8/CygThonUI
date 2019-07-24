@@ -8,6 +8,7 @@ from azure.storage.blob.blockblobservice import BlockBlobService
 
 from django.conf import settings
 
+
 class DTF:
     def __init__(self, dtf_filepath):
         self.xml = None
@@ -125,6 +126,8 @@ class DTF:
         df.to_excel(array_file_name)
         df2.to_excel(deid_file_name)
 
+    def pretty_print(self):
+        return etree.tostring(self.xml, pretty_print=True)
 
     def save(self):
         # TODO: Setup save with azure

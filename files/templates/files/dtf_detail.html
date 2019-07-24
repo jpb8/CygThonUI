@@ -8,16 +8,7 @@
                 <li>Project - {{ dtf.project }}</li>
                 <li>Uploaded - {{ dtf.uploaded }}</li>
             </ul>
-            <button onclick="window.location.href = '{{ dtf.export_url }}';">Export File!</button>
-<!--            <button onclick="window.location.href = '{% url 'files:dds_mappings_export' %}?id={{ dds.pk }}';">Export-->
-<!--                Mappings-->
-<!--            </button>-->
-            <div>
-                <h2>All Functions</h2>
-                <ul>
-                    <li>Find Unused DEIDs</li>
-                </ul>
-            </div>
+            <button onclick="window.location.href = '{% url 'files:dtf_export' %}?id={{ dds.pk }}';">Export File!</button>
             <form method="post" action="{% url 'files:unused_dieds' %}"
                   id="dtf-died-check">
                 {% csrf_token %}
@@ -35,6 +26,11 @@
         </div>
         <div class="col" id="device-info">
             <h1>All Arrays</h1>
+            {% if arrays %}
+            {% for a in arrays %}
+            <p>{{ a.name }} - {{ a.niceName }}</p>
+            {% endfor %}
+            {% endif %}
 
         </div>
     </div>
@@ -57,64 +53,4 @@
         </div>
     </div>
 </div>
-
-</body>
-<script>
-    $(document).ready(function () {
-
-        function createPointTable(points, rows) {
-            var table = "<table style='width:100%'>" + buildHeaders(rows);
-            for (i = 0; i < points.length; i++) {
-                table += "<tr>";
-                for (j = 0; j < rows.length; j++) {
-                    table += "<td style='font-size:8pt'>" + points[i][rows[j]] + "</td>";
-                }
-                table += "</tr>";
-            }
-            table += "</table>";
-            return table
-        }
-
-        function buildHeaders(rows) {
-            var headerHTML = "<tr>";
-            for (i = 0; i < rows.length; i++) {
-                headerHTML += "<th>" + rows[i] + "</th>";
-            }
-            headerHTML += "</tr>";
-            return headerHTML
-        }
-
-        function createResponseHTML(data) {
-            if (data.error) {
-                return "<h1>ERROR</h1>"
-            }
-            var text = "<h2>" + data.header + "</h2>";
-            var table = createPointTable(data.responseData, data.rows);
-            text += table;
-            return text
-        }
-
-        $("#dtf-died-check").submit(function (event) {
-            event.preventDefault();
-            var formData = $("#dtf-died-check").serialize();
-            var _url = $(this).attr("action");
-            var method = "POST";
-            console.log(formData);
-            $.ajax({
-                url: _url,
-                type: method,
-                data: formData,
-                success: function (data) {
-                    var text = createResponseHTML(data);
-                    $("#modal-body").html(text);
-                    $('#response-modal').modal('show');
-                },
-                error: function (request, error) {
-                    alert("Request: " + JSON.stringify(request));
-                }
-            });
-        });
-
-    });
-</script>
 {% endblock %}

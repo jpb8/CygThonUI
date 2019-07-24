@@ -176,6 +176,9 @@ class DeviceDef:
         block_blob_service = BlockBlobService(account_name=settings.AZURE_ACCOUNT_NAME, account_key=MEDIA_ACCOUNT_KEY)
         block_blob_service.create_blob_from_text("media", self.device_xml_path, output)
 
+    def pretty_print(self):
+        return etree.tostring(self.xml, pretty_print=True)
+
     def export_data(self):
         """
         Export all UIS mappings for easy validation

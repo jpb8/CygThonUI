@@ -11,11 +11,8 @@ from .models import DDS, DTF
 from .forms import DDSForm, DTFForm
 from .utils import build_ajax_response_dict
 
-from projects.models import Project
-
 import os
 from cygdevices.device import DeviceDef
-from cygdevices.dtf import DTF as D
 
 import pandas as pd
 
@@ -67,15 +64,16 @@ class DDSDetailView(DetailView):
 
 def export_dds(request):
     dds_id = request.GET.get("id")
-    dds = DDS.objects.get(pk=dds_id)
-    file_path = os.path.join(settings.MEDIA_ROOT, str(dds.file))
-    if os.path.exists(file_path):
-        with open(file_path, 'rb') as fh:
-            response = HttpResponse(fh.read(), content_type='application/force-download')
-            response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(file_path)
-            response['X-Sendfile'] = file_path
-            return response
-    raise Http404
+    try:
+        dds = DDS.objects.get(pk=dds_id)
+        file_path = os.path.join(settings.MEDIA_ROOT, str(dds.file))
+        response = HttpResponse(dds.xml.pretty_print(), content_type='application/force-download')
+        response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(file_path)
+        response['X-Sendfile'] = file_path
+    except:
+        raise Http404
+    return response
+
 
 
 def dds_add_mapping(request):
@@ -244,20 +242,20 @@ class DTFDetailView(DetailView):
 
 def export_dtf(request):
     dtf_id = request.GET.get("id")
-    dtf = DTF.objects.get(pk=dtf_id)
-    file_path = os.path.join(settings.MEDIA_ROOT, str(dtf.file))
-    if os.path.exists(file_path):
-        with open(file_path, 'rb') as fh:
-            response = HttpResponse(fh.read(), content_type='application/force-download')
-            response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(file_path)
-            response['X-Sendfile'] = file_path
-            return response
-    raise Http404
+    try:
+        dtf = DTF.objects.get(pk=dtf_id)
+        file_path = os.path.join(settings.MEDIA_ROOT, str(dtf.file))
+        response = HttpResponse(dtf.xml.pretty_print(), content_type='application/force-download')
+        response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(file_path)
+        response['X-Sendfile'] = file_path
+    except:
+        raise Http404
+    return response
+
 
 
 def unmapped_dieds(request):
     if request.method == "POST":
-        print(request.POST)
         dds_id = int(request.POST.get("dds-id"))
         dtf_id = int(request.POST.get("dtf-id"))
         try:

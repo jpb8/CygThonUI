@@ -27,7 +27,7 @@ class DDS(models.Model):
 
     @property
     def export_url(self):
-        return "http://127.0.0.1:8000/files/dds/export/?id={}".format(self.pk)
+        return reverse("files:dds_export", kwargs={'id': self.pk})
 
     @property
     def xml(self):
@@ -84,10 +84,11 @@ class DTF(models.Model):
 
     @property
     def export_url(self):
-        return "http://127.0.0.1:8000/files/dds/export/?id={}".format(self.pk)
+        return reverse("files:dtf_export", kwargs={'id': self.pk})
 
     def get_absolute_url(self):
         return reverse('files:dtf', args=[str(self.pk)])
+
 
 class ScreenSubstitutions(models.Model):
     file = models.FileField(upload_to="dtf/")

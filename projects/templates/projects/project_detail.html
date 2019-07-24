@@ -1,61 +1,6 @@
 {% extends 'base.html' %}
 {% block body_block %}
-<style>
-
-    .file-selector {
-        width: 100%;
-        border: 1px solid transparent;
-        border-color: #605e5c;
-        text-align: center;
-        text-color: black;
-        padding: 2px 4px 2px 4px;
-        cursor: pointer;
-    }
-
-    .file-selector:hover {
-        background: #cde2ff;
-    }
-
-    .file-name {
-        padding
-    }
-
-    .file-container {
-        text-align: center;
-        background: #e0e0e0;
-        margin: 25px;
-        padding: 15px;
-    }
-
-    .file-delete {
-        color: black;
-    }
-
-    a.file-delete:hover {
-        color: red;
-    }
-
-    .util-container {
-        text-align: center;
-
-    }
-
-    .project-util {
-        margin: 7px;
-        padding: 5px;
-        border: 1px solid transparent;
-        border-color: #605e5c;
-        width: 50%;
-        display: inline-block;
-    }
-
-
-
-
-
-</style>
-
-<div class="container" style="width: 100%; margin: 0px; max-width: 100%">
+<div class="container" style="width: 100%; margin: 0px; max-width: 100%; text-align: center;">
     <h1>{{ project.name }}</h1>
     <div class="row">
         <div class="col file-container">
@@ -117,11 +62,4 @@
         </div>
     </div>
 </div>
-
-<script>
-    $(document).ready(function () {
-
-    }
-
-</script>
 {% endblock %}
