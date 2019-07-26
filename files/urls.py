@@ -19,8 +19,10 @@ urlpatterns = [
     path('dds/fac_exist/', facs_dne, name="fac_exist"),
     path('dds/get_mappings/', get_mappings, name="get_mappings"),
     path('dds/mapping_template/', mapping_template, name="mapping_template"),
+    path('dds/delete/', dds_delete, name="dds_delete"),
     ## DTF ##
     path('dtf/<int:pk>/', DTFDetailView.as_view(), name="dtf"),
     path('dtf/export/', export_dtf, name='dtf_export'),
     path('dtf/unused_deids/', unmapped_dieds, name="unused_dieds"),
+    path('dtf/delete/', dtf_delete, name="dtf_delete"),
 ]

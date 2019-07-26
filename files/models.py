@@ -10,6 +10,9 @@ import os
 from cygdevices.device import DeviceDef
 from cygdevices.dtf import DTF as D
 
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
+
 
 # Create your models here.
 class DDS(models.Model):
@@ -61,6 +64,11 @@ class DDS(models.Model):
         self.xml.save()
 
 
+@receiver(pre_delete, sender=DDS)
+def dds_pre_delete(sender, instance, **kwargs):
+    instance.xml.delete()
+
+
 class DTF(models.Model):
     file = models.FileField(upload_to="dtf/")
     uploaded = models.DateTimeField(auto_now=True)
@@ -88,6 +96,11 @@ class DTF(models.Model):
 
     def get_absolute_url(self):
         return reverse('files:dtf', args=[str(self.pk)])
+
+
+@receiver(pre_delete, sender=DTF)
+def dtf_pre_delete(sender, instance, **kwargs):
+    instance.xml.delete()
 
 
 class ScreenSubstitutions(models.Model):

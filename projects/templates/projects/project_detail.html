@@ -16,7 +16,7 @@
             </div>
             <div style="width: 90%; margin-top: 50px;">
                 <h4>Files</h4>
-                {% include 'projects/snippets/file_table.html' with files=project.dds_set.all %}
+                {% include 'projects/snippets/file_table.html' with files=project.dds_set.all dds=True %}
             </div>
         </div>
         <div class="col file-container">
@@ -33,7 +33,7 @@
             <br>
             <div style="width: 90%; margin-top: 50px;">
                 <h4>Files</h4>
-                {% include 'projects/snippets/file_table.html' with files=project.dtf_set.all %}
+                {% include 'projects/snippets/file_table.html' with files=project.dtf_set.all dtf=True %}
             </div>
         </div>
     </div>

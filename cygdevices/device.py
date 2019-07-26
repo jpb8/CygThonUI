@@ -176,6 +176,10 @@ class DeviceDef:
         block_blob_service = BlockBlobService(account_name=settings.AZURE_ACCOUNT_NAME, account_key=MEDIA_ACCOUNT_KEY)
         block_blob_service.create_blob_from_text("media", self.device_xml_path, output)
 
+    def delete(self):
+        block_blob_service = BlockBlobService(account_name=settings.AZURE_ACCOUNT_NAME, account_key=MEDIA_ACCOUNT_KEY)
+        block_blob_service.delete_blob("media", self.device_xml_path)
+
     def pretty_print(self):
         return etree.tostring(self.xml, pretty_print=True)
 
@@ -425,10 +429,10 @@ class DeviceDef:
             'bits': [2, 1],
             'array': ['N40', 'AI_ARRAY'],
             'deid': ['MB000405', 'N4X00'],
-            'indexed': ['N40', 'AI_MT_TK_N4X'],
-            'bit': [0, 0],
-            'bit12': [4, 0],
-            'bit22': [5, None]
+            'tag': ['N40', 'AI_MT_TK_N4X'],
+            'register': [0, 0],
+            'bit1': [4, 0],
+            'bit2': [5, None]
         }
         df = pd.DataFrame(data=sheet)
         sio = BytesIO()
@@ -488,18 +492,18 @@ class UdcMap:
         # TODO: Scrub udc data. (None for bit)
         """
         :param dtf_xml: DTF class
-        :param row: Dict of {'facilityid': '','bit':'','uniformdatacode':'','indexed':''}
+        :param row: Dict of {'facilityid': '','register':'','uniformdatacode':'','tag':''}
         :param dev_array: array we are looking to add a mapping too
         :param deid_only: bool that tells whether or not to build UDC from
         :return: Tuple of UDC and error bool, (if error, returns Error message)
         """
         if row["type"] == "A" and not deid_only:
-            deid = dtf_xml.get_analog_deid(dev_array, row["indexed"], str(int(row["bit"])))
+            deid = dtf_xml.get_analog_deid(dev_array, row["tag"], str(int(row["register"])))
             if deid:
                 _udc, err = UdcMap(row["uniformdatacode"], deid, row["facilityid"]), False
             else:
                 _udc, err = "*DEID Not found* tagname: {}[{}], Array: {}, UDC: {} FAC: {}".format(
-                    row["indexed"], row["bit"], dev_array,
+                    row["tag"], row["reg"], dev_array,
                     row["uniformdatacode"],
                     row["facilityid"]
                 ), True

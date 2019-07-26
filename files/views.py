@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.template.loader import render_to_string
 from django.views.generic import DetailView
 from django.http import HttpResponse, Http404
@@ -36,15 +36,14 @@ def dds_upload(request):
     return redirect(next)
 
 
-def dtf_upload(request):
-    if request.method == 'POST':
-        form = DTFForm(request.POST, request.FILES)
-        next = request.POST.get('next', '/')
-        if form.is_valid():
-            form.save()
-        else:
-            print("Error in form")
-    return redirect(next)
+def dds_delete(request):
+    dds_id = request.GET.get("id")
+    try:
+        dds = DDS.objects.get(pk=int(dds_id))
+    except ObjectDoesNotExist:
+        return redirect("files:upload")
+    dds.delete()
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 
 class DDSDetailView(DetailView):
@@ -73,7 +72,6 @@ def export_dds(request):
     except:
         raise Http404
     return response
-
 
 
 def dds_add_mapping(request):
@@ -227,6 +225,27 @@ def mapping_template(reqeust):
 
 ####################### DTF #######################
 
+def dtf_upload(request):
+    if request.method == 'POST':
+        form = DTFForm(request.POST, request.FILES)
+        next = request.POST.get('next', '/')
+        if form.is_valid():
+            form.save()
+        else:
+            print("Error in form")
+    return redirect(next)
+
+
+def dtf_delete(request):
+    dtf_id = request.GET.get("id")
+    print(dtf_id)
+    try:
+        dtf = DTF.objects.get(pk=int(dtf_id))
+    except ObjectDoesNotExist:
+        return redirect("files:upload")
+    dtf.delete()
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
 
 class DTFDetailView(DetailView):
     queryset = DTF.objects.all()
@@ -251,7 +270,6 @@ def export_dtf(request):
     except:
         raise Http404
     return response
-
 
 
 def unmapped_dieds(request):

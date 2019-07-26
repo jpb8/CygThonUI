@@ -142,5 +142,6 @@ WORDS_UPPER = {
     "UPSTRM": "Upstream",
     "DNSTRM": "Downstream",
     "PRES": "Pressure",
-    "VSP": "Variable Setpoint"
+    "VSP": "Variable Setpoint",
+    "ALM": "Alarm"
 }

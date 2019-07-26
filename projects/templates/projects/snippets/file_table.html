@@ -20,7 +20,11 @@
             {{ d.uploaded }}
         </div>
         <div class="col">
-            <a class="file-delete" href="#">Delete</a>
+            {% if dds %}
+            <a class="file-delete" href="{% url 'files:dds_delete' %}?id={{ d.pk }}">Delete</a>
+            {% elif dtf %}
+            <a class="file-delete" href="{% url 'files:dtf_delete' %}?id={{ d.pk }}">Delete</a>
+            {% endif %}
         </div>
     </div>
 </div>
