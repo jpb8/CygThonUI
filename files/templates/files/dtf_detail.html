@@ -1,14 +1,16 @@
 {% extends 'base.html' %}
 {% block body_block %}
 <div class="container">
+    <div class="row file-header">
+        <h2>{{ dtf.base_file }}</h2>
+        <ul>
+            <li>Project - {{ dtf.project }}</li>
+            <li>Uploaded - {{ dtf.uploaded }}</li>
+        </ul>
+        <button onclick="window.location.href = '{% url 'files:dtf_export' %}?id={{ dtf.pk }}';">Export File!</button>
+    </div>
     <div class="row">
         <div class="col">
-            <h2>{{ dtf.base_file }}</h2>
-            <ul>
-                <li>Project - {{ dtf.project }}</li>
-                <li>Uploaded - {{ dtf.uploaded }}</li>
-            </ul>
-            <button onclick="window.location.href = '{% url 'files:dtf_export' %}?id={{ dds.pk }}';">Export File!</button>
             <form method="post" action="{% url 'files:unused_dieds' %}"
                   id="dtf-died-check">
                 {% csrf_token %}

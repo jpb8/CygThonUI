@@ -8,25 +8,10 @@ from azure.storage.blob.blockblobservice import BlockBlobService
 
 from django.conf import settings
 
+from .xml import XmlFile
 
-class DeviceDef:
-    def __init__(self, device_xml_path):
-        self.xml = None
-        self.device_xml_path = device_xml_path
-        self.create_xml()
 
-    def create_xml(self):
-        """
-        Sets the xml prop to an ETREE root with the supplied xml file
-        :return:
-        """
-
-        block_blob_service = BlockBlobService(account_name=settings.AZURE_ACCOUNT_NAME, account_key=MEDIA_ACCOUNT_KEY)
-        file = block_blob_service.get_blob_to_bytes("media", self.device_xml_path)
-        parser = etree.XMLParser(remove_blank_text=True)
-        tree = etree.parse(BytesIO(file.content), parser)
-        root = tree.getroot()
-        self.xml = root
+class DeviceDef(XmlFile):
 
     def check_device(self, device_id):
         """
@@ -168,20 +153,6 @@ class DeviceDef:
         else:
             outcome = "Device {} was not found to add facilities".format(device_id)
         return outcome
-
-    def save(self):
-        # TODO: Setup save for Azure
-        output = StringIO()
-        output = etree.tostring(self.xml, pretty_print=True)
-        block_blob_service = BlockBlobService(account_name=settings.AZURE_ACCOUNT_NAME, account_key=MEDIA_ACCOUNT_KEY)
-        block_blob_service.create_blob_from_text("media", self.device_xml_path, output)
-
-    def delete(self):
-        block_blob_service = BlockBlobService(account_name=settings.AZURE_ACCOUNT_NAME, account_key=MEDIA_ACCOUNT_KEY)
-        block_blob_service.delete_blob("media", self.device_xml_path)
-
-    def pretty_print(self):
-        return etree.tostring(self.xml, pretty_print=True)
 
     def export_data(self):
         """
