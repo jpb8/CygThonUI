@@ -1,12 +1,5 @@
-from lxml import etree
 from lxml.etree import SubElement
 import pandas as pd
-from io import BytesIO, StringIO
-from backend.custom_azure import MEDIA_ACCOUNT_KEY
-
-from azure.storage.blob.blockblobservice import BlockBlobService
-
-from django.conf import settings
 
 from .xml import XmlFile
 
@@ -63,6 +56,9 @@ class DTF(XmlFile):
 
     def create_digital_deid(self, array_type, died, desc, ref, b_pos, data_type="bool"):
         pass
+
+    def deid_tagname(self, array, deid):
+        return self.find_dg_element(array, deid).get("tagname")
 
     def create_array(self, name, nice_name):
         new_dg = SubElement(self.data_groups, name, {

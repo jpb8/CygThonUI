@@ -54,11 +54,62 @@ class DDS(models.Model):
             error_log = ["DDS or DTF File not found"]
         return error_log
 
-    def check_facilities(self, excel):
+    def check_facilities(self, excel, ):
         facs_df = pd.read_excel(excel, sheet_name="Sheet1")
         facs = facs_df["facility"].to_list()
         dne = self.xml.fac_exists_check(facs)
         return dne
+
+    def validate_cmds(self, cmd_data, dtf):
+        cmds = pd.read_excel(cmd_data, sheet_name="Sheet1")
+        dds_xml = self.xml
+        dtf_xml = dtf.xml
+        errors = []
+        for i, cmd in cmds.iterrows():
+            pnt_type = cmd["pointtype"]
+            reg = cmd["reg"].split(":")
+            cmd_tag = "{}[{}]".format(reg[0], reg[1])
+            if pnt_type == "manual entry":
+                data = dds_xml.do_manual_entry_data(cmd["device"], cmd["command"], cmd["facility"])
+                if data is not None:
+                    tag = dtf_xml.deid_tagname(data["dg"], data["ld"])
+                    if (
+                            cmd_tag != tag or
+                            int(cmd["value"]) != int(data["val"]) or
+                            cmd["facility"] != data["fac"] or
+                            cmd["udc"] != data["udc"]
+                    ):
+                        udc = str(cmd["udc"])
+                        errors.append({
+                            "device": cmd["device"],
+                            "command": cmd["command"],
+                            "fac": cmd["facility"],
+                            "val": cmd["value"],
+                            "dds_val": data["val"],
+                            "udc": udc,
+                            "dds_fac": data["udc"],
+                            "reg": cmd_tag,
+                            "dtf_reg": tag
+                        })
+            elif pnt_type == "telemetered":
+                data = dds_xml.do_command_data(cmd["device"], cmd["command"], cmd["facility"])
+                if data is not None:
+                    tag = dtf_xml.deid_tagname(data["dg"], data["ld"])
+                    if cmd_tag != tag or int(cmd["value"]) != int(data["val"]):
+                        errors.append({
+                            "device": cmd["device"],
+                            "command": cmd["command"],
+                            "fac": cmd["facility"],
+                            "val": cmd["value"],
+                            "dds_val": data["val"],
+                            "udc": "None",
+                            "dds_fac": "",
+                            "reg": cmd_tag,
+                            "dtf": tag
+                        })
+            else:
+                data = "double"
+        return errors
 
     def save_document(self):
         self.xml.save()

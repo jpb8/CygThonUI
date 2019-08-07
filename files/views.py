@@ -199,6 +199,24 @@ def facs_dne(request):
     return redirect("files:upload")
 
 
+def validate_commands(request):
+    if request.method == "POST":
+        if "cmds" not in request.FILES:
+            return JsonResponse({"error": True})
+        cmd_data = request.FILES["cmds"] if "cmds" in request.FILES else None
+        try:
+            dds = DDS.objects.get(pk=int(request.POST.get("dds-id")))
+            dtf = DTF.objects.get(pk=int(request.POST.get("dtf-id")))
+        except ObjectDoesNotExist:
+            print("DTF or DDS not found")
+            return redirect("files:upload")
+        errors = dds.validate_cmds(cmd_data, dtf)
+        if request.is_ajax():
+            data = build_ajax_response_dict(errors, "Command Errors")
+            return JsonResponse(data)
+    return redirect("files:upload")
+
+
 @csrf_exempt
 def get_mappings(request):
     if request.method == "POST":

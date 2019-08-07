@@ -17,6 +17,7 @@ urlpatterns = [
     path('dds/unmapped_facs/', unmapped_facs, name="unmapped_facs"),
     path('dds/orphans/', find_orphans, name="orphans"),
     path('dds/fac_exist/', facs_dne, name="fac_exist"),
+    path('dds/validate_commands/', validate_commands, name="validate_commands"),
     path('dds/get_mappings/', get_mappings, name="get_mappings"),
     path('dds/mapping_template/', mapping_template, name="mapping_template"),
     path('dds/delete/', dds_delete, name="dds_delete"),
