@@ -60,7 +60,19 @@ class DDS(models.Model):
         dne = self.xml.fac_exists_check(facs)
         return dne
 
-    def _validator(self, cmd, data, pnt_type, manual, dtf_xml, tag):
+    def _validator(self, cmd, data, pnt_type, manual, tag):
+        """
+        Runs a series of checks on command to validate
+            1. cmd_tag != tag => tagName in DTF matches command
+            2. int(cmd["value"]) != int(data["val"]) => value of command is DDS matching command (do only)
+            3. cmd["facility"] != data["fac"] or cmd["udc"] != data["udc"] => Manual entry point matches (manual only)
+        :param cmd: singled command pandas row
+        :param data: data fetched form device and dtf
+        :param pnt_type: point type (ao or do)
+        :param manual: manual entry bool
+        :param tag: tagName from DTF
+        :return: True if valid, False if invalid
+        """
         reg = cmd["reg"].split(":")
         cmd_tag = "{}[{}]".format(reg[0], reg[1])
         if cmd_tag != tag:
@@ -74,6 +86,15 @@ class DDS(models.Model):
         return True, None
 
     def validate_cmds(self, cmd_data, dtf):
+        """
+        Validates commands by:
+            1. Fetching command from device
+            2. Fetching where the command is pointed to in dtf
+            3. Comparing fetched data to supplied command (see _validator method)
+        :param cmd_data: pandas df object from commands excel import
+        :param dtf: dtf object
+        :return: List of invalid commands
+        """
         cmds = pd.read_excel(cmd_data, sheet_name="Sheet1")
         dds_xml = self.xml
         dtf_xml = dtf.xml
@@ -84,7 +105,7 @@ class DDS(models.Model):
             data = dds_xml.cmd_data(cmd["device"], cmd["command"], cmd["facility"], pnt_type, manual)
             if data is not None:
                 tag = dtf_xml.deid_tagname(data["dg"], data["ld"])
-                valid, err = self._validator(cmd, data, pnt_type, manual, dtf_xml, tag)
+                valid, err = self._validator(cmd, data, pnt_type, manual, tag)
                 if not valid:
                     udc = str(cmd["udc"])
                     errors.append({
