@@ -60,55 +60,45 @@ class DDS(models.Model):
         dne = self.xml.fac_exists_check(facs)
         return dne
 
+    def _validator(self, cmd, data, pnt_type, manual, dtf_xml, tag):
+        reg = cmd["reg"].split(":")
+        cmd_tag = "{}[{}]".format(reg[0], reg[1])
+        if cmd_tag != tag:
+            return False, "Wrong Reg"
+        if pnt_type == "do":
+            if int(cmd["value"]) != int(data["val"]):
+                return False, "Wrong Cmd Value"
+        if manual:
+            if cmd["facility"] != data["fac"] or cmd["udc"] != data["udc"]:
+                return False, "Wrong manual Update Pnt"
+        return True, None
+
     def validate_cmds(self, cmd_data, dtf):
         cmds = pd.read_excel(cmd_data, sheet_name="Sheet1")
         dds_xml = self.xml
         dtf_xml = dtf.xml
         errors = []
         for i, cmd in cmds.iterrows():
-            pnt_type = cmd["pointtype"]
-            reg = cmd["reg"].split(":")
-            cmd_tag = "{}[{}]".format(reg[0], reg[1])
-            if pnt_type == "manual entry":
-                data = dds_xml.do_manual_entry_data(cmd["device"], cmd["command"], cmd["facility"])
-                if data is not None:
-                    tag = dtf_xml.deid_tagname(data["dg"], data["ld"])
-                    if (
-                            cmd_tag != tag or
-                            int(cmd["value"]) != int(data["val"]) or
-                            cmd["facility"] != data["fac"] or
-                            cmd["udc"] != data["udc"]
-                    ):
-                        udc = str(cmd["udc"])
-                        errors.append({
-                            "device": cmd["device"],
-                            "command": cmd["command"],
-                            "fac": cmd["facility"],
-                            "val": cmd["value"],
-                            "dds_val": data["val"],
-                            "udc": udc,
-                            "dds_fac": data["udc"],
-                            "reg": cmd_tag,
-                            "dtf_reg": tag
-                        })
-            elif pnt_type == "telemetered":
-                data = dds_xml.do_command_data(cmd["device"], cmd["command"], cmd["facility"])
-                if data is not None:
-                    tag = dtf_xml.deid_tagname(data["dg"], data["ld"])
-                    if cmd_tag != tag or int(cmd["value"]) != int(data["val"]):
-                        errors.append({
-                            "device": cmd["device"],
-                            "command": cmd["command"],
-                            "fac": cmd["facility"],
-                            "val": cmd["value"],
-                            "dds_val": data["val"],
-                            "udc": "None",
-                            "dds_fac": "",
-                            "reg": cmd_tag,
-                            "dtf": tag
-                        })
-            else:
-                data = "double"
+            manual = True if cmd["pointtype"] == "manual entry" else False
+            pnt_type = cmd["cmd_type"]
+            data = dds_xml.cmd_data(cmd["device"], cmd["command"], cmd["facility"], pnt_type, manual)
+            if data is not None:
+                tag = dtf_xml.deid_tagname(data["dg"], data["ld"])
+                valid, err = self._validator(cmd, data, pnt_type, manual, dtf_xml, tag)
+                if not valid:
+                    udc = str(cmd["udc"])
+                    errors.append({
+                        "device": cmd["device"],
+                        "command": cmd["command"],
+                        "fac": cmd["facility"],
+                        "val": cmd["value"],
+                        "dds_val": data["val"],
+                        "udc": udc,
+                        "dds_fac": data["udc"] if "udc" in data else "NONE",
+                        "reg": cmd["reg"],
+                        "dtf_reg": tag,
+                        "err_msg": err
+                    })
         return errors
 
     def save_document(self):

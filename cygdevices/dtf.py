@@ -58,6 +58,9 @@ class DTF(XmlFile):
         pass
 
     def deid_tagname(self, array, deid):
+        dg_elm = self.find_dg_element(array, deid)
+        if dg_elm is None:
+            return None
         return self.find_dg_element(array, deid).get("tagname")
 
     def create_array(self, name, nice_name):

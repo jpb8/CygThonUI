@@ -43,8 +43,7 @@ class DeviceDef(XmlFile):
         if self.find_command(device, cmd_name, fac) is None:
             return None
         command = self.find_command(device, cmd_name, fac)
-        return self.find_command(device, cmd_name, fac).find(
-            "CommandComponents/Component[@type='{}']".format(component))
+        return command.find("CommandComponents/Component[@type='{}']".format(component))
 
     def do_command_data(self, device, cmd_name, fac):
         cmd_comp = self.find_command_component(device, cmd_name, fac, "DG_T_DEV")
@@ -63,15 +62,36 @@ class DeviceDef(XmlFile):
             data["val"] = xpath.get("value")
         return data
 
-    def do_manual_entry_data(self, device, cmd_name, fac):
-        data = self.do_command_data(device, cmd_name, fac)
-        if data is None:
-            return None
-        cmd_comp = self.find_command_component(device, cmd_name, fac, "CYUPDTPT")
+    def ao_command_data(self, device, cmd_name, fac):
+        cmd_comp = self.find_command_component(device, cmd_name, fac, "DG_T_DEV")
         if cmd_comp is None:
             return None
-        data["fac"] = cmd_comp.find("Param[@key='Fac']").get("value")
-        data["udc"] = cmd_comp.find("Param[@key='UDC']").get("value")
+        data = dict()
+        if cmd_comp is None:
+            return None
+        dg = cmd_comp.find("Param[@key='DGTYPE']").get("value")
+        data["dg"] = dg
+        dg_xml, err = self.device_dg_mappings(device, dg)
+        if dg_xml is None:
+            return None
+        deid = dg_xml.find("UdcMapping").get("data_element_id") if dg_xml.find("UdcMapping") is not None else None
+        data['ld'] = deid
+        data['val'] = None
+        return data
+
+    def cmd_data(self, device, cmd_name, fac, ao_do='do', manual=False):
+        if ao_do == "ao":
+            data = self.ao_command_data(device, cmd_name, fac)
+        else:
+            data = self.do_command_data(device, cmd_name, fac)
+        if data is None:
+            return None
+        if manual:
+            cmd_comp = self.find_command_component(device, cmd_name, fac, "CYUPDTPT")
+            if cmd_comp is None:
+                return None
+            data["fac"] = cmd_comp.find("Param[@key='Fac']").get("value")
+            data["udc"] = cmd_comp.find("Param[@key='UDC']").get("value")
         return data
 
     def device_dg_mappings(self, device_id, array_type):
