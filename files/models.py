@@ -74,6 +74,8 @@ class DDS(models.Model):
         :return: True if valid, False if invalid
         """
         reg = cmd["reg"].split(":")
+        if len(reg) < 2:
+            return False, "Invalid Reg"
         cmd_tag = "{}[{}]".format(reg[0], reg[1])
         if cmd_tag != tag:
             return False, "Wrong Reg"
