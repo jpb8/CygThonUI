@@ -70,7 +70,8 @@ WORDS = {
     "UPS": "Uninterrupted Power Supply",
     "VP": "Vapor Pressure",
     "Upstrm": "Upstream",
-    "Dnstrm": "Downstream"
+    "Dnstrm": "Downstream",
+    "VMtr": "Virtual Meter"
 }
 
 WORDS_UPPER = {
@@ -143,5 +144,6 @@ WORDS_UPPER = {
     "DNSTRM": "Downstream",
     "PRES": "Pressure",
     "VSP": "Variable Setpoint",
-    "ALM": "Alarm"
+    "ALM": "Alarm",
+    "VMTR": "Virtual Meter"
 }
