@@ -245,7 +245,7 @@ class DeviceDef(XmlFile):
                     devs_dict["udc"].append(m.get("UDC"))
         return pd.DataFrame(data=devs_dict)
 
-    def uis_commands(self):
+    def uis_commands(self, dtf_xml=False):
         """
         Format DDS XML to a usable Excel dataframe to for mapping validation
         Every component will have single line
@@ -253,6 +253,7 @@ class DeviceDef(XmlFile):
         """
 
         def _dg_type(s_cmd):
+            dg = c.find("Param[@key='DGTYPE']").get("value")
             s_cmd["dev_id"] = dev_id
             s_cmd["comm_id"] = comm_id
             s_cmd["desc"] = cmd_decs
@@ -261,12 +262,26 @@ class DeviceDef(XmlFile):
             s_cmd["comp_type"] = c_type
             s_cmd["comp_pos"] = c.get("position")
             s_cmd["DGORD"] = c.find("Param[@key='DGORD']").get("value")
-            s_cmd["DGTYPE"] = c.find("Param[@key='DGTYPE']").get("value")
+            s_cmd["DGTYPE"] = dg
             xpath = c.xpath("Param[starts-with(@key,'L')]")[0] if len(
                 c.xpath("Param[starts-with(@key,'L')]")) != 0 else None
             if xpath is not None:
+                ld = xpath.get("key")
+                if dtf_xml:
+                    tag = dtf_xml.deid_tagname(dg, ld)
+                    s_cmd["Register"] = tag
                 s_cmd["LD"] = xpath.get("key")
                 s_cmd["Value"] = xpath.get("value")
+            else:
+                dg_xml, err = self.device_dg_mappings(dev_id, dg)
+                if dg_xml is None:
+                    return None
+                deid = dg_xml.find("UdcMapping").get("data_element_id") if dg_xml.find(
+                    "UdcMapping") is not None else None
+                s_cmd["LD"] = deid
+                if dtf_xml:
+                    tag = dtf_xml.deid_tagname(dg, deid)
+                    s_cmd["Register"] = tag
             append_cmd(s_cmd)
 
         def _cyupdtpt(s_cmd):
@@ -303,6 +318,7 @@ class DeviceDef(XmlFile):
             "UDC": [],
             "UType": [],
             "Value": [],
+            "Register": []
         }
         for elem in self.xml:
             dev_id = elem.get("device_id")
@@ -330,6 +346,7 @@ class DeviceDef(XmlFile):
                         "UDC": "",
                         "UType": "",
                         "Value": "",
+                        "Register": ""
                     }
                     c_type = c.get("type")
                     if c_type == "DG_T_DEV" or c_type == "DG_F_DEV":
@@ -473,9 +490,9 @@ class DeviceDef(XmlFile):
         sio.seek(0)
         return sio.getvalue()
 
-    def export_mappings(self):
+    def export_mappings(self, dtf_xml=None):
         df_pnt = self.export_data()
-        df_cmd = self.uis_commands()
+        df_cmd = self.uis_commands(dtf_xml)
         sio = BytesIO()
         writer = pd.ExcelWriter(sio, engine="xlsxwriter")
         df_pnt.to_excel(writer, sheet_name="PNTS")

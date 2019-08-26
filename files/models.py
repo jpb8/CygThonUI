@@ -54,7 +54,7 @@ class DDS(models.Model):
             error_log = ["DDS or DTF File not found"]
         return error_log
 
-    def check_facilities(self, excel, ):
+    def check_facilities(self, excel):
         facs_df = pd.read_excel(excel, sheet_name="Sheet1")
         facs = facs_df["facility"].to_list()
         dne = self.xml.fac_exists_check(facs)
@@ -122,6 +122,20 @@ class DDS(models.Model):
                         "dtf_reg": tag,
                         "err_msg": err
                     })
+            else:
+                udc = str(cmd["udc"])
+                errors.append({
+                    "device": cmd["device"],
+                    "command": cmd["command"],
+                    "fac": cmd["facility"],
+                    "val": cmd["value"],
+                    "dds_val": "NONE",
+                    "udc": udc,
+                    "dds_fac": "NONE",
+                    "reg": cmd["reg"],
+                    "dtf_reg": "NONE",
+                    "err_msg": "NONE"
+                })
         return errors
 
     def save_document(self):

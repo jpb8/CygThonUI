@@ -12,6 +12,7 @@ urlpatterns = [
     path('dds/<int:pk>/', DDSDetailView.as_view(), name="dds"),
     path('dds/export/', export_dds, name="dds_export"),
     path('dds/dds_mappings_export/', mapping_export, name="dds_mappings_export"),
+    path('dds/export_cmds/', mapping_export_with_regs, name="export_cmds"),
     path('dds/dds_add_mappings/', dds_add_mapping, name="dds_add_mappings"),
     path('dds/correct_dec_check/', correct_device_check, name="correct_dec_check"),
     path('dds/unmapped_facs/', unmapped_facs, name="unmapped_facs"),
