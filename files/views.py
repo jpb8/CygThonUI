@@ -249,6 +249,24 @@ def get_mappings(request):
     return redirect("home")
 
 
+def validate_mappings(request):
+    if request.method == "POST":
+        if "pnts" not in request.FILES:
+            return JsonResponse({"error": True})
+        pnt_data = request.FILES["pnts"]
+        try:
+            dds = DDS.objects.get(pk=int(request.POST.get("dds-id")))
+            dtf = DTF.objects.get(pk=int(request.POST.get("dtf-id"))).xml
+        except ObjectDoesNotExist:
+            print("DTF or DDS not found")
+            return redirect("files:upload")
+        errors = dds.validate_mappings(dtf, pnt_data)
+        if request.is_ajax():
+            data = build_ajax_response_dict(errors, "Mapping Errors")
+            return JsonResponse(data)
+    return redirect("files:upload")
+
+
 def mapping_template(reqeust):
     workbook = DeviceDef.mappings_template()
     response = HttpResponse(workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')

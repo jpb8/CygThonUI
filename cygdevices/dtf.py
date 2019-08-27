@@ -33,6 +33,46 @@ class DTF(XmlFile):
         deid = self.xml.find("dataGroups/{}/dgElements/*[@tagname='{}']".format(array_name, tag))
         return deid.tag if deid is not None else False
 
+    def get_analog_tag(self, array_name, deid):
+        tag = self.xml.find("dataGroups/{}/dgElements/{}".format(array_name, deid))
+        if tag is None:
+            return None
+        return tag.get("tagname")
+
+    def get_multibit_tag(self, array_name, deid):
+        tag = self.xml.find("dataGroups/{}/dgElements/{}".format(array_name, deid))
+        if tag is None:
+            return None, None, None
+        refs = tag.findall("ref")
+        if len(refs) < 2:
+            return None, None, None
+        tag_name, bit = self.get_digital_tag(array_name, refs[0].get("deid"))
+        tag2, bit2 = self.get_digital_tag(array_name, refs[1].get("deid"))
+        return tag_name, bit, bit2
+
+    def get_digital_tag(self, array_name, deid):
+        tag = self.xml.find("dataGroups/{}/dgElements/{}".format(array_name, deid))
+        if tag is None:
+            return None, None
+        parent_tag = self.xml.find("dataGroups/{}/dgElements/{}".format(array_name, tag.get("ref")))
+        if parent_tag is None:
+            return None, None
+        tag_name = parent_tag.get("tagname")
+        bit = tag.get("bPos")
+        return tag_name, bit
+
+    def get_deid_tag(self, array_name, deid):
+        if deid[:2] == "MB":
+            tag, bit, bit2 = self.get_multibit_tag(array_name, deid)
+        elif deid[0] == "D":
+            tag, bit = self.get_digital_tag(array_name, deid)
+            bit2 = False
+        else:
+            tag = self.get_analog_tag(array_name, deid)
+            bit = False
+            bit2 = False
+        return tag, bit, bit2
+
     def all_arrays(self):
         arrays = []
         for dg in self.data_groups:

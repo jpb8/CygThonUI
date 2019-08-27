@@ -132,11 +132,18 @@ class DDS(models.Model):
                     "dds_val": "NONE",
                     "udc": udc,
                     "dds_fac": "NONE",
-                    "reg": cmd["reg"],
+                    "reg": "NONE",
                     "dtf_reg": "NONE",
-                    "err_msg": "NONE"
+                    "err_msg": "Cmd Not Found in Device"
                 })
         return errors
+
+    def validate_mappings(self, dtf_xml, pnts_data):
+        pnts = pd.read_excel(pnts_data, sheet_name="Sheet1")
+        pnts.set_index("point", inplace=True)
+        log = self.xml.validate_mappings(dtf_xml, pnts)
+        return log
+
 
     def save_document(self):
         self.xml.save()

@@ -22,6 +22,7 @@ urlpatterns = [
     path('dds/get_mappings/', get_mappings, name="get_mappings"),
     path('dds/mapping_template/', mapping_template, name="mapping_template"),
     path('dds/delete/', dds_delete, name="dds_delete"),
+    path('dds/validate_maps/', validate_mappings, name="validate_maps"),
     ## DTF ##
     path('dtf/<int:pk>/', DTFDetailView.as_view(), name="dtf"),
     path('dtf/export/', export_dtf, name='dtf_export'),

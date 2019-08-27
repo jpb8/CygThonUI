@@ -148,6 +148,30 @@ $(document).ready(function () {
         $(document.body).css({ 'cursor': 'default' });
     });
 
+    $("#mapping-validation").submit(function (event) {
+        event.preventDefault();
+        var formData = new FormData($(this)[0]);
+        var _url = $(this).attr("action");
+        var method = "POST";
+        $(document.body).css({ 'cursor': 'wait' });
+        $.ajax({
+            url: _url,
+            type: method,
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                var text = createResponseHTML(data);
+                $("#modal-body").html(text);
+                $('#response-modal').modal('show');
+            },
+            error: function (request, error) {
+                alert("Request: " + JSON.stringify(request));
+            }
+        });
+        $(document.body).css({ 'cursor': 'default' });
+    });
+
     $(".dds-util").click(function () {
         var _url = $(this).data("url");
         var _data = {id: $(this).data("id")};

@@ -245,6 +245,59 @@ class DeviceDef(XmlFile):
                     devs_dict["udc"].append(m.get("UDC"))
         return pd.DataFrame(data=devs_dict)
 
+    @staticmethod
+    def _mapping_validator(pnts, point, tag, bit=False, bit2=False):
+        tag_new = "{}:{}".format(tag.split("[")[0], tag.split("[")[1].split("]")[0])
+        try:
+            dtf_bit = int(pnts.loc[point][1])
+            dtf_bit2 = int(pnts.loc[point][2])
+            dtf_tag = pnts.loc[point][0]
+        except KeyError:
+            return True, None
+        if bit2:
+            bits = [int(bit), int(bit2)]
+            if tag_new != dtf_tag or dtf_bit not in bits or dtf_bit2 not in bits:
+                return False, {"tag": dtf_tag, "bit": dtf_bit, "bit2": dtf_bit2}
+        elif bit:
+            if tag_new != pnts.loc[point][0] or int(bit) != int(pnts.loc[point][1]):
+                return False, {"tag": dtf_tag, "bit": dtf_bit, "bit2": 0}
+        else:
+            if tag_new != pnts.loc[point][0]:
+                return False, {"tag": dtf_tag, "bit": 0, "bit2": 0}
+        return True, None
+
+    def validate_mappings(self, dtf_xml, pnts):
+        log = []
+        for elem in self.xml:
+            dev_id = elem.get("device_id")
+            for data_group in elem.find("DataGroups"):
+                dg_type = data_group.find("DataGroupAttributes/DataGroupType").text
+                for m in data_group.find("UdcMappings"):
+                    deid = m.get("data_element_id")
+                    long_id = "{}_{}".format(m.get("facility"), m.get("UDC"))
+                    tag, bit, bit2 = dtf_xml.get_deid_tag(dg_type, deid)
+                    if tag is not None:
+                        valid, vals = self._mapping_validator(pnts, long_id, tag, bit=bit, bit2=bit2)
+                    else:
+                        valid = False
+                        vals = {"tag": "ORPHAN", "bit": False, "bit2": False}
+                    if not valid:
+                        log.append(
+                            {
+                                "device": dev_id,
+                                "long_id": long_id,
+                                "datagroup": dg_type,
+                                "deid": deid,
+                                "dtf_tag": tag,
+                                "tag": vals["tag"],
+                                "dtf_bit": bit,
+                                "bit": vals["bit"],
+                                "dtf_bit2": bit2,
+                                "bit2": vals["bit2"]
+                             }
+                        )
+        return log
+
     def uis_commands(self, dtf_xml=False):
         """
         Format DDS XML to a usable Excel dataframe to for mapping validation

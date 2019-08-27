@@ -106,6 +106,28 @@
                 </div>
                 <div class="file-function">
                     <div class="file-function-desc">
+                        Validate All mappings
+                    </div>
+                    <div class="file-function-body">
+                        <form method="post" enctype="multipart/form-data" action="{% url 'files:validate_maps' %}"
+                              id="mapping-validation">
+                            {% csrf_token %}
+                            <select name="dtf-id">
+                                {% if dtfs %}
+                                {% for d in dtfs %}
+                                <option value="{{ d.pk }}">{{ d.file }}</option>
+                                {% endfor %}
+                                {% endif %}
+                            </select>
+                            <label>All Mappings</label>
+                            <input type="file" name="pnts"><br>
+                            <input hidden name="dds-id" value="{{ dds.pk }}">
+                            <button class="btn btn-primary" type="submit">GO</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="file-function">
+                    <div class="file-function-desc">
                         Find all unmapped facilities
                     </div>
                     <div class="file-function-body">
