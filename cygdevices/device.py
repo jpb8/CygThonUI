@@ -50,8 +50,6 @@ class DeviceDef(XmlFile):
         if cmd_comp is None:
             return None
         data = dict()
-        if cmd_comp is None:
-            return None
         data["dg"] = cmd_comp.find("Param[@key='DGTYPE']").get("value")
         if len(cmd_comp.xpath("Param[starts-with(@key,'L')]")) == 0:
             data["ld"] = None
@@ -294,7 +292,7 @@ class DeviceDef(XmlFile):
                                 "bit": vals["bit"],
                                 "dtf_bit2": bit2,
                                 "bit2": vals["bit2"]
-                             }
+                            }
                         )
         return log
 
@@ -521,7 +519,8 @@ class DeviceDef(XmlFile):
 
     @classmethod
     def mappings_template(cls):
-        sheet = {
+        sheets = list()
+        sheets.append({
             'device': ["ABIL_DEV", "ANDW_DEV"],
             'type': ['D', 'A'],
             'facilityid': ['ABIL_PUMP1', 'ANDW_A_PSTATION'],
@@ -533,15 +532,20 @@ class DeviceDef(XmlFile):
             'register': [0, 0],
             'bit1': [4, 0],
             'bit2': [5, None]
-        }
-        df = pd.DataFrame(data=sheet)
-        sio = BytesIO()
-        writer = pd.ExcelWriter(sio, engine="xlsxwriter")
-        df.to_excel(writer, sheet_name="Sheet1", index=False)
-        writer.save()
-        writer.close()
-        sio.seek(0)
-        return sio.getvalue()
+        })
+        return cls.template_export(sheets)
+
+    @classmethod
+    def pnt_validation_template(cls):
+        sheets = list()
+        sheets.append({
+            'point': ["ABIL_A_PSTATION_PSTATIC", "ABIL_PUMP2_PSTATUS"],
+            'register': ['0', "N40:3"],
+            'bit': ['0', '15'],
+            'bit2': ['0', '0'],
+
+        })
+        return cls.template_export(sheets)
 
     def export_mappings(self, dtf_xml=None):
         df_pnt = self.export_data()

@@ -26,6 +26,18 @@ class XmlFile:
         root = tree.getroot()
         self.xml = root
 
+    @classmethod
+    def template_export(cls, sheets):
+        sio = BytesIO()
+        writer = pd.ExcelWriter(sio, engine="xlsxwriter")
+        for i, s in enumerate(sheets, start=1):
+            df = pd.DataFrame(data=s)
+            df.to_excel(writer, sheet_name="Sheet{}".format(i), index=False)
+        writer.save()
+        writer.close()
+        sio.seek(0)
+        return sio.getvalue()
+
     def pretty_print(self):
         return etree.tostring(self.xml, pretty_print=True)
 
