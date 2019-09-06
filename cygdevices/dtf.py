@@ -137,7 +137,7 @@ class DTF(XmlFile):
         """
         data_groups = self.xml.find('dataGroups')
         arrs = {"id": [], "niceName": []}
-        dg_elems = {"deid": [], "array_id": [], "tagName": [], "niceName": [], "desc": []}
+        dg_elems = {"deid": [], "array_id": [], "tagName": [], "niceName": [], "desc": [], "dataType": []}
         for elem in data_groups:
             arrs["id"].append(elem.tag)
             arrs["niceName"].append(elem.get("niceName"))
@@ -147,4 +147,5 @@ class DTF(XmlFile):
                 dg_elems["tagName"].append(died.get("tagname"))
                 dg_elems["niceName"].append(died.get("niceName"))
                 dg_elems["desc"].append(died.get("desc"))
+                dg_elems["dataType"].append(died.get("type"))
         return self.template_export([arrs, dg_elems])
