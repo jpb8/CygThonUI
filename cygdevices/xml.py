@@ -28,6 +28,7 @@ class XmlFile:
 
     @classmethod
     def template_export(cls, sheets):
+        # TODO: Rename to build excel
         sio = BytesIO()
         writer = pd.ExcelWriter(sio, engine="xlsxwriter")
         for i, s in enumerate(sheets, start=1):

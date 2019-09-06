@@ -12,7 +12,6 @@ from files.forms import DDSForm, DTFForm
 from files.utils import build_ajax_response_dict
 
 import os
-from cygdevices.device import DeviceDef
 
 
 def upload(request):

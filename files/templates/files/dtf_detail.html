@@ -8,6 +8,7 @@
             <li>Uploaded - {{ dtf.uploaded }}</li>
         </ul>
         <button onclick="window.location.href = '{% url 'files:dtf_export' %}?id={{ dtf.pk }}';">Export File!</button>
+        <button onclick="window.location.href = '{% url 'files:export_dtf_data' %}?id={{ dtf.pk }}';">Export Data to Excel!</button>
     </div>
     <div class="row">
         <div class="col">

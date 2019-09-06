@@ -251,7 +251,7 @@ class DeviceDef(XmlFile):
             dtf_bit2 = int(pnts.loc[point][2])
             dtf_tag = pnts.loc[point][0]
         except KeyError:
-            return True, None
+            return False, {"tag": "NotInImport", "bit": 0, "bit2": 0}
         if bit2:
             bits = [int(bit), int(bit2)]
             if tag_new != dtf_tag or dtf_bit not in bits or dtf_bit2 not in bits:

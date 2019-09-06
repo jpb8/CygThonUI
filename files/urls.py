@@ -28,4 +28,5 @@ urlpatterns = [
     path('dtf/export/', export_dtf, name='dtf_export'),
     path('dtf/unused_deids/', unmapped_dieds, name="unused_dieds"),
     path('dtf/delete/', dtf_delete, name="dtf_delete"),
+    path('dtf/export_dtf_data/', export_dtf_data, name="export_dtf_data"),
 ]

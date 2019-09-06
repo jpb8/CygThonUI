@@ -62,7 +62,7 @@ class DTF(XmlFile):
         return tag_name, bit
 
     def get_deid_tag(self, array_name, deid):
-        if deid[:2] == "MB":
+        if deid[:2] in ["MB", "VS", "PS"]:
             tag, bit, bit2 = self.get_multibit_tag(array_name, deid)
         elif deid[0] == "D":
             tag, bit = self.get_digital_tag(array_name, deid)
@@ -128,7 +128,7 @@ class DTF(XmlFile):
                 unused.append({"ARRAY": array_name, "DEID": u})
         return unused
 
-    def create_array_excel(self, array_file_name, deid_file_name):
+    def create_array_excel(self):
         """
         Exports all the of Arrays and DEID for a supplied DTF
         :param array_file_name: Excel file name
@@ -147,7 +147,4 @@ class DTF(XmlFile):
                 dg_elems["tagName"].append(died.get("tagname"))
                 dg_elems["niceName"].append(died.get("niceName"))
                 dg_elems["desc"].append(died.get("desc"))
-        df = pd.DataFrame(data=arrs)
-        df2 = pd.DataFrame(data=dg_elems)
-        df.to_excel(array_file_name)
-        df2.to_excel(deid_file_name)
+        return self.template_export([arrs, dg_elems])

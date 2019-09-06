@@ -104,3 +104,16 @@ def import_dtf(request):
                     deid = bit
                 dtf.create_ai_deid(array_type, deid, index, data_type=pnt["anain.type"])
         dtf.save()
+
+
+def export_dtf_data(request):
+    dtf_id = request.GET.get("id")
+    try:
+        dtf = DTF.objects.get(pk=int(dtf_id))
+    except ObjectDoesNotExist:
+        print("DTF or DDS not found")
+        return redirect("files:upload")
+    workbook = dtf.xml.create_array_excel()
+    response = HttpResponse(workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename={}'.format("dtf_array_data.xlsx")
+    return response
