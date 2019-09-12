@@ -8,7 +8,9 @@
             <li>Uploaded - {{ dtf.uploaded }}</li>
         </ul>
         <button onclick="window.location.href = '{% url 'files:dtf_export' %}?id={{ dtf.pk }}';">Export File!</button>
-        <button onclick="window.location.href = '{% url 'files:export_dtf_data' %}?id={{ dtf.pk }}';">Export Data to Excel!</button>
+        <button onclick="window.location.href = '{% url 'files:export_dtf_data' %}?id={{ dtf.pk }}';">Export Data to
+            Excel!
+        </button>
     </div>
     <div class="row">
         <div class="col">
@@ -25,6 +27,79 @@
                 </select><br>
                 <input hidden name="dtf-id" value="{{ dtf.pk }}">
                 <button type="submit">Find</button>
+            </form>
+            <form method="post" action="{% url 'files:add_array' %}" id="dtf-add-array">
+                {% csrf_token %}
+                <h2>Add New Array</h2>
+                <input hidden name="dtf-id" value="{{ dtf.pk }}">
+                <div class="form-group row">
+                    <label for="arrayName" class="col-sm-4 col-form-label">Array Name</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="arrayName" name="arrayName" placeholder="DI_ARRAY">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="niceName" class="col-sm-4 col-form-label">Nice Name</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="niceName" name="niceName" placeholder="niceName">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="tagName" class="col-sm-4 col-form-label">Tag Name</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="tagName" name="tagName" placeholder="DI_N40">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="dataType" class="col-sm-4 col-form-label">Data Type</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="dataType" name="dataType" placeholder="r4">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="dataType" class="col-sm-4 col-form-label">DEID Naming</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="deid" name="deid" placeholder="DIArr">
+                    </div>
+                </div>
+                <fieldset class="form-group">
+                    <div class="row">
+                        <legend class="col-form-label col-sm-2 pt-0">Array type</legend>
+                        <div class="col-sm-10">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="diai" id="ai" value="ai" checked>
+                                <label class="form-check-label" for="ai">Analog</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="diai" id="di" value="di">
+                                <label class="form-check-label" for="di">Digital</label>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+                <div class="form-group row">
+                    <label for="bits" class="col-sm-4 col-form-label">Bit Numbers</label>
+                    <div class="col-sm-8">
+                        <select id="bits" class="form-control" name="bits">
+                            <option value="32" selected>32</option>
+                            <option value="16">16</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="dataType" class="col-sm-4 col-form-label">Start-Stop</label>
+                    <div class="col-sm-4">
+                        <input type="number" class="form-control" id="start" name="start" value="0">
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="number" class="form-control" id="stop" name="stop" value="5">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </div>
             </form>
         </div>
         <div class="col" id="device-info">
@@ -56,4 +131,12 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+    }
+
+
+</script>
 {% endblock %}

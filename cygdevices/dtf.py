@@ -5,7 +5,6 @@ from .xml import XmlFile
 
 
 class DTF(XmlFile):
-
     @property
     def data_groups(self):
         return self.xml.find("dataGroups")
@@ -85,17 +84,13 @@ class DTF(XmlFile):
     def get_discrete_deid(self, array_name, index, index2=None):
         pass
 
-    def create_ai_deid(self, array_type, deid, tagname, data_type="r4"):
-        dg_elem = self.xml.find('dataGroups/{}/dgElements'.format(array_type))
-        SubElement(dg_elem, deid, {
+    def create_ai_deid(self, array_root, deid, tagname, data_type="r4"):
+        SubElement(array_root, deid, {
             "niceName": tagname,
             "desc": tagname,
             "tagname": tagname,
             "type": data_type
         })
-
-    def create_digital_deid(self, array_type, died, desc, ref, b_pos, data_type="bool"):
-        pass
 
     def deid_tagname(self, array, deid):
         dg_elm = self.find_dg_element(array, deid)
@@ -104,9 +99,9 @@ class DTF(XmlFile):
         return self.find_dg_element(array, deid).get("tagname")
 
     def create_array(self, name, nice_name):
-        new_dg = SubElement(self.data_groups, name, {
+        new_array = SubElement(self.data_groups, name, {
             "niceName": nice_name,
-            "udcCat": "UDCALL",
+            "udcCat": "~UDCALL",
             "canSend": "false",
             "canRecv": "true",
             "uccSend": "false",
@@ -116,7 +111,53 @@ class DTF(XmlFile):
             "baseOrd": "0",
             "maxCnt": "1"
         })
-        return new_dg
+        return new_array
+
+    @staticmethod
+    def _build_ai_deid(deid_base, number):
+        num_len = len(str(number))
+        if num_len == 1:
+            return "{}00{}".format(deid_base, number)
+        elif num_len == 2:
+            return "{}0{}".format(deid_base, number)
+        else:
+            return "{}{}".format(deid_base, number)
+
+    @staticmethod
+    def _build_di_deid(deid_base, array_num, bit_num):
+        num_str = str(bit_num) if len(str(bit_num)) > 1 else "0{}".format(str(bit_num))
+        return "{}{}{}".format(deid_base, array_num, str(num_str))
+
+    def add_full_array(self, array_name, nice_name, tag_name, data_type, deid, diai, bits, start, stop):
+        new_array = self.create_array(array_name, nice_name)
+        if diai == "ai":
+            for i in range(start, stop):
+                full_deid = self._build_ai_deid(deid, i)
+                SubElement(new_array, full_deid, {
+                    "niceName": "{} {}".format(nice_name, i),
+                    "desc": "{} {}".format(nice_name, i),
+                    "tagname": "{}[{}]".format(tag_name, i),
+                    "type": data_type
+                })
+        else:
+            for i in range(start, stop):
+                array_num = "0{}".format(str(i)) if len(str(i)) < 2 else str(i)
+                array_deid = "{}{}R".format(deid, array_num)
+                SubElement(new_array, array_deid, {
+                    "niceName": "{} {}".format(nice_name, i),
+                    "desc": "{} {}".format(nice_name, i),
+                    "tagname": "{}[{}]".format(tag_name, i),
+                    "type": data_type
+                })
+                for j in range(bits):
+                    full_deid = self._build_di_deid(deid, array_num, j)
+                    SubElement(new_array, full_deid, {
+                        "desc": "{} Array {} Bit {}".format(nice_name, i, j),
+                        "ref": array_deid,
+                        "type": "boolean",
+                        "bPos": str(j)
+                    })
+        self.save()
 
     def unused_deids(self, dds):
         unused = []

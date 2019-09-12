@@ -77,6 +77,29 @@ def unmapped_dieds(request):
             return JsonResponse(data)
     return redirect("files:upload")
 
+# TODO: Delete Array, Edit Array Display Array Data
+
+def add_array(request):
+    if request.method != "POST":
+        return redirect("home")
+    dtf_id = request.POST.get("dtf-id")
+    nice_name = request.POST.get("niceName")
+    tag_name = request.POST.get("tagName")
+    array_name = request.POST.get("arrayName")
+    data_type = request.POST.get("dataType")
+    deid = request.POST.get("deid")
+    diai = request.POST.get("diai")
+    bits = request.POST.get("bits")
+    start = request.POST.get("start")
+    stop = request.POST.get("stop")
+    try:
+        dtf = DTF.objects.get(pk=dtf_id)
+    except ObjectDoesNotExist:
+        print("DTF or DDS not found")
+        return redirect("home")
+    dtf.xml.add_full_array(array_name, nice_name, tag_name, data_type, deid, diai, int(bits), int(start), int(stop))
+    return redirect("home")
+
 
 def import_dtf(request):
     dtf_id = request.POST.get("id")
