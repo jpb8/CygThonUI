@@ -4,23 +4,30 @@
 <div class="container">
     <div class="row" style="margin:10px">
         <form method="POST" action="{% url 'projects:add' %}">
-            <h2>Create Project</h2>
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Create</button>
+            <div class="form-group">
+                <h2>Create Project</h2>
+                {% csrf_token %}
+                {{ form.as_p }}
+            </div>
+            <button type="submit" class="btn btn-primary">Create</button>
         </form>
     </div>
     <div class="row" style="margin-top: 50px">
-        <h2>All Projects</h2><br>
-        <ul>
-            {% if projects %}
-            {% for p in projects %}
-            <li>
-                <a href="{{ p.get_absolute_url }}"><h3>{{ p }}</h3></a>
-            </li>
-            {% endfor %}
-            {% endif %}
-        </ul>
+        <div class="card text-center">
+            <div class="card-header">
+                All Projects
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% if projects %}
+                    {% for p in projects %}
+                    <a href="{{ p.get_absolute_url }}" class="list-group-item list-group-item-action">{{ p }}</a>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 </body>
