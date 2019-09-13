@@ -16,11 +16,11 @@
         <div class="col">
             <div class="function-container">
                 <h2>Validation Functions</h2>
-                <div class="file-function">
-                    <div class="file-function-desc">
+                <div class="card mb-3">
+                    <div class="card-header">
                         Find all Mapped points without a matching DEID in the DTF
                     </div>
-                    <div class="file-fuction-body">
+                    <div class="card-body">
                         <form method="POST" action="{% url 'files:orphans' %}" id="dds-orphans">
                             {% csrf_token %}
                             <label for="dtf-id">Import Mappings</label>
@@ -36,23 +36,22 @@
                         </form>
                     </div>
                 </div>
-                <div class="file-function">
-                    <div class="file-function-desc">
+                <div class="card mb-3">
+                    <div class="card-header">
                         Validate first 4 letters in facility match device
                     </div>
-                    <div class="file-function-body">
+                    <div class="card-body">
                         <div class="dds-util btn btn-primary" data-id="{{ dds.pk }}"
                              data-url="{% url 'files:correct_dec_check' %}?id={{ dds.pk }}">
                             GO
                         </div>
                     </div>
-
                 </div>
-                <div class="file-function">
-                    <div class="file-function-desc">
+                <div class="card mb-3">
+                    <div class="card-header">
                         Validate all mapped facilities exist in facilities export
                     </div>
-                    <div class="file-function-body">
+                    <div class="card-body">
                         <form method="post" enctype="multipart/form-data" action="{% url 'files:fac_exist' %}"
                               id="dds-facs">
                             {% csrf_token %}
@@ -63,11 +62,11 @@
                         </form>
                     </div>
                 </div>
-                <div class="file-function">
-                    <div class="file-function-desc">
+                <div class="card mb-3">
+                    <div class="card-header">
                         Validate Commands from Excel Import
                     </div>
-                    <div class="file-function-body">
+                    <div class="card-body">
                         <form method="post" enctype="multipart/form-data" action="{% url 'files:validate_commands' %}"
                               id="dds-cmds">
                             {% csrf_token %}
@@ -85,11 +84,11 @@
                         </form>
                     </div>
                 </div>
-                <div class="file-function">
-                    <div class="file-function-desc">
+                <div class="card mb-3">
+                    <div class="card-header">
                         Command export with Device Reg
                     </div>
-                    <div class="file-function-body">
+                    <div class="card-body">
                         <form method="post" enctype="multipart/form-data" action="{% url 'files:export_cmds' %}">
                             {% csrf_token %}
                             <select name="dtf-id">
@@ -104,11 +103,11 @@
                         </form>
                     </div>
                 </div>
-                <div class="file-function">
-                    <div class="file-function-desc">
+                <div class="card mb-3">
+                    <div class="card-header">
                         Validate All mappings
                     </div>
-                    <div class="file-function-body">
+                    <div class="card-body">
                         <form method="post" enctype="multipart/form-data" action="{% url 'files:validate_maps' %}"
                               id="mapping-validation">
                             {% csrf_token %}
@@ -126,19 +125,21 @@
                         </form>
                     </div>
                 </div>
-                <div class="file-function">
-                    <div class="file-function-desc">
+                <div class="card mb-3">
+                    <div class="card-header">
                         Find all unmapped facilities
                     </div>
-                    <div class="file-function-body">
-                        <div class="dds-util btn btn-primary" data-id="{{ dds.pk }}"
-                             data-url="{% url 'files:unmapped_facs' %}?id={{ dds.pk }}">
-                            Check Missing Facilities
+                    <div class="card-body">
+                        <div class="file-function-body">
+                            <div class="dds-util btn btn-primary" data-id="{{ dds.pk }}"
+                                 data-url="{% url 'files:unmapped_facs' %}?id={{ dds.pk }}">
+                                Check Missing Facilities
+                            </div>
                         </div>
-                    </div>
-                    <div class="btn btn-primary" id="map-unmapped" data-id="{{ dds.pk }}" data-map="True"
-                         data-url="{% url 'files:unmapped_facs' %}">
-                        Check and map
+                        <div class="btn btn-primary" id="map-unmapped" data-id="{{ dds.pk }}" data-map="True"
+                             data-url="{% url 'files:unmapped_facs' %}">
+                            Check and map
+                        </div>
                     </div>
                 </div>
             </div>
