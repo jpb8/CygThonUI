@@ -2,6 +2,7 @@ from lxml import etree
 from lxml.etree import SubElement
 import pandas as pd
 from io import BytesIO, StringIO
+import os
 
 from .xml import XmlFile
 
@@ -102,7 +103,7 @@ class DeviceDef(XmlFile):
         if dgs is None:
             return None, "Device {} Not Found".format(device_id)
         if dgs.find('./DataGroup/DataGroupAttributes/[DataGroupType="{}"].../UdcMappings'.format(array_type)) is None:
-            return None, "Array {} not found in Device {}".format(device_id, array_type)
+            return None, "Array {} not found in Device {}".format(array_type, device_id)
         return dgs.find('./DataGroup/DataGroupAttributes/[DataGroupType="{}"].../UdcMappings'.format(array_type)), ""
 
     def all_devices(self):
@@ -136,20 +137,32 @@ class DeviceDef(XmlFile):
             maps.append({"ERROR": error})
         return maps
 
-    def add_maps(self, device_id, array_type, maps):
+    def add_maps(self, device_id, array_type, maps, create=False, dtf=None):
         """
         Maps all supplied UDCs the given Device's Array.
         Checks all UCDs to see they already exist
         :param device_id: CygNet Device name
         :param array_type: The array name inside the device
         :param maps: List of UDCs to be mapped
+        :param create: True to create False to skip
+        :param dtf: DTF object
         :return: Any errors
         """
         mappings, err = self.device_dg_mappings(device_id, array_type)
         errs = []
         if mappings is None:
-            errs.append(err)
-            return errs
+            if create:
+                desc = dtf.get_array_description(array_type)
+                if desc:
+                    dg = self.add_datagroup(desc, array_type, device_id)
+                    errs.append("{} DataGroup created for device: {}".format(array_type, device_id))
+                    mappings, err = self.device_dg_mappings(device_id, array_type)
+                else:
+                    errs.append("{} Not Found in DTF".format(array_type))
+                    return errs
+            else:
+                errs.append(err)
+                return errs
         for m in maps:
             if mappings.find(".//UdcMapping[@UDC='{}'][@data_element_id='{}'][@facility='{}']".format(
                     m.udc,
@@ -164,6 +177,12 @@ class DeviceDef(XmlFile):
             else:
                 errs.append("{} {} {} mapping already exists".format(m.udc, m.data_id, m.fac))
         return errs
+
+    def add_datagroup(self, description, data_group_type, device_id):
+        dg = DataGroup(description, device_id, data_group_type)
+        current_dgs = self.device_dgs_element(device_id)
+        current_dgs.append(dg.dg_element)
+        return current_dgs
 
     @staticmethod
     def _ordinal_finder(fac_elem):
@@ -488,11 +507,13 @@ class DeviceDef(XmlFile):
             deids = list(set(deids) - set(a_deieds))
         return deids
 
-    def mapping_excel_import(self, mappings, dtfxml, deid_only):
+    def mapping_excel_import(self, mappings, dtfxml, deid_only, add_dgs=False):
         """
         Add all mappings supplied in pandas object (create pandas object in method?)
         :param mappings: pandas dataframe with all mappings
         :param dtfxml: DTF Object used to check deids
+        :param deid_only:
+        :param add_dgs: DTF Object used to check deids
         :return: List of errors (strings) that occurred while mapping points
         """
         devices = mappings.device.unique()
@@ -509,7 +530,7 @@ class DeviceDef(XmlFile):
                         udc, pnt_err = UdcMap.safe_create(dtfxml, p, da, deid_only)
                         maps.append(udc) if not pnt_err else errs.append(udc)
                         facs.append(p["facilityid"]) if p["facilityid"] not in facs else None
-                    map_log = self.add_maps(d, da, maps)
+                    map_log = self.add_maps(d, da, maps, add_dgs, dtfxml)
                     fac_log = self.add_facs(facs, d)
                     errs = errs + map_log + fac_log
             else:
@@ -569,7 +590,9 @@ class DataGroup:
         self.create_element()
 
     def create_element(self):
-        tree = etree.parse("utils/DataGroup.xml")
+        dg_xml_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "utils", "DataGroup.xml")
+        print(dg_xml_path)
+        tree = etree.parse(dg_xml_path)
         root = tree.getroot()
         root.find("DataGroupAttributes/Description").text = self.description
         root.find("DataGroupAttributes/FacilityId").text = self.fac_id

@@ -72,6 +72,10 @@ class DTF(XmlFile):
             bit2 = False
         return tag, bit, bit2
 
+    def get_array_description(self, array_name):
+        return self.data_groups.find(array_name).get("niceName") if self.data_groups.find(
+            array_name) is not None else False
+
     def all_arrays(self):
         arrays = []
         for dg in self.data_groups:
