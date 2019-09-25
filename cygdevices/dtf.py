@@ -76,6 +76,16 @@ class DTF(XmlFile):
         return self.data_groups.find(array_name).get("niceName") if self.data_groups.find(
             array_name) is not None else False
 
+    def get_ucc_param(self, array_name):
+        array_xml = self.data_groups.find(array_name)
+        if array_xml is None:
+            return None
+        ucc_params = array_xml.find("uccSendParms")
+        if ucc_params is None:
+            return None
+        for ucc in ucc_params:
+            return ucc.tag
+
     def all_arrays(self):
         arrays = []
         for dg in self.data_groups:

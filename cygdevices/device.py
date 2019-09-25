@@ -3,6 +3,7 @@ from lxml.etree import SubElement
 import pandas as pd
 from io import BytesIO, StringIO
 import os
+import math
 
 from .xml import XmlFile
 
@@ -315,6 +316,46 @@ class DeviceDef(XmlFile):
                         )
         return log
 
+    def import_commands(self, cmds, dtf_xml):
+        errs = []
+        for i, cmd in cmds.iterrows():
+            device_id = cmd.get("device")
+            facility = cmd.get("facility")
+            name = cmd.get("name")
+            data_group = cmd.get("data_group")
+            comp_type = cmd.get("comp_type")
+            update_fac = cmd.get("update_fac")
+            udc = cmd.get("udc")
+            site = cmd.get("site")
+            service = cmd.get("service")
+            utype = cmd.get("utype")
+            value = cmd.get("value") if not math.isnan(cmd.get("value")) else False
+            cmd_xml = self.find_command(device_id, name, facility)
+            if cmd_xml is None:
+                cmd_xml = self.create_command(device_id, name, facility, cmd.get("description"))
+            if not cmd_xml:
+                errs.append("Device {} not in xml".format(device_id))
+            else:
+                cmd_comp_xml = cmd_xml.find("CommandComponents")
+                ord = len(cmd_comp_xml)
+                if comp_type == "DG_T_DEV":
+                    load = dtf_xml.get_ucc_param(data_group)
+                    comp = Command.create_dg_t_dev_comp(ord, data_group, load, value)
+                    cmd_comp_xml.append(comp)
+                elif comp_type == "CYUPDTPT":
+                    comp = Command.create_cyuptpt_comp(ord, update_fac, service, site, udc, utype)
+                    cmd_comp_xml.append(comp)
+        self.save()
+        return errs
+
+    def create_command(self, device_id, name, facility, desc):
+        device_cmds = self.device_uis_element(device_id)
+        if device_cmds is None:
+            return False
+        new_cmd = Command(name, facility, desc)
+        device_cmds.append(new_cmd.command_element)
+        return self.find_command(device_id, name, facility)
+
     def uis_commands(self, dtf_xml=False):
         """
         Format DDS XML to a usable Excel dataframe to for mapping validation
@@ -591,7 +632,6 @@ class DataGroup:
 
     def create_element(self):
         dg_xml_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "utils", "DataGroup.xml")
-        print(dg_xml_path)
         tree = etree.parse(dg_xml_path)
         root = tree.getroot()
         root.find("DataGroupAttributes/Description").text = self.description
@@ -602,6 +642,46 @@ class DataGroup:
     @property
     def udc_maps(self):
         return self.dg_element.find("UdcMappings")
+
+
+class Command:
+    def __init__(self, name, fac_id, description):
+        self.name = name
+        self.fac_id = fac_id
+        self.description = description
+        self.command_element = None
+        self.create_element()
+
+    def create_element(self):
+        dg_xml_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "utils", "Command.xml")
+        tree = etree.parse(dg_xml_path)
+        root = tree.getroot()
+        root.find("CommandAttributes/Name").text = self.name
+        root.find("CommandAttributes/Facility").text = self.fac_id
+        root.find("CommandAttributes/Description").text = self.description
+        self.command_element = root
+
+    @classmethod
+    def create_dg_t_dev_comp(cls, pos, data_group, load=False, value=False):
+        component = etree.Element("Component", {"type": "DG_T_DEV", "position": str(pos)})
+        SubElement(component, "Param", {"key": "DGORD", "value": "0"})
+        SubElement(component, "Param", {"key": "DGTYPE", "value": data_group})
+        if load and value:
+            SubElement(component, "Param", {"key": load, "value": str(int(value))})
+        return component
+
+    @classmethod
+    def create_cyuptpt_comp(cls, pos, fac, service, site, udc, utype):
+        component = etree.Element("Component", {"type": "CYUPDTPT", "position": str(pos)})
+        SubElement(component, "Param", {"key": "DGORD", "value": "-1"})
+        SubElement(component, "Param", {"key": "DGTYPE", "value": "n/a"})
+        SubElement(component, "Param", {"key": "Fac", "value": fac})
+        SubElement(component, "Param", {"key": "FOnErr", "value": "1"})
+        SubElement(component, "Param", {"key": "Serv", "value": service})
+        SubElement(component, "Param", {"key": "Site", "value": site})
+        SubElement(component, "Param", {"key": "UDC", "value": udc})
+        SubElement(component, "Param", {"key": "UType", "value": str(int(utype))})
+        return component
 
 
 class UdcMap:

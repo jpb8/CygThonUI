@@ -1,0 +1,30 @@
+<UisCommand>
+    <CommandAttributes>
+        <Name></Name>
+        <Facility></Facility>
+        <Type/>
+        <Description></Description>
+        <IsVisible>1</IsVisible>
+        <CanBeScheduled>1</CanBeScheduled>
+        <ClientCanInvoke>1</ClientCanInvoke>
+        <Flags>0</Flags>
+        <SecurityApp>DDS</SecurityApp>
+        <SecurityEvent>ACCESS</SecurityEvent>
+        <InheritsSecurity>0</InheritsSecurity>
+        <Prototype>0</Prototype>
+        <AuditDetail>Service defined detail</AuditDetail>
+        <State>2</State>
+        <LockTime>25569.000000</LockTime>
+        <LockUser/>
+        <LockComment/>
+        <Ver1>0</Ver1>
+        <Ver2>0</Ver2>
+        <Ver3>0</Ver3>
+        <Ver4>0</Ver4>
+        <VerTime>25569.000000</VerTime>
+        <VerUser/>
+        <VerComment/>
+    </CommandAttributes>
+    <CommandParameters/>
+    <CommandComponents/>
+</UisCommand>

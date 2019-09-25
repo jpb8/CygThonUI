@@ -83,10 +83,36 @@ def dds_add_mapping(request):
         except ObjectDoesNotExist:
             print("DTF or DDS not found")
             return redirect("files:upload")
+        try:
+            errors = dds.add_mappings(dtf, mappings, deid_only, add_dgs)
+        except:
+            errors = ["Error Handling Excel File. Please use template file"]
+        if request.is_ajax():
+            errs = []
+            for e in errors:
+                errs.append({"Log": e})
+            data = build_ajax_response_dict(errs, "Import Log")
+            devices = dds.xml.all_devices()
+            devices_html = render_to_string("files/snippets/device_accord.html", {"devices": devices})
+            data["devices_html"] = devices_html
+            return JsonResponse(data)
+    return redirect("files:upload")
+
+
+def dds_add_commands(request):
+    # Pass Excel file and dtf document to import script, return error logs
+    if request.method == "POST":
+        cmds = request.FILES["commands"]
+        try:
+            dtf = DTF.objects.get(pk=int(request.POST.get("dtf-id")))
+            dds = DDS.objects.get(pk=int(request.POST.get("dds-id")))
+        except ObjectDoesNotExist:
+            print("DTF or DDS not found")
+            return redirect("files:upload")
         # try:
-        errors = dds.add_mappings(dtf, mappings, deid_only, add_dgs)
+        errors = dds.add_commands(dtf, cmds)
         # except:
-        #     errors = ["Error Handling Excel File. Please use template file", ]
+        #     errors = ["Error Handling Excel File. Please use template file"]
         if request.is_ajax():
             errs = []
             for e in errors:

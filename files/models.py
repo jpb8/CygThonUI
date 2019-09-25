@@ -54,6 +54,16 @@ class DDS(models.Model):
             error_log = ["DDS or DTF File not found"]
         return error_log
 
+    def add_commands(self, dtf_obj, excel):
+        dtf_xml = dtf_obj.xml
+        dds_xml = self.xml
+        if dtf_xml is not None and dds_xml is not None:
+            cmds = pd.read_excel(excel, sheet_name="Sheet1")
+            error_log = dds_xml.import_commands(cmds, dtf_xml)
+        else:
+            error_log = ["DDS or DTF File not found"]
+        return error_log
+
     def check_facilities(self, excel):
         facs_df = pd.read_excel(excel, sheet_name="Sheet1")
         facs = facs_df["facility"].to_list()

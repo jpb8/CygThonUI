@@ -164,6 +164,24 @@
                     <button class="btn btn-primary" type="submit">Map!</button>
                 </form>
             </div>
+            <div class="file-function-container">
+                <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_add_commands' %}"
+                      id="dds-commands">
+                    {% csrf_token %}
+                    <h3>Import Commands</h3><br>
+                    <label>Mappings Excel</label>
+                    <input type="file" name="commands"><br>
+                    <select name="dtf-id">
+                        {% if dtfs %}
+                        {% for d in dtfs %}
+                        <option value="{{ d.pk }}">{{ d.file }}</option>
+                        {% endfor %}
+                        {% endif %}
+                    </select><br>
+                    <input hidden name="dds-id" value="{{ dds.pk }}">
+                    <button class="btn btn-primary" type="submit">Map!</button>
+                </form>
+            </div>
         </div>
         <div class="col" id="device-info">
             <h1>All Devices</h1>
