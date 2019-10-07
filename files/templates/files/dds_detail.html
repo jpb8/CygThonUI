@@ -78,6 +78,7 @@
                                 {% endif %}
                             </select>
                             <label>Command Upload</label>
+                            <a href="{% url 'files:command__validation_template' %}">Download Template</a><br>
                             <input type="file" name="cmds"><br>
                             <input hidden name="dds-id" value="{{ dds.pk }}">
                             <button class="btn btn-primary" type="submit">GO</button>
@@ -149,7 +150,7 @@
                     {% csrf_token %}
                     <h3>Import Mappings</h3><br>
                     <a href="{% url 'files:mapping_template' %}">Download Template</a><br>
-                    <label>Mappings Excel</label>
+                    <label>Mappings Excel Import</label>
                     <input type="file" name="mappings"><br>
                     <input type="checkbox" name="died-only">DEID Only<br>
                     <input type="checkbox" name="add-dgs">Create Data Groups?<br>
@@ -169,7 +170,8 @@
                       id="dds-commands">
                     {% csrf_token %}
                     <h3>Import Commands</h3><br>
-                    <label>Mappings Excel</label>
+                    <a href="{% url 'files:command_template' %}">Download Template</a><br>
+                    <label>Commands Excel Import</label>
                     <input type="file" name="commands"><br>
                     <select name="dtf-id">
                         {% if dtfs %}

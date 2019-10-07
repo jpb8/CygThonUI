@@ -21,7 +21,6 @@ urlpatterns = [
     path('dds/fac_exist/', facs_dne, name="fac_exist"),
     path('dds/validate_commands/', validate_commands, name="validate_commands"),
     path('dds/get_mappings/', get_mappings, name="get_mappings"),
-    path('dds/mapping_template/', mapping_template, name="mapping_template"),
     path('dds/delete/', dds_delete, name="dds_delete"),
     path('dds/validate_maps/', validate_mappings, name="validate_maps"),
     ## DTF ##
@@ -31,4 +30,8 @@ urlpatterns = [
     path('dtf/delete/', dtf_delete, name="dtf_delete"),
     path('dtf/export_dtf_data/', export_dtf_data, name="export_dtf_data"),
     path('dtf/add_array/', add_array, name="add_array"),
+    ## TEMPLATES ##
+    path('dds/mapping_template/', mapping_template, name="mapping_template"),
+    path('dds/commands_template/', command_import_template, name="command_template"),
+    path('dds/commands_validation_template/', command_validation_template, name="command__validation_template"),
 ]

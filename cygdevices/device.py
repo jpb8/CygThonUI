@@ -285,6 +285,13 @@ class DeviceDef(XmlFile):
         return True, None
 
     def validate_mappings(self, dtf_xml, pnts):
+        """
+        Loop through every mapping in every data group in every device and check the
+        point against a supplied list of points and where they should be mapped
+        :param dtf_xml: DTF object to grap registers from
+        :param pnts: pandas object with all points and their mappings
+        :return: Log of errors
+        """
         log = []
         for elem in self.xml:
             dev_id = elem.get("device_id")
