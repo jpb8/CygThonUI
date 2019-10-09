@@ -112,6 +112,12 @@ class DTF(XmlFile):
             return None
         return self.find_dg_element(array, deid).get("tagname")
 
+    def deid_datatype(self, array, deid):
+        dg_elm = self.find_dg_element(array, deid)
+        if dg_elm is None:
+            return None
+        return self.find_dg_element(array, deid).get("type")
+
     def create_array(self, name, nice_name):
         new_array = SubElement(self.data_groups, name, {
             "niceName": nice_name,

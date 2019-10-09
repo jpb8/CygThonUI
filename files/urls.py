@@ -32,6 +32,7 @@ urlpatterns = [
     path('dtf/add_array/', add_array, name="add_array"),
     ## TEMPLATES ##
     path('dds/mapping_template/', mapping_template, name="mapping_template"),
+    path('dds/mapping_validation_template/', mapping_validation_template, name="mapping_validation_template"),
     path('dds/commands_template/', command_import_template, name="command_template"),
-    path('dds/commands_validation_template/', command_validation_template, name="command__validation_template"),
+    path('dds/commands_validation_template/', command_validation_template, name="command_validation_template"),
 ]

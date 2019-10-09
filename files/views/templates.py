@@ -41,7 +41,7 @@ def mapping_validation_template(request):
     sheets = [sheet, ]
     workbook = XmlFile.template_export(sheets)
     response = HttpResponse(workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename={}'.format("command_import_template.xlsx")
+    response['Content-Disposition'] = 'attachment; filename={}'.format("mapping_validation_template.xlsx")
     return response
 
 

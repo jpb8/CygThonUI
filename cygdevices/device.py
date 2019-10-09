@@ -387,19 +387,25 @@ class DeviceDef(XmlFile):
                 ld = xpath.get("key")
                 if dtf_xml:
                     tag = dtf_xml.deid_tagname(dg, ld)
+                    dtype = dtf_xml.deid_datatype(dg, ld)
                     s_cmd["Register"] = tag
+                    s_cmd["datatype"] = dtype
                 s_cmd["LD"] = xpath.get("key")
                 s_cmd["Value"] = xpath.get("value")
             else:
                 dg_xml, err = self.device_dg_mappings(dev_id, dg)
                 if dg_xml is None:
                     return None
-                deid = dg_xml.find("UdcMapping").get("data_element_id") if dg_xml.find(
-                    "UdcMapping") is not None else None
+                if dg_xml.find("UdcMapping") is not None:
+                    deid = dg_xml.find("UdcMapping").get("data_element_id")
+                else:
+                    deid = dtf_xml.get_ucc_param(dg)
                 s_cmd["LD"] = deid
                 if dtf_xml:
                     tag = dtf_xml.deid_tagname(dg, deid)
+                    dtype = dtf_xml.deid_datatype(dg, deid)
                     s_cmd["Register"] = tag
+                    s_cmd["datatype"] = dtype
             append_cmd(s_cmd)
 
         def _cyupdtpt(s_cmd):
@@ -416,8 +422,10 @@ class DeviceDef(XmlFile):
 
         def append_cmd(cmd_sing):
             for k, v in cmd_sing.items():
-                cmd_dict[k].append(v)
-
+                try:
+                    cmd_dict[k].append(v)
+                except KeyError:
+                    print(k, v)
         cmd_dict = {
             "dev_id": [],
             "comm_id": [],
@@ -436,7 +444,8 @@ class DeviceDef(XmlFile):
             "UDC": [],
             "UType": [],
             "Value": [],
-            "Register": []
+            "Register": [],
+            "datatype": []
         }
         for elem in self.xml:
             dev_id = elem.get("device_id")
@@ -464,7 +473,8 @@ class DeviceDef(XmlFile):
                         "UDC": "",
                         "UType": "",
                         "Value": "",
-                        "Register": ""
+                        "Register": "",
+                        "datatype": ""
                     }
                     c_type = c.get("type")
                     if c_type == "DG_T_DEV" or c_type == "DG_F_DEV":

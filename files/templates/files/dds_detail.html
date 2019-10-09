@@ -78,7 +78,7 @@
                                 {% endif %}
                             </select>
                             <label>Command Upload</label>
-                            <a href="{% url 'files:command__validation_template' %}">Download Template</a><br>
+                            <a href="{% url 'files:command_validation_template' %}">Download Template</a><br>
                             <input type="file" name="cmds"><br>
                             <input hidden name="dds-id" value="{{ dds.pk }}">
                             <button class="btn btn-primary" type="submit">GO</button>
@@ -120,6 +120,7 @@
                                 {% endif %}
                             </select>
                             <label>All Mappings</label>
+                            <a href="{% url 'files:mapping_validation_template' %}">Download Template</a><br>
                             <input type="file" name="pnts"><br>
                             <input hidden name="dds-id" value="{{ dds.pk }}">
                             <button class="btn btn-primary" type="submit">GO</button>
