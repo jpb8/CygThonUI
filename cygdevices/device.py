@@ -231,7 +231,7 @@ class DeviceDef(XmlFile):
             outcome = "Device {} was not found to add facilities".format(device_id)
         return outcome
 
-    def export_data(self):
+    def export_data(self, dtf_xml=False):
         """
         Export all UIS mappings for easy validation
         :return: Pandas DF of all UIS mappings
@@ -244,7 +244,10 @@ class DeviceDef(XmlFile):
             "deid": [],
             "last_char": [],
             "fac": [],
-            "udc": []
+            "udc": [],
+            "reg": [],
+            "bit1": [],
+            "bit2": []
         }
         for elem in self.xml:
             dev_id = elem.get("device_id")
@@ -253,14 +256,22 @@ class DeviceDef(XmlFile):
                 desc = data_group.find("DataGroupAttributes/Description").text
                 dg_type = data_group.find("DataGroupAttributes/DataGroupType").text
                 for m in data_group.find("UdcMappings"):
+                    deid = m.get("data_element_id")
+                    if dtf_xml:
+                        reg, bit, bit2 = dtf_xml.get_deid_tag(dg_type, deid)
+                    else:
+                        reg = bit = bit2 = ""
                     devs_dict["dev_id"].append(dev_id)
                     devs_dict["comm_id"].append(comm_id)
                     devs_dict["desc"].append(desc)
                     devs_dict["dg_type"].append(dg_type)
-                    devs_dict["deid"].append(m.get("data_element_id"))
-                    devs_dict["last_char"].append(m.get("data_element_id")[-2:])
+                    devs_dict["deid"].append(deid)
+                    devs_dict["last_char"].append(deid[-2:])
                     devs_dict["fac"].append(m.get("facility"))
                     devs_dict["udc"].append(m.get("UDC"))
+                    devs_dict["reg"].append(reg)
+                    devs_dict["bit1"].append(bit if bit else "")
+                    devs_dict["bit2"].append(bit2 if bit2 else "")
         return pd.DataFrame(data=devs_dict)
 
     @staticmethod
@@ -627,7 +638,7 @@ class DeviceDef(XmlFile):
         return cls.template_export(sheets)
 
     def export_mappings(self, dtf_xml=None):
-        df_pnt = self.export_data()
+        df_pnt = self.export_data(dtf_xml)
         df_cmd = self.uis_commands(dtf_xml)
         sio = BytesIO()
         writer = pd.ExcelWriter(sio, engine="xlsxwriter")
