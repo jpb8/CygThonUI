@@ -410,7 +410,7 @@ class DeviceDef(XmlFile):
                 if dg_xml.find("UdcMapping") is not None:
                     deid = dg_xml.find("UdcMapping").get("data_element_id")
                 else:
-                    deid = dtf_xml.get_ucc_param(dg)
+                    deid = dtf_xml.get_ucc_param(dg) if dtf_xml else ""
                 s_cmd["LD"] = deid
                 if dtf_xml:
                     tag = dtf_xml.deid_tagname(dg, deid)
