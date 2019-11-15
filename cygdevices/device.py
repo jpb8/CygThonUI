@@ -732,8 +732,11 @@ class UdcMap:
         :param deid_only: bool that tells whether or not to build UDC from
         :return: Tuple of UDC and error bool, (if error, returns Error message)
         """
-        if row["type"] == "A" and not deid_only:
-            deid = dtf_xml.get_analog_deid(dev_array, row["tag"], str(int(row["register"])))
+        if row["type"] == "A":
+            if deid_only:
+                deid = row["deid"] if  dtf_xml.check_dg_element(row["array"], row["deid"]) else False
+            else:
+                deid = dtf_xml.get_analog_deid(dev_array, row["tag"], str(int(row["register"])))
             if deid:
                 _udc, err = UdcMap(row["uniformdatacode"], deid, row["facilityid"]), False
             else:
