@@ -738,7 +738,7 @@ class UdcMap:
                 _udc, err = UdcMap(row["uniformdatacode"], deid, row["facilityid"]), False
             else:
                 _udc, err = "*DEID Not found* tagname: {}[{}], Array: {}, UDC: {} FAC: {}".format(
-                    row["tag"], row["reg"], dev_array,
+                    row["tag"], row["register"], dev_array,
                     row["uniformdatacode"],
                     row["facilityid"]
                 ), True
