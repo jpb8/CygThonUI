@@ -355,11 +355,19 @@ class DeviceDef(XmlFile):
                 errs.append("Device {} not in xml".format(device_id))
             else:
                 cmd_comp_xml = cmd_xml.find("CommandComponents")
+                dg_exists, _ = self.device_dg_mappings(device_id, data_group)
                 ord = len(cmd_comp_xml)
                 if comp_type == "DG_T_DEV":
                     load = dtf_xml.get_ucc_param(data_group)
                     comp = Command.create_dg_t_dev_comp(ord, data_group, load, value)
                     cmd_comp_xml.append(comp)
+                    if dg_exists is None:
+                        desc = dtf_xml.get_array_description(data_group)
+                        if desc:
+                            dg = self.add_datagroup(description=desc, data_group_type=data_group, device_id=device_id)
+                            errs.append("{} DataGroup created for device: {}".format(data_group, device_id))
+                        else:
+                            errs.append("{} Not Found in DTF".format(data_group))
                 elif comp_type == "CYUPDTPT":
                     comp = Command.create_cyuptpt_comp(ord, update_fac, service, site, udc, utype)
                     cmd_comp_xml.append(comp)
