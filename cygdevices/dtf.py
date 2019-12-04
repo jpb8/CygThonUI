@@ -29,14 +29,17 @@ class DTF(XmlFile):
         :return: DEID Tag
         """
         tag = "{}[{}]".format(index, reg)
-        deid = self.xml.find("dataGroups/{}/dgElements/*[@tagname='{}']".format(array_name, tag))
+        if self.xml.find("dataGroups/{}/dgElements/*[@tagname='{}']".format(array_name, tag)) is None:
+            deid = self.xml.find("dataGroups/{}/dgElements/*[@elemAddr='{}']".format(array_name, tag))
+        else:
+            deid = self.xml.find("dataGroups/{}/dgElements/*[@tagname='{}']".format(array_name, tag))
         return deid.tag if deid is not None else False
 
     def get_analog_tag(self, array_name, deid):
         tag = self.xml.find("dataGroups/{}/dgElements/{}".format(array_name, deid))
         if tag is None:
             return None
-        return tag.get("tagname")
+        return tag.get("tagname") if tag.get("tagname") is not None else tag.get("elemAddr")
 
     def get_multibit_tag(self, array_name, deid):
         tag = self.xml.find("dataGroups/{}/dgElements/{}".format(array_name, deid))
@@ -56,7 +59,7 @@ class DTF(XmlFile):
         parent_tag = self.xml.find("dataGroups/{}/dgElements/{}".format(array_name, tag.get("ref")))
         if parent_tag is None:
             return None, None
-        tag_name = parent_tag.get("tagname")
+        tag_name = parent_tag.get("tagname") if parent_tag.get("tagname") is not None else parent_tag.get("elemAddr")
         bit = tag.get("bPos")
         return tag_name, bit
 
@@ -110,7 +113,11 @@ class DTF(XmlFile):
         dg_elm = self.find_dg_element(array, deid)
         if dg_elm is None:
             return None
-        return self.find_dg_element(array, deid).get("tagname")
+        if self.find_dg_element(array, deid).get("tagname") is not None:
+            tag = self.find_dg_element(array, deid).get("tagname")
+        else:
+            tag = self.find_dg_element(array, deid).get("elemAddr")
+        return tag
 
     def deid_datatype(self, array, deid):
         dg_elm = self.find_dg_element(array, deid)

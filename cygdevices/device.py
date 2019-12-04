@@ -276,7 +276,10 @@ class DeviceDef(XmlFile):
 
     @staticmethod
     def _mapping_validator(pnts, point, tag, bit=False, bit2=False):
-        tag_new = "{}:{}".format(tag.split("[")[0], tag.split("[")[1].split("]")[0])
+        if "[" in tag:
+            tag_new = "{}:{}".format(tag.split("[")[0], tag.split("[")[1].split("]")[0])
+        else:
+            tag_new = tag
         try:
             dtf_bit = int(pnts.loc[point][1])
             dtf_bit2 = int(pnts.loc[point][2])
