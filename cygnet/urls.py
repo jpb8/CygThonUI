@@ -17,13 +17,15 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
-from projects.views import index
+from projects.views import index, user_login, user_logout
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('files/', include('files.urls', namespace='files')),
     path('projects/', include('projects.urls', namespace='projects')),
     path('', index, name="home"),
+    path('login/', user_login, name="login"),
+    path('logout/', user_logout, name="logout")
 ]
 if settings.DEBUG:
     urlpatterns = urlpatterns + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

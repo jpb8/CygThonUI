@@ -1,6 +1,8 @@
 from django.views.generic import DetailView
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.http import JsonResponse, HttpResponse, Http404, HttpResponseRedirect
+from django.shortcuts import render, redirect, reverse
+from django.contrib.auth.decorators import login_required
 
 from .models import Project
 from .forms import ProjectForm
@@ -11,12 +13,37 @@ from cygdevices.substitutions import Substitutions
 from cygdevices.points import Points
 
 
+@login_required()
 def index(request):
     cont_dict = {
-        "projects": Project.objects.all(),
+        "projects": request.user.project_set.all(),
         "form": ProjectForm
     }
     return render(request, 'index.html', cont_dict)
+
+
+def user_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(username=username, password=password)
+        if user:
+            if user.is_active:
+                login(request, user)
+                return HttpResponseRedirect(reverse('home'))
+            else:
+                return HttpResponse("ACCOUNT NOT ACTIVE")
+        else:
+            print('Someone tried to login and failed')
+            print('User: {} and password: {}'.format(username, password))
+            return HttpResponse("invalid login details")
+    return render(request, 'login.html')
+
+
+@login_required()
+def user_logout(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('login'))
 
 
 def project_add(request):
@@ -31,6 +58,12 @@ def project_add(request):
 
 class ProjectDetailView(DetailView):
     queryset = Project.objects.all()
+
+    def get_object(self, queryset=None):
+        obj = super(ProjectDetailView, self).get_object(queryset=queryset)
+        if self.request.user not in obj.members.all():
+            raise Http404()
+        return obj
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)

@@ -28,6 +28,19 @@
             {% endif %}
         </ul>
     </div>
+      {% if user.is_authenticated %}
+        <div class="dropdown dropleft">
+            <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {{ user.username }}
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+            </div>
+        </div>
+        {{% else %}
+        <a class="btn btn-primary btn-sm" type="submit" href="/login">Login</a>
+        {% endif %}
   </div>
 </nav>
 {% block body_block %}

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ProjectDetailView, update_long_descriptions, create_substitutions, project_add, export_template
+from .views import *
 
 app_name = 'projects'
 
@@ -8,5 +8,5 @@ urlpatterns = [
     path('long_desc/', update_long_descriptions, name="long_desc"),
     path('create_subs/', create_substitutions, name="create_subs"),
     path('add/', project_add, name="add"),
-    path('templates/', export_template, name="templates")
+    path('templates/', export_template, name="templates"),
 ]

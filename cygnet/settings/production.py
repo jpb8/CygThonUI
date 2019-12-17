@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["*",]
+ALLOWED_HOSTS = ["*", ]
 
 # Application definition
 
@@ -123,28 +123,8 @@ USE_L10N = True
 
 USE_TZ = True
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'filters': {
-#         'require_debug_false': {
-#             '()': 'django.utils.log.RequireDebugFalse'
-#         }
-#     },
-#     'handlers': {
-#         'logfile': {
-#             'class': 'logging.handlers.WatchedFileHandler',
-#             'filename': 'D:\home\site\wwwroot\myapp.log'
-#         }
-#     },
-#     'loggers': {
-#         'django': {
-#             'handlers': ['logfile'],
-#             'level': 'ERROR',
-#             'propagate': False,
-#         }
-#     }
-# }
+LOGIN_URL = '/login'
+LOGIN_REDIRECT_URL = '/'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/

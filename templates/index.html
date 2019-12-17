@@ -2,6 +2,7 @@
 {% block body_block %}
 <body>
 <div class="container">
+    {% if user.is_staff %}
     <div class="row" style="margin:10px">
         <form method="POST" action="{% url 'projects:add' %}">
             <div class="form-group">
@@ -12,6 +13,7 @@
             <button type="submit" class="btn btn-primary">Create</button>
         </form>
     </div>
+    {% endif %}
     <div class="row" style="margin-top: 50px">
         <div class="card text-center">
             <div class="card-header">

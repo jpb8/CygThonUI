@@ -39,6 +39,12 @@ def dtf_delete(request):
 class DTFDetailView(DetailView):
     queryset = DTF.objects.all()
 
+    def get_object(self, queryset=None):
+        obj = super(DTFDetailView, self).get_object(queryset=queryset)
+        if self.request.user not in obj.project.members.all():
+            raise Http404()
+        return obj
+
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         proj = self.object.project
