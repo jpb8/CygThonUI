@@ -45,12 +45,13 @@ def user_logout(request):
     logout(request)
     return HttpResponseRedirect(reverse('login'))
 
-
+@login_required()
 def project_add(request):
     if request.method == 'POST':
         form = ProjectForm(request.POST)
         if form.is_valid():
-            form.save()
+            proj = form.save()
+            proj.members.add(request.user)
         else:
             print("Error in Form")
     return redirect("home")

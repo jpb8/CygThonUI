@@ -247,7 +247,8 @@ class DeviceDef(XmlFile):
             "udc": [],
             "reg": [],
             "bit1": [],
-            "bit2": []
+            "bit2": [],
+            "dtype": []
         }
         for elem in self.xml:
             dev_id = elem.get("device_id")
@@ -259,6 +260,7 @@ class DeviceDef(XmlFile):
                     deid = m.get("data_element_id")
                     if dtf_xml:
                         reg, bit, bit2 = dtf_xml.get_deid_tag(dg_type, deid)
+                        dtype = dtf_xml.deid_datatype(dg_type, deid)
                     else:
                         reg = bit = bit2 = ""
                     devs_dict["dev_id"].append(dev_id)
@@ -272,6 +274,7 @@ class DeviceDef(XmlFile):
                     devs_dict["reg"].append(reg)
                     devs_dict["bit1"].append(bit if bit else "")
                     devs_dict["bit2"].append(bit2 if bit2 else "")
+                    devs_dict["dtype"].append(dtype if dtype else "")
         return pd.DataFrame(data=devs_dict)
 
     @staticmethod
