@@ -62,7 +62,7 @@
             <div class="project-util">
                 <form method="POST" enctype="multipart/form-data" action="{% url 'projects:galaxy_parse' %}">
                     {% csrf_token %}
-                    <h3>Create Substitution XML</h3>
+                    <h3>Parse Galaxy Dump</h3>
                     <label>Parse Galaxy Dump</label><br>
                     <input type="file" name="galaxy"><br>
                     <button type="submit">Parse</button>
