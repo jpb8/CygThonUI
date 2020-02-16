@@ -748,7 +748,7 @@ class UdcMap:
         """
         if row["type"] == "A":
             if deid_only:
-                deid = row["deid"] if  dtf_xml.check_dg_element(row["array"], row["deid"]) else False
+                deid = row["deid"] if dtf_xml.check_dg_element(row["array"], row["deid"]) else False
             else:
                 deid = dtf_xml.get_analog_deid(dev_array, row["tag"], str(int(row["register"])))
             if deid:

@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse, HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth.decorators import login_required
+from django.utils.encoding import codecs
 
 from .models import Project
 from .forms import ProjectForm
@@ -11,6 +12,7 @@ from files.forms import DDSForm, DTFForm
 
 from cygdevices.substitutions import Substitutions
 from cygdevices.points import Points
+from cygdevices.galaxy import transform_galaxy
 
 
 @login_required()
@@ -99,6 +101,20 @@ def create_substitutions(request):
         response['X-Sendfile'] = "{}.xml".format(name)
         return response
     return redirect("home")
+
+def parse_galaxy(request):
+    if request.method == "POST":
+        file = request.FILES.get("galaxy")
+        name = file.name.split(".")[0]
+        new_galaxy = transform_galaxy(file)
+        response = HttpResponse(new_galaxy,
+                                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename={}.xlsx'.format(name)
+        response['X-Sendfile'] = "{}.xlsx".format(name)
+        return response
+    return redirect("home")
+
+
 
 
 def export_template(request):

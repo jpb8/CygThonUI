@@ -9,4 +9,5 @@ urlpatterns = [
     path('create_subs/', create_substitutions, name="create_subs"),
     path('add/', project_add, name="add"),
     path('templates/', export_template, name="templates"),
+    path('galaxy_parse/', parse_galaxy, name="galaxy_parse"),
 ]
