@@ -258,6 +258,7 @@ class DeviceDef(XmlFile):
                 dg_type = data_group.find("DataGroupAttributes/DataGroupType").text
                 for m in data_group.find("UdcMappings"):
                     deid = m.get("data_element_id")
+                    dtype = ""
                     if dtf_xml:
                         reg, bit, bit2 = dtf_xml.get_deid_tag(dg_type, deid)
                         dtype = dtf_xml.deid_datatype(dg_type, deid)
