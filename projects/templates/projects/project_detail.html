@@ -65,6 +65,24 @@
                     <h3>Parse Galaxy Dump</h3>
                     <label>Parse Galaxy Dump</label><br>
                     <input type="file" name="galaxy"><br>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="parseType" id="full" value="full" checked>
+                      <label class="form-check-label" for="full">
+                        Full Parse
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="parseType" id="regonly" value="regonly">
+                      <label class="form-check-label" for="regonly">
+                        Register and Source Info Only
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="parseType" id="scaling" value="scaling">
+                      <label class="form-check-label" for="scaling">
+                        Scaling Only
+                      </label>
+                    </div>
                     <button type="submit">Parse</button>
                 </form>
             </div>

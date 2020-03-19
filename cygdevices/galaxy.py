@@ -50,7 +50,7 @@ def parse_scaling(df_scale, new):
     return df_scale
 
 
-def create_xlxs(templates):
+def create_xlxs(templates, parse_type):
     sio = BytesIO()
     writer = pd.ExcelWriter(sio, engine="xlsxwriter")
     df_scalers = pd.DataFrame(columns=[":Tagname", "Area", "RawMin", "RawMax", "EngUnitsMin", "EngUnitsMax", "attr"])
@@ -58,22 +58,27 @@ def create_xlxs(templates):
         df = pd.DataFrame([sub.split(",") for sub in v])
         df.columns = df.iloc[0]
         df = df[1:]
-        reg_cols = [col for col in df if str(col).startswith('reg') or str(col).startswith('Reg')]
-        bit_col = [col for col in df if str(col).startswith('bit') or str(col).startswith('Bit')]
-        eng_units = [col for col in df if 'EngUnitsM' in str(col) or 'RawM' in str(col) or 'EngUnitsM' in str(col)]
-        df_eng = df[list(df.columns[0:2]) + eng_units]
-        df_scalers = parse_scaling(df_scalers, df_eng)
-        source_col = [col for col in df if str(col).endswith('InputSource') or str(col).endswith('OutputDest')]
-        df = df[list(df.columns[0:4]) + reg_cols + bit_col + source_col + eng_units]
-        df.to_excel(writer, sheet_name=k, index=False)
-    df_scalers.to_excel(writer, sheet_name="scales", index=False)
+        if parse_type == "regonly":
+            reg_cols = [col for col in df if str(col).startswith('reg') or str(col).startswith('Reg') or str(col).startswith('_reg')]
+            bit_col = [col for col in df if str(col).startswith('bit') or str(col).startswith('Bit')]
+            source_col = [col for col in df if str(col).endswith('InputSource') or str(col).endswith('OutputDest')]
+            eng_units = [col for col in df if 'EngUnitsM' in str(col) or 'RawM' in str(col) or 'EngUnitsM' in str(col)]
+            df = df[list(df.columns[0:4]) + reg_cols + bit_col + source_col + eng_units]
+        elif parse_type == "scaling":
+            eng_units = [col for col in df if 'EngUnitsM' in str(col) or 'RawM' in str(col) or 'EngUnitsM' in str(col)]
+            df_eng = df[list(df.columns[0:2]) + eng_units]
+            df_scalers = parse_scaling(df_scalers, df_eng)
+        if parse_type in ["regonly", "full"]:
+            df.to_excel(writer, sheet_name=k, index=False)
+    if parse_type == "scaling":
+        df_scalers.to_excel(writer, sheet_name="scales", index=False)
     writer.save()
     writer.close()
     sio.seek(0)
     return sio.getvalue()
 
 
-def transform_galaxy(gal_file):
+def transform_galaxy(gal_file, parse_type="full"):
     templates = {}
     with codecs.EncodedFile(gal_file, 'utf-16-le') as f:
         while True:
@@ -92,4 +97,4 @@ def transform_galaxy(gal_file):
                     templates[template] = objs
                 else:
                     templates[template] = templates[template] + objs[1:]
-    return create_xlxs(templates)
+    return create_xlxs(templates, parse_type)

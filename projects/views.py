@@ -105,8 +105,9 @@ def create_substitutions(request):
 def parse_galaxy(request):
     if request.method == "POST":
         file = request.FILES.get("galaxy")
+        parse_type = request.POST.get("parseType")
         name = file.name.split(".")[0]
-        new_galaxy = transform_galaxy(file)
+        new_galaxy = transform_galaxy(file, parse_type)
         response = HttpResponse(new_galaxy,
                                 content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename={}.xlsx'.format(name)

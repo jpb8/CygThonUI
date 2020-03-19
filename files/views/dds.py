@@ -109,14 +109,18 @@ def dds_add_commands(request):
     # Pass Excel file and dtf document to import script, return error logs
     if request.method == "POST":
         cmds = request.FILES["commands"]
+        modbus = True if "modbus" in request.POST else False
         try:
-            dtf = DTF.objects.get(pk=int(request.POST.get("dtf-id")))
+            if modbus:
+                dtf = False
+            else:
+                dtf = DTF.objects.get(pk=int(request.POST.get("dtf-id")))
             dds = DDS.objects.get(pk=int(request.POST.get("dds-id")))
         except ObjectDoesNotExist:
             print("DTF or DDS not found")
             return redirect("files:upload")
         try:
-            errors = dds.add_commands(dtf, cmds)
+            errors = dds.add_commands(dtf, cmds, modbus)
         except:
             errors = ["Error Handling Excel File. Please use template file"]
         if request.is_ajax():
