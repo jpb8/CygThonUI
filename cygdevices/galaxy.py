@@ -20,7 +20,6 @@ def no_commas(string):
     return output
 
 
-
 def parse_scaling(df_scale, new):
     if len(new.columns) == 2:
         return df_scale
@@ -38,11 +37,13 @@ def parse_scaling(df_scale, new):
         for attr in attrs:
             if attr + ".RawMin" in new.columns and attr + ".EngUnitsMin" in new.columns:
                 if attr + ".RawMin" not in new.columns:
-                    cols = [":Tagname", "Area", attr + ".EngUnitsMin", attr + ".EngUnitsMax", attr + ".EngUnitsMin", attr + ".EngUnitsMax"]
+                    cols = [":Tagname", "Area", attr + ".EngUnitsMin", attr + ".EngUnitsMax", attr + ".EngUnitsMin",
+                            attr + ".EngUnitsMax"]
                 elif attr + ".EngUnitsMin" not in new.columns:
                     cols = [":Tagname", "Area", attr + ".RawMin", attr + ".RawMax", attr + ".RawMin", attr + ".RawMax"]
                 else:
-                    cols = [":Tagname", "Area", attr + ".RawMin", attr + ".RawMax", attr + ".EngUnitsMin", attr + ".EngUnitsMax"]
+                    cols = [":Tagname", "Area", attr + ".RawMin", attr + ".RawMax", attr + ".EngUnitsMin",
+                            attr + ".EngUnitsMax"]
                 temp = new[cols]
                 temp["attr"] = [attr for i in range(rows)]
                 temp.columns = [":Tagname", "Area", "RawMin", "RawMax", "EngUnitsMin", "EngUnitsMax", "attr"]
@@ -59,7 +60,9 @@ def create_xlxs(templates, parse_type):
         df.columns = df.iloc[0]
         df = df[1:]
         if parse_type == "regonly":
-            reg_cols = [col for col in df if str(col).startswith('reg') or str(col).startswith('Reg') or str(col).startswith('_reg')]
+            reg_cols = [col for col in df if
+                        str(col).startswith('reg') or str(col).startswith('Reg') or str(col).startswith('_reg') or str(
+                            col).startswith('_Reg')]
             bit_col = [col for col in df if str(col).startswith('bit') or str(col).startswith('Bit')]
             source_col = [col for col in df if str(col).endswith('InputSource') or str(col).endswith('OutputDest')]
             eng_units = [col for col in df if 'EngUnitsM' in str(col) or 'RawM' in str(col) or 'EngUnitsM' in str(col)]
