@@ -13,6 +13,7 @@ from files.forms import DDSForm, DTFForm
 from cygdevices.substitutions import Substitutions
 from cygdevices.points import Points
 from cygdevices.galaxy import transform_galaxy
+from cygdevices.commdev import MasterComm
 
 
 @login_required()
@@ -46,6 +47,7 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return HttpResponseRedirect(reverse('login'))
+
 
 @login_required()
 def project_add(request):
@@ -102,6 +104,7 @@ def create_substitutions(request):
         return response
     return redirect("home")
 
+
 def parse_galaxy(request):
     if request.method == "POST":
         file = request.FILES.get("galaxy")
@@ -116,6 +119,17 @@ def parse_galaxy(request):
     return redirect("home")
 
 
+def create_comm_devs(request):
+    if request.method == "POST":
+        file = request.FILES.get("commdevs")
+        name = file.name.split(".")[0]
+        mast_comm = MasterComm()
+        mast_comm.import_devs(file)
+        response = HttpResponse(mast_comm.pretty_print(), content_type='application/force-download')
+        response['Content-Disposition'] = 'attachment; filename={}.xml'.format(name)
+        response['X-Sendfile'] = "{}.xml".format(name)
+        return response
+    return redirect("home")
 
 
 def export_template(request):
@@ -123,8 +137,14 @@ def export_template(request):
     if file_type is not None:
         if file_type == "subs":
             workbook = Substitutions.template()
-            response = HttpResponse(workbook,
-                                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            response['Content-Disposition'] = 'attachment; filename=Excel2XML_substitions_template.xlsx'
-            return response
+            name = "Excel2XML_substitions_template.xlsx"
+        elif file_type == "commdevs":
+            workbook = MasterComm.template()
+            name = "comm_dev_import_template.xlsx"
+        else:
+            return redirect("home")  # Go back to same location??
+        response = HttpResponse(workbook,
+                                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename={}'.format(name)
+        return response
     return redirect("home")

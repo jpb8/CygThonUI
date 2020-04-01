@@ -60,6 +60,16 @@
                 </form>
             </div>
             <div class="project-util">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'projects:create_comm_devs' %}">
+                    {% csrf_token %}
+                    <h3>Create Bulk CygNet Comm Devices</h3>
+                    <a href="{% url 'projects:templates' %}?file=commdevs">Download Template</a><br>
+                    <label>Substitutions Excel</label><br>
+                    <input type="file" name="commdevs"><br>
+                    <button type="submit">Create Devices</button>
+                </form>
+            </div>
+            <div class="project-util">
                 <form method="POST" enctype="multipart/form-data" action="{% url 'projects:galaxy_parse' %}">
                     {% csrf_token %}
                     <h3>Parse Galaxy Dump</h3>

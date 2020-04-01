@@ -1,0 +1,57 @@
+<Device category="CD" device_id="">
+    <DeviceAttributes>
+        <DeviceType>Udp</DeviceType>
+        <DeviceDescription></DeviceDescription>
+        <SecurityApp/>
+        <SecurityEvent/>
+        <DeviceManufacturer/>
+        <DeviceModel/>
+        <DeviceRevision/>
+        <DeviceClass/>
+        <DaylightFlag>0</DaylightFlag>
+        <DeviceEnabled>1</DeviceEnabled>
+        <TimezoneCorrection>0</TimezoneCorrection>
+        <ConfHistoryData>
+            <dgData xmlns:dt="urn:schemas-microsoft-com:datatypes">
+                <DestPort dt:dt="ui4"></DestPort>
+                <BindPort dt:dt="ui4">0</BindPort>
+                <MsgDelay dt:dt="ui4">0</MsgDelay>
+                <BufSize dt:dt="ui4">4096</BufSize>
+                <HostMode>Master</HostMode>
+                <DestAddr></DestAddr>
+                <BindAddr/>
+            </dgData>
+        </ConfHistoryData>
+    </DeviceAttributes>
+    <FacilityLinks/>
+    <DataGroups>
+        <DataGroup>
+            <DataGroupAttributes>
+                <Ordinal>0</Ordinal>
+                <Description>Data Group for </Description>
+                <FacilityId></FacilityId>
+                <BelongsToDevice>0</BelongsToDevice>
+                <TxRetentionType>1</TxRetentionType>
+                <TxFailedMax>5</TxFailedMax>
+                <TxSuccessfulMax>10</TxSuccessfulMax>
+                <TxSuccessfulMin>0</TxSuccessfulMin>
+                <TxSuccessfulDays>7</TxSuccessfulDays>
+                <TxReplicationEnabled>1</TxReplicationEnabled>
+                <DataGroupInstalled>0</DataGroupInstalled>
+                <DataGroupRequired>1</DataGroupRequired>
+                <DataGroupSecurityApp/>
+                <DataGroupSecurityEvent/>
+                <DataGroupSpecific/>
+                <DataGroupType>Udp</DataGroupType>
+                <DataGroupVisible>0</DataGroupVisible>
+                <DefaultsFacility>0</DefaultsFacility>
+                <InheritsSecurity>0</InheritsSecurity>
+                <WebEnabled>0</WebEnabled>
+                <SystemFlags>0</SystemFlags>
+                <UserDefined>0</UserDefined>
+            </DataGroupAttributes>
+            <UdcMappings/>
+        </DataGroup>
+    </DataGroups>
+    <UisCommands/>
+</Device>

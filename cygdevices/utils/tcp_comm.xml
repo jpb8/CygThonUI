@@ -1,0 +1,67 @@
+<Device category="CD" device_id="xxDEVIDxx">
+    <DeviceAttributes>
+        <DeviceType>Tcpip</DeviceType>
+        <DeviceDescription></DeviceDescription>
+        <SecurityApp/>
+        <SecurityEvent/>
+        <DeviceManufacturer/>
+        <DeviceModel/>
+        <DeviceRevision/>
+        <DeviceClass/>
+        <DaylightFlag>0</DaylightFlag>
+        <DeviceEnabled>0</DeviceEnabled>
+        <TimezoneCorrection>0</TimezoneCorrection>
+        <ConfHistoryData>
+            <dgData xmlns:dt="urn:schemas-microsoft-com:datatypes">
+                <IP_Port dt:dt="ui4">xxPORTxx</IP_Port>
+                <HoldCnectn dt:dt="boolean">1</HoldCnectn>
+                <ConTryFreq dt:dt="ui4">300</ConTryFreq>
+                <CloseIdle dt:dt="boolean">0</CloseIdle>
+                <IdleSecs dt:dt="ui4">300</IdleSecs>
+                <DoKeepAliv dt:dt="boolean">0</DoKeepAliv>
+                <KAChar dt:dt="ui4">255</KAChar>
+                <KAFreq dt:dt="ui4">3600</KAFreq>
+                <ConRetries dt:dt="ui4">1</ConRetries>
+                <ConRtyDly dt:dt="ui4">45000</ConRtyDly>
+                <MsgDelay dt:dt="ui4">0</MsgDelay>
+                <ListenPrt dt:dt="ui4">0</ListenPrt>
+                <MaxNR dt:dt="ui4">9999</MaxNR>
+                <UseCallCon dt:dt="boolean">1</UseCallCon>
+                <HostMode>Master</HostMode>
+                <TxBaud dt:dt="ui4">19200</TxBaud>
+                <IP_Addr>xxIPxx</IP_Addr>
+            </dgData>
+        </ConfHistoryData>
+    </DeviceAttributes>
+    <FacilityLinks/>
+    <DataGroups>
+        <DataGroup>
+            <DataGroupAttributes>
+                <Ordinal>0</Ordinal>
+                <Description>Data Group for xxDEVIDxx</Description>
+                <FacilityId>xxDEVIDxx</FacilityId>
+                <BelongsToDevice>0</BelongsToDevice>
+                <TxRetentionType>1</TxRetentionType>
+                <TxFailedMax>5</TxFailedMax>
+                <TxSuccessfulMax>10</TxSuccessfulMax>
+                <TxSuccessfulMin>0</TxSuccessfulMin>
+                <TxSuccessfulDays>7</TxSuccessfulDays>
+                <TxReplicationEnabled>1</TxReplicationEnabled>
+                <DataGroupInstalled>0</DataGroupInstalled>
+                <DataGroupRequired>1</DataGroupRequired>
+                <DataGroupSecurityApp/>
+                <DataGroupSecurityEvent/>
+                <DataGroupSpecific/>
+                <DataGroupType>Tcpip</DataGroupType>
+                <DataGroupVisible>0</DataGroupVisible>
+                <DefaultsFacility>0</DefaultsFacility>
+                <InheritsSecurity>0</InheritsSecurity>
+                <WebEnabled>0</WebEnabled>
+                <SystemFlags>0</SystemFlags>
+                <UserDefined>0</UserDefined>
+            </DataGroupAttributes>
+            <UdcMappings/>
+        </DataGroup>
+    </DataGroups>
+    <UisCommands/>
+</Device>
