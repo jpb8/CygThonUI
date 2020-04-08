@@ -341,7 +341,7 @@ class DeviceDef(XmlFile):
                         )
         return log
 
-    def import_commands(self, cmds, dtf_xml):
+    def import_commands(self, cmds, dtf_xml, semgroup=False):
         errs = []
         for i, cmd in cmds.iterrows():
             device_id = cmd.get("device")
@@ -355,6 +355,8 @@ class DeviceDef(XmlFile):
             service = cmd.get("service")
             utype = cmd.get("utype")
             value = cmd.get("value") if not math.isnan(cmd.get("value")) else False
+            reg_number = cmd.get("reg_number") if not math.isnan(cmd.get("reg_number")) else False
+            dtype = cmd.get("dtype") if not math.isnan(cmd.get("reg_number")) else False
             cmd_xml = self.find_command(device_id, name, facility)
             if cmd_xml is None:
                 cmd_xml = self.create_command(device_id, name, facility, cmd.get("description"))
@@ -365,18 +367,17 @@ class DeviceDef(XmlFile):
                 dg_exists, _ = self.device_dg_mappings(device_id, data_group)
                 ord = len(cmd_comp_xml)
                 if comp_type == "DG_T_DEV":
-                    load = dtf_xml.get_ucc_param(data_group)
-                    comp = Command.create_dg_t_dev_comp(ord, data_group, load, value)
+                    if dtf_xml:
+                        load = dtf_xml.get_ucc_param(data_group)
+                    else:
+                        load = False
+                    if semgroup:
+                        comp = Command.create_dg_t_dev_comp(ord, data_group, load, value, dtype, reg_number)
+                    else:
+                        comp = Command.create_dg_t_dev_comp(ord, data_group, load, value)
                     cmd_comp_xml.append(comp)
-                    if dg_exists is None:
-                        desc = dtf_xml.get_array_description(data_group)
-                        if desc:
-                            dg = self.add_datagroup(description=desc, data_group_type=data_group, device_id=device_id)
-                            errs.append("{} DataGroup created for device: {}".format(data_group, device_id))
-                        else:
-                            errs.append("{} Not Found in DTF".format(data_group))
                 elif comp_type == "CYUPDTPT":
-                    comp = Command.create_cyuptpt_comp(ord, update_fac, service, site, udc, utype)
+                    comp = Command.create_cyuptpt_comp(ord, update_fac, service, site, udc, utype, value)
                     cmd_comp_xml.append(comp)
         self.save()
         return errs
@@ -705,16 +706,21 @@ class Command:
         self.command_element = root
 
     @classmethod
-    def create_dg_t_dev_comp(cls, pos, data_group, load=False, value=False):
+    def create_dg_t_dev_comp(cls, pos, data_group, load=False, value=False, dtype=False, reg_num=False):
         component = etree.Element("Component", {"type": "DG_T_DEV", "position": str(pos)})
         SubElement(component, "Param", {"key": "DGORD", "value": "0"})
         SubElement(component, "Param", {"key": "DGTYPE", "value": data_group})
         if load and value:
             SubElement(component, "Param", {"key": load, "value": str(int(value))})
+        if dtype and reg_num:
+            SubElement(component, "Param", {"key": "DataType", "value": dtype})
+            SubElement(component, "Param", {"key": "RegNum", "value": str(int(reg_num))})
+            if value:
+                SubElement(component, "Param", {"key": "Value", "value": str(int(value))})
         return component
 
     @classmethod
-    def create_cyuptpt_comp(cls, pos, fac, service, site, udc, utype):
+    def create_cyuptpt_comp(cls, pos, fac, service, site, udc, utype, value=False):
         component = etree.Element("Component", {"type": "CYUPDTPT", "position": str(pos)})
         SubElement(component, "Param", {"key": "DGORD", "value": "-1"})
         SubElement(component, "Param", {"key": "DGTYPE", "value": "n/a"})
@@ -724,6 +730,8 @@ class Command:
         SubElement(component, "Param", {"key": "Site", "value": site})
         SubElement(component, "Param", {"key": "UDC", "value": udc})
         SubElement(component, "Param", {"key": "UType", "value": str(int(utype))})
+        if value:
+            SubElement(component, "Param", {"key": "Value", "value": str(int(value))})
         return component
 
 
