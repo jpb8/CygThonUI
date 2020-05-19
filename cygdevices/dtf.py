@@ -1,4 +1,5 @@
 from lxml.etree import SubElement
+from lxml import etree
 import pandas as pd
 
 from .xml import XmlFile
@@ -217,3 +218,61 @@ class DTF(XmlFile):
                 dg_elems["desc"].append(died.get("desc"))
                 dg_elems["dataType"].append(died.get("type"))
         return self.template_export([arrs, dg_elems])
+
+    def import_datagroups(self, data_elements):
+        data_groups = data_elements.data_group.unique()
+        for dg in data_groups:
+            deids = data_elements.loc[data_elements["data_group"] == dg]
+            dg = DataGroup(dg, dg)
+            dg.add_deids(deids)
+            # TODO: append dg to dtf here
+        self.save()
+
+
+class DataGroup:
+    def __init__(self, name, nice_name):
+        self.name = name
+        self.nice_name = nice_name
+        self.xml = self.create_datagroup_xml()
+
+    def create_datagroup_xml(self):
+        dg = etree.Element(self.name, {"niceName": self.nice_name, "devDG": "false", "baseOrd": "0",
+                                       "canSend": "false", "canRecv": "true", "uccSend": "false", "uccRecv": "false"})
+        SubElement(dg, "dgElements", {"byteOrder": "bigEndian", "secLev": "4"})
+        SubElement(dg, "modbusReadBlocks")
+        return dg.getroot()
+
+    def add_deids(self, deids):
+        dg_elems = self.find("dgElements")
+        reg_numbs = []
+        for i, deid in deids.iterrows():
+            reg_num = deid.get("reg_num")
+            desc = deid.get("description")
+            dtype = deid.get("dtype")
+            udc = deid.get("udc")
+            SubElement(dg_elems, "R{}".format(reg_num), {"desc": desc, "udc": udc, "regNu_m": reg_num, "type": dtype})
+            reg_numbs.append(int(reg_num))
+        self._add_read_blocks(reg_numbs)
+
+    def _add_read_blocks(self, register_numbs):
+        # TODO: add Digital functionaility
+        blocks = self.find("modbusReadBlocks")
+        block_number = 1
+        reg_cnt = 1
+        reg_numb = register_numbs[0]
+        for i in range(start=1, stop=len(register_numbs)):
+            if register_numbs[i] != register_numbs:
+                SubElement(blocks, "block{}".format(block_number),
+                           {"regCnt": str(reg_cnt), "funcCode": "3", "regNum": str(reg_numb),
+                            "regOff": "-40001", "regByteLen": "2"}
+                           )
+                reg_cnt = register_numbs[i]
+                reg_numb = 1
+                block_number += 1
+            else:
+                reg_cnt += 1
+        SubElement(blocks, "block{}".format(block_number),
+                   {"regCnt": str(reg_cnt), "funcCode": "3", "regNum": str(reg_numb),
+                    "regOff": "-40001", "regByteLen": "2"}
+                   )
+

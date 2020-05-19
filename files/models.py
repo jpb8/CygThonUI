@@ -154,7 +154,6 @@ class DDS(models.Model):
         log = self.xml.validate_mappings(dtf_xml, pnts)
         return log
 
-
     def save_document(self):
         self.xml.save()
 
@@ -191,6 +190,10 @@ class DTF(models.Model):
 
     def get_absolute_url(self):
         return reverse('files:dtf', args=[str(self.pk)])
+
+    def import_datagroups(self, excel_data):
+        dgs_data = pd.read_excel(excel_data, sheet_name="Sheet1")
+        self.xml.import_datagroups(dgs_data)
 
 
 @receiver(pre_delete, sender=DTF)
