@@ -3,12 +3,19 @@ from lxml import etree
 import pandas as pd
 
 from .xml import XmlFile
+import math
 
 
 class DTF(XmlFile):
     @property
     def data_groups(self):
         return self.xml.find("dataGroups")
+
+    @property
+    def def_data_groups(self):
+        if self.xml.find("defDataGroups") is None:
+            SubElement(self.xml, "defDataGroups")
+        return self.xml.find("defDataGroups")
 
     def find_dg_element(self, array_type, element):
         """
@@ -220,12 +227,15 @@ class DTF(XmlFile):
         return self.template_export([arrs, dg_elems])
 
     def import_datagroups(self, data_elements):
+        data_groups_xml = self.data_groups
         data_groups = data_elements.data_group.unique()
+        def_data_groups = self.def_data_groups
         for dg in data_groups:
             deids = data_elements.loc[data_elements["data_group"] == dg]
-            dg = DataGroup(dg, dg)
-            dg.add_deids(deids)
-            # TODO: append dg to dtf here
+            dg_xml = DataGroup(dg, dg)
+            dg_xml.add_deids(deids)
+            data_groups_xml.append(dg_xml.xml)
+            SubElement(def_data_groups, dg)
         self.save()
 
 
@@ -240,39 +250,50 @@ class DataGroup:
                                        "canSend": "false", "canRecv": "true", "uccSend": "false", "uccRecv": "false"})
         SubElement(dg, "dgElements", {"byteOrder": "bigEndian", "secLev": "4"})
         SubElement(dg, "modbusReadBlocks")
-        return dg.getroot()
+        return dg
 
     def add_deids(self, deids):
-        dg_elems = self.find("dgElements")
+        dg_elems = self.xml.find("dgElements")
         reg_numbs = []
         for i, deid in deids.iterrows():
             reg_num = deid.get("reg_num")
             desc = deid.get("description")
             dtype = deid.get("dtype")
-            udc = deid.get("udc")
-            SubElement(dg_elems, "R{}".format(reg_num), {"desc": desc, "udc": udc, "regNu_m": reg_num, "type": dtype})
+            udc = deid.get("udc") if not pd.isna(deid.get("udc")) else None
+            if udc:
+                attrs = {"desc": desc, "udc": udc, "regNum": str(reg_num), "type": dtype if dtype != "digital" else "ui2"}
+            else:
+                attrs = {"desc": desc, "regNum": str(reg_num), "type": dtype if dtype != "digital" else "ui2"}
+            SubElement(dg_elems, "R{}".format(reg_num), attrs)
+            if dtype == "digital":
+                self._add_bits(dg_elems, "R{}".format(reg_num))
             reg_numbs.append(int(reg_num))
         self._add_read_blocks(reg_numbs)
 
+    @staticmethod
+    def _add_bits(dg_elems, ref):
+        for i in range(0, 16):
+            bit_str = "0{}".format(i) if i < 10 else str(i)
+            attrs = {"desc": "Reg {} bit {}".format(ref, bit_str), "ref": ref, "bPos": str(i), "type": "Boolean"}
+            SubElement(dg_elems, "{}B{}".format(ref, bit_str), attrs)
+
+
     def _add_read_blocks(self, register_numbs):
         # TODO: add Digital functionaility
-        blocks = self.find("modbusReadBlocks")
+        blocks = self.xml.find("modbusReadBlocks")
         block_number = 1
         reg_cnt = 1
+        register_numbs.sort()
         reg_numb = register_numbs[0]
-        for i in range(start=1, stop=len(register_numbs)):
-            if register_numbs[i] != register_numbs:
-                SubElement(blocks, "block{}".format(block_number),
-                           {"regCnt": str(reg_cnt), "funcCode": "3", "regNum": str(reg_numb),
-                            "regOff": "-40001", "regByteLen": "2"}
-                           )
-                reg_cnt = register_numbs[i]
-                reg_numb = 1
+        for i in range(1, len(register_numbs)):
+            attrs = {
+                "regCnt": str(reg_cnt), "funcCode": "3", "regNum": str(reg_numb), "regOff": "-40001", "regByteLen": "2"
+            }
+            if (register_numbs[i] - 1) != register_numbs[i - 1]:
+                SubElement(blocks, "block{}".format(block_number), attrs)
+                reg_cnt = 1
+                reg_numb = register_numbs[i]
                 block_number += 1
             else:
                 reg_cnt += 1
-        SubElement(blocks, "block{}".format(block_number),
-                   {"regCnt": str(reg_cnt), "funcCode": "3", "regNum": str(reg_numb),
-                    "regOff": "-40001", "regByteLen": "2"}
-                   )
-
+        SubElement(blocks, "block{}".format(block_number), attrs)

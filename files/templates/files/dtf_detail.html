@@ -111,6 +111,19 @@
                     </form>
                 </div>
             </div>
+            <div class="file-function-container">
+                <form method="post" enctype="multipart/form-data" action="{% url 'files:import_arrays' %}"
+                      id="dtf-dgcreate">
+                    {% csrf_token %}
+                    <h3>Import DTF Arrays</h3><br>
+                    <a href="{% url 'files:dtf_dg_import' %}">Download Template</a><br>
+                    <label>Datagroup Excel Import</label>
+                    <input type="file" name="dg-data"><br>
+                    <input type="checkbox" name="modbus">Modbus?<br>
+                    <input hidden name="dtf-id" value="{{ dtf.pk }}">
+                    <button class="btn btn-primary" type="submit">Create!!</button>
+                </form>
+            </div>
         </div>
         <div class="col" id="device-info">
             <h1>All Arrays</h1>

@@ -15,6 +15,7 @@ def mapping_template(reqeust):
     response['Content-Disposition'] = 'attachment; filename={}'.format("Mappings_import_template.xlsx")
     return response
 
+
 def command_validation_template(request):
     sheet = {
         "cmd_type": ["ao", "do", "do"],
@@ -30,6 +31,7 @@ def command_validation_template(request):
     workbook = XmlFile.template_export(sheets)
     response = build_http_response(workbook, "command_validation_template.xlsx")
     return response
+
 
 def mapping_validation_template(request):
     sheet = {
@@ -64,4 +66,19 @@ def command_import_template(request):
     workbook = XmlFile.template_export(sheets)
     response = HttpResponse(workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename={}'.format("command_import_template.xlsx")
+    return response
+
+
+def dtf_data_group_import(request):
+    sheet = {
+        "data_group": ["DG1", "DG2", "DG2"],
+        "reg_num": ["44006", "44002", "44003"],
+        "description": ["Test Desc 1", "Test Desc 2", "Test Desc 3"],
+        "udc": ["TESTPSI", "TESTDENS", ""],
+        "dtype": ["i2", "ui2", "digital"]
+    }
+    sheets = [sheet, ]
+    workbook = XmlFile.template_export(sheets)
+    response = HttpResponse(workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename={}'.format("dtf_dg_import_template.xlsx")
     return response

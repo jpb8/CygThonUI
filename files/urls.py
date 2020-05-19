@@ -30,6 +30,8 @@ urlpatterns = [
     path('dtf/delete/', dtf_delete, name="dtf_delete"),
     path('dtf/export_dtf_data/', export_dtf_data, name="export_dtf_data"),
     path('dtf/add_array/', add_array, name="add_array"),
+    path('dtf/import_arrays/', import_arrays, name="import_arrays"),
+    path('dtf/dtf_dg_import/', dtf_data_group_import, name="dtf_dg_import"),
     ## TEMPLATES ##
     path('dds/mapping_template/', mapping_template, name="mapping_template"),
     path('dds/mapping_validation_template/', mapping_validation_template, name="mapping_validation_template"),

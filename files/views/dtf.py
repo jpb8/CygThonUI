@@ -148,17 +148,15 @@ def export_dtf_data(request):
     response['Content-Disposition'] = 'attachment; filename={}'.format("dtf_array_data.xlsx")
     return response
 
-def import_excel_datagroups(request):
+def import_arrays(request):
     # TODO: Create error log? Reload page with updated data
     if request.method != "POST":
         return redirect("home")
-    dg_data = request.FILES["dg_data"]
+    dg_data = request.FILES["dg-data"]
     try:
         dtf = DTF.objects.get(pk=int(request.POST.get("dtf-id")))
     except ObjectDoesNotExist:
         print("DTF or DDS not found")
         return redirect("files:upload")
-    try:
-        dtf.import_datagroups(dg_data)
-    except:
-        pass
+    dtf.import_datagroups(dg_data)
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
