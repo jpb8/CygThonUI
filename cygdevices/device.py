@@ -376,6 +376,13 @@ class DeviceDef(XmlFile):
                     else:
                         comp = Command.create_dg_t_dev_comp(ord, data_group, load, value)
                     cmd_comp_xml.append(comp)
+                    if dg_exists is None:
+                        desc = dtf_xml.get_array_description(data_group)
+                        if desc:
+                            dg = self.add_datagroup(description=desc, data_group_type=data_group, device_id=device_id)
+                            errs.append("{} DataGroup created for device: {}".format(data_group, device_id))
+                        else:
+                            errs.append("{} Not Found in DTF".format(data_group))
                 elif comp_type == "CYUPDTPT":
                     comp = Command.create_cyuptpt_comp(ord, update_fac, service, site, udc, utype, value)
                     cmd_comp_xml.append(comp)
