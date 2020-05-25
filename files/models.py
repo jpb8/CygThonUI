@@ -193,7 +193,7 @@ class DTF(models.Model):
 
     def import_datagroups(self, excel_data, reg_gap):
         dgs_data = pd.read_excel(excel_data, sheet_name="Sheet1")
-        self.xml.import_datagroups(dgs_data, reg_gap)
+        return self.xml.import_datagroups(dgs_data, reg_gap)
 
 
 @receiver(pre_delete, sender=DTF)

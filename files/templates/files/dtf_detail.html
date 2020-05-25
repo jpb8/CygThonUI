@@ -13,7 +13,7 @@
         </button>
     </div>
     <div class="row">
-        <div class="col">
+        <div class="col-sm-8">
             <form method="post" action="{% url 'files:unused_dieds' %}"
                   id="dtf-died-check">
                 {% csrf_token %}
@@ -146,19 +146,15 @@
                 </div>
             </div>
         </div>
-        <div class="col" id="device-info">
-            <h1>All Arrays</h1>
+        <div class="col-sm-4" id="device-info">
             {% if arrays %}
-            {% for a in arrays %}
-            <p>{{ a.name }} - {{ a.niceName }}</p>
-            {% endfor %}
+            {% include 'files/snippets/dtf_arrays.html' with arrays=arrays %}
             {% endif %}
-
         </div>
     </div>
     <div class="modal fade" id="response-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"
          aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLongTitle">Response Data</h5>
@@ -175,14 +171,4 @@
         </div>
     </div>
 </div>
-
-<script type="text/javascript">
-    $(document).ready(function () {
-
-    }
-
-
-
-
-</script>
 {% endblock %}

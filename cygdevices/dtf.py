@@ -227,6 +227,8 @@ class DTF(XmlFile):
         return self.template_export([arrs, dg_elems])
 
     def import_datagroups(self, data_elements, reg_gap):
+        error_df = self._check_dg_excel_import(data_elements)
+        data_elements.drop(data_elements.index[[tuple(error_df.index.values)]], inplace=True)
         data_groups_xml = self.data_groups
         data_groups = data_elements.data_group.unique()
         def_data_groups = self.def_data_groups
@@ -237,6 +239,18 @@ class DTF(XmlFile):
             data_groups_xml.append(dg_xml.xml)
             SubElement(def_data_groups, dg)
         self.save()
+        error_df.fillna('None', inplace=True)
+        return error_df.to_dict('records'), self.all_arrays()
+
+    @staticmethod
+    def _check_dg_excel_import(data_elements):
+        reg_str_df = data_elements.loc[~data_elements['reg_num'].astype(str).str.isdigit()]
+        reg_str_df["error"] = "reg_num must be integer"
+        bit_str_df = data_elements.loc[~data_elements['bit'].astype(str).str.isdigit()]
+        bit_str_df.dropna(subset=['bit'], inplace=True)
+        bit_str_df["error"] = "bit must be integer"
+        error_df = pd.concat([reg_str_df, bit_str_df])
+        return error_df
 
 
 class DataGroup:
@@ -267,8 +281,6 @@ class DataGroup:
             else:
                 attrs = {"desc": desc, "regNum": str(reg_num), "type": dtype if dtype != "digital" else "ui2"}
             SubElement(dg_elems, "R{}".format(reg_num), attrs)
-            # if dtype == "digital":
-            #     self._add_bits(dg_elems, "R{}".format(reg_num))
         self._add_digitals(dg_elems, digital_df)
         self._add_read_blocks(deids.reg_num.unique(), reg_gap)
 
@@ -310,7 +322,7 @@ class DataGroup:
         new = False
         for i in range(1, len(register_numbs) - 1):
             if (register_numbs[i] - reg_gap) > register_numbs[i - 1]:
-                reg_cnt = register_numbs[i - 1] - reg_numb
+                reg_cnt = (register_numbs[i - 1] - reg_numb) + 1
                 attrs = {
                     "regCnt": str(reg_cnt), "funcCode": "3", "regNum": str(reg_numb), "regOff": "-40001",
                     "regByteLen": "2"
@@ -320,7 +332,7 @@ class DataGroup:
                 block_number += 1
                 new = True
         if not new:
-            reg_cnt = register_numbs[-1] - reg_numb
+            reg_cnt = (register_numbs[i - 1] - reg_numb) + 1
             attrs = {
                 "regCnt": str(reg_cnt), "funcCode": "3", "regNum": str(reg_numb), "regOff": "-40001",
                 "regByteLen": "2"

@@ -267,4 +267,29 @@ $(document).ready(function () {
         $(document.body).css({ 'cursor': 'default' });
     });
 
+    $("#dtf-import-array").submit(function (event) {
+            event.preventDefault();
+            var formData = new FormData($(this)[0]);
+            var _url = $(this).attr("action");
+            var method = "POST";
+            $(document.body).css({ 'cursor': 'wait' });
+            $.ajax({
+                url: _url,
+                type: method,
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    var text = createResponseHTML(data);
+                    $("#modal-body").html(text);
+                    $("#device-info").html(data.array_html);
+                    $('#response-modal').modal('show');
+                },
+                error: function (request, error) {
+                    alert("Request: " + JSON.stringify(request));
+                }
+            });
+            $(document.body).css({ 'cursor': 'default' });
+        });
+
 });

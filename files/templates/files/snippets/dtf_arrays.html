@@ -1,0 +1,6 @@
+<h1>All Arrays</h1>
+{% if arrays %}
+{% for a in arrays %}
+<p>{{ a.name }} - {{ a.niceName }}</p>
+{% endfor %}
+{% endif %}

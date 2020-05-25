@@ -1,5 +1,6 @@
 from django.shortcuts import redirect
 from django.http import JsonResponse, HttpResponseRedirect
+from django.template.loader import render_to_string
 from django.views.generic import DetailView
 from django.http import HttpResponse, Http404
 from django.conf import settings
@@ -148,12 +149,11 @@ def export_dtf_data(request):
     response['Content-Disposition'] = 'attachment; filename={}'.format("dtf_array_data.xlsx")
     return response
 
+
 def import_arrays(request):
     # TODO: Create error log? Reload page with updated data
     if request.method != "POST":
         return redirect("home")
-    print(request.POST)
-    print(request.FILES)
     dg_data = request.FILES["dg-data"]
     reg_gap = int(request.POST.get("reg-gap"))
     try:
@@ -161,5 +161,11 @@ def import_arrays(request):
     except ObjectDoesNotExist:
         print("DTF or DDS not found")
         return redirect("files:upload")
-    dtf.import_datagroups(dg_data, reg_gap)
+    errors, arrays = dtf.import_datagroups(dg_data, reg_gap)
+    if request.is_ajax():
+        data = build_ajax_response_dict(data=errors, header="Import Errors")
+        array_html = render_to_string("files/snippets/dtf_arrays.html", {"arrays": arrays})
+        print(array_html)
+        data["array_html"] = array_html
+        return JsonResponse(data)
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
