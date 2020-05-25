@@ -152,11 +152,14 @@ def import_arrays(request):
     # TODO: Create error log? Reload page with updated data
     if request.method != "POST":
         return redirect("home")
+    print(request.POST)
+    print(request.FILES)
     dg_data = request.FILES["dg-data"]
+    reg_gap = int(request.POST.get("reg-gap"))
     try:
         dtf = DTF.objects.get(pk=int(request.POST.get("dtf-id")))
     except ObjectDoesNotExist:
         print("DTF or DDS not found")
         return redirect("files:upload")
-    dtf.import_datagroups(dg_data)
+    dtf.import_datagroups(dg_data, reg_gap)
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))

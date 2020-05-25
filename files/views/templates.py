@@ -73,9 +73,10 @@ def dtf_data_group_import(request):
     sheet = {
         "data_group": ["DG1", "DG2", "DG2"],
         "reg_num": ["44006", "44002", "44003"],
+        "bit": ["", "", "1"],
         "description": ["Test Desc 1", "Test Desc 2", "Test Desc 3"],
         "udc": ["TESTPSI", "TESTDENS", ""],
-        "dtype": ["i2", "ui2", "digital"]
+        "dtype": ["i2", "ui2", "boolean"]
     }
     sheets = [sheet, ]
     workbook = XmlFile.template_export(sheets)

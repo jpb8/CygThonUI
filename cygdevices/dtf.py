@@ -226,14 +226,14 @@ class DTF(XmlFile):
                 dg_elems["dataType"].append(died.get("type"))
         return self.template_export([arrs, dg_elems])
 
-    def import_datagroups(self, data_elements):
+    def import_datagroups(self, data_elements, reg_gap):
         data_groups_xml = self.data_groups
         data_groups = data_elements.data_group.unique()
         def_data_groups = self.def_data_groups
         for dg in data_groups:
             deids = data_elements.loc[data_elements["data_group"] == dg]
             dg_xml = DataGroup(dg, dg)
-            dg_xml.add_deids(deids)
+            dg_xml.add_deids(deids, reg_gap)
             data_groups_xml.append(dg_xml.xml)
             SubElement(def_data_groups, dg)
         self.save()
@@ -252,23 +252,25 @@ class DataGroup:
         SubElement(dg, "modbusReadBlocks")
         return dg
 
-    def add_deids(self, deids):
+    def add_deids(self, deids, reg_gap):
         dg_elems = self.xml.find("dgElements")
-        reg_numbs = []
-        for i, deid in deids.iterrows():
+        analog_df = deids[deids["dtype"] != "boolean"]
+        digital_df = deids[deids["dtype"] == "boolean"]
+        for i, deid in analog_df.iterrows():
             reg_num = deid.get("reg_num")
             desc = deid.get("description")
             dtype = deid.get("dtype")
             udc = deid.get("udc") if not pd.isna(deid.get("udc")) else None
             if udc:
-                attrs = {"desc": desc, "udc": udc, "regNum": str(reg_num), "type": dtype if dtype != "digital" else "ui2"}
+                attrs = {"desc": desc, "udc": udc, "regNum": str(reg_num),
+                         "type": dtype if dtype != "digital" else "ui2"}
             else:
                 attrs = {"desc": desc, "regNum": str(reg_num), "type": dtype if dtype != "digital" else "ui2"}
             SubElement(dg_elems, "R{}".format(reg_num), attrs)
-            if dtype == "digital":
-                self._add_bits(dg_elems, "R{}".format(reg_num))
-            reg_numbs.append(int(reg_num))
-        self._add_read_blocks(reg_numbs)
+            # if dtype == "digital":
+            #     self._add_bits(dg_elems, "R{}".format(reg_num))
+        self._add_digitals(dg_elems, digital_df)
+        self._add_read_blocks(deids.reg_num.unique(), reg_gap)
 
     @staticmethod
     def _add_bits(dg_elems, ref):
@@ -277,23 +279,50 @@ class DataGroup:
             attrs = {"desc": "Reg {} bit {}".format(ref, bit_str), "ref": ref, "bPos": str(i), "type": "Boolean"}
             SubElement(dg_elems, "{}B{}".format(ref, bit_str), attrs)
 
+    @staticmethod
+    def _add_digitals(dg_elems, digital_df):
+        registers = digital_df.reg_num.unique()
+        for reg in registers:
+            attrs = {"desc": "Digital Registers {}".format(reg), "regNum": str(reg), "type": "ui2"}
+            SubElement(dg_elems, "R{}".format(reg), attrs)
+            reg_digitals = digital_df[digital_df["reg_num"] == reg]
+            bits = reg_digitals.bit.unique()
+            for i in range(0, 16):
+                bit_str = "0{}".format(i) if i < 10 else str(i)
+                if i in bits:
+                    bit_row = reg_digitals[reg_digitals["bit"] == i].iloc[0]
+                    desc = bit_row.get("description")
+                    udc = bit_row.get("udc") if not pd.isna(bit_row.get("udc")) else None
+                    if udc:
+                        attrs = {"desc": desc, "ref": "R{}".format(reg), "bPos": str(i), "type": "Boolean", "udc": udc}
+                    else:
+                        attrs = {"desc": desc, "ref": "R{}".format(reg), "bPos": str(i), "type": "Boolean"}
+                else:
+                    attrs = {"desc": "Reg {} Bit {}".format(reg, bit_str),
+                             "ref": "R{}".format(reg), "bPos": str(i), "type": "Boolean"}
+                SubElement(dg_elems, "R{}B{}".format(reg, bit_str), attrs)
 
-    def _add_read_blocks(self, register_numbs):
-        # TODO: add Digital functionaility
+    def _add_read_blocks(self, register_numbs, reg_gap):
         blocks = self.xml.find("modbusReadBlocks")
         block_number = 1
-        reg_cnt = 1
         register_numbs.sort()
         reg_numb = register_numbs[0]
-        for i in range(1, len(register_numbs)):
-            attrs = {
-                "regCnt": str(reg_cnt), "funcCode": "3", "regNum": str(reg_numb), "regOff": "-40001", "regByteLen": "2"
-            }
-            if (register_numbs[i] - 1) != register_numbs[i - 1]:
+        new = False
+        for i in range(1, len(register_numbs) - 1):
+            if (register_numbs[i] - reg_gap) > register_numbs[i - 1]:
+                reg_cnt = register_numbs[i - 1] - reg_numb
+                attrs = {
+                    "regCnt": str(reg_cnt), "funcCode": "3", "regNum": str(reg_numb), "regOff": "-40001",
+                    "regByteLen": "2"
+                }
                 SubElement(blocks, "block{}".format(block_number), attrs)
-                reg_cnt = 1
                 reg_numb = register_numbs[i]
                 block_number += 1
-            else:
-                reg_cnt += 1
-        SubElement(blocks, "block{}".format(block_number), attrs)
+                new = True
+        if not new:
+            reg_cnt = register_numbs[-1] - reg_numb
+            attrs = {
+                "regCnt": str(reg_cnt), "funcCode": "3", "regNum": str(reg_numb), "regOff": "-40001",
+                "regByteLen": "2"
+            }
+            SubElement(blocks, "block{}".format(block_number), attrs)
