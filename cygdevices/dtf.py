@@ -320,7 +320,7 @@ class DataGroup:
         register_numbs.sort()
         reg_numb = register_numbs[0]
         new = False
-        for i in range(1, len(register_numbs) - 1):
+        for i in range(1, len(register_numbs)):
             if (register_numbs[i] - reg_gap) > register_numbs[i - 1]:
                 reg_cnt = (register_numbs[i - 1] - reg_numb) + 1
                 attrs = {
@@ -331,8 +331,10 @@ class DataGroup:
                 reg_numb = register_numbs[i]
                 block_number += 1
                 new = True
+            else:
+                new = False
         if not new:
-            reg_cnt = (register_numbs[i - 1] - reg_numb) + 1
+            reg_cnt = (register_numbs[-1] - reg_numb) + 1
             attrs = {
                 "regCnt": str(reg_cnt), "funcCode": "3", "regNum": str(reg_numb), "regOff": "-40001",
                 "regByteLen": "2"

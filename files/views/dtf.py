@@ -165,7 +165,6 @@ def import_arrays(request):
     if request.is_ajax():
         data = build_ajax_response_dict(data=errors, header="Import Errors")
         array_html = render_to_string("files/snippets/dtf_arrays.html", {"arrays": arrays})
-        print(array_html)
         data["array_html"] = array_html
         return JsonResponse(data)
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
