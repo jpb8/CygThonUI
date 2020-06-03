@@ -164,7 +164,20 @@ def import_arrays(request):
     errors, arrays = dtf.import_datagroups(dg_data, reg_gap)
     if request.is_ajax():
         data = build_ajax_response_dict(data=errors, header="Import Errors")
-        array_html = render_to_string("files/snippets/dtf_arrays.html", {"arrays": arrays})
+        array_html = render_to_string("files/snippets/dtf_arrays.html", {"arrays": arrays, "dtf": dtf}, request=request)
         data["array_html"] = array_html
         return JsonResponse(data)
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+
+def delete_datagroup(request):
+    if request.method != "POST":
+        return redirect("home")
+    dg_name = request.POST.get("dg-name")
+    try:
+        dtf = DTF.objects.get(pk=int(request.POST.get("dtf-id")))
+    except ObjectDoesNotExist:
+        print("DTF or DDS not found")
+        return redirect("files:upload")
+    dtf.xml.delete_datagroup(dg_name)
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))

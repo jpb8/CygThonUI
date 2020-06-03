@@ -109,6 +109,15 @@ class DTF(XmlFile):
     def get_discrete_deid(self, array_name, index, index2=None):
         pass
 
+    def delete_datagroup(self, dg_name):
+        dg = self.data_groups.find(dg_name)
+        def_dg = self.def_data_groups.find(dg_name)
+        if dg:
+            self.data_groups.remove(dg)
+        if def_dg:
+            self.def_data_groups.remove(def_dg)
+        self.save()
+
     def create_ai_deid(self, array_root, deid, tagname, data_type="r4"):
         SubElement(array_root, deid, {
             "niceName": tagname,

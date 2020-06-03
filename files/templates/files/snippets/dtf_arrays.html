@@ -1,6 +1,12 @@
 <h1>All Arrays</h1>
 {% if arrays %}
 {% for a in arrays %}
-<p>{{ a.name }} - {{ a.niceName }}</p>
+<form method="post" enctype="multipart/form-data" action="{% url 'files:delete_datagroup' %}">
+    {% csrf_token %}
+    <p>{{ a.name }} - {{ a.niceName }}</p>
+    <input hidden name="dtf-id" value="{{ dtf.pk }}">
+    <input hidden name="dg-name" value="{{ a.name }}">
+    <button class="btn-sm btn-primary" type="submit">Delete</button>
+</form><br>
 {% endfor %}
 {% endif %}
