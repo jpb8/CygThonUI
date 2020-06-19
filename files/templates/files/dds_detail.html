@@ -191,7 +191,7 @@
                 </div>
                 <div class="card-body">
                     <form method="post" enctype="multipart/form-data"
-                          action="{% url 'files:import_facs' %}" id="import-facs">
+                          action="{% url 'files:import_facs' %}" id="import-facs" class="dds-import-ajax-form">
                         {% csrf_token %}
                         <input hidden name="dds-id" value="{{ dds.pk }}">
                         <div class="form-group row">
