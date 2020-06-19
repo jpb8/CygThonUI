@@ -301,4 +301,20 @@ def validate_mappings(request):
     return redirect("files:upload")
 
 
-
+def import_facs(request):
+    if request.method != "POST":
+        return redirect("home")
+    fac_data = request.FILES["fac-data"]
+    try:
+        dds = DDS.objects.get(pk=int(request.POST.get("dds-id")))
+    except ObjectDoesNotExist:
+        print("DTF or DDS not found")
+        return redirect("files:upload")
+    outcomes = dds.import_facilites(fac_data)
+    if request.is_ajax():
+        devices = dds.xml.all_devices()
+        data = build_ajax_response_dict(data=outcomes, header="Import Errors")
+        devices_html = render_to_string("files/snippets/device_accord.html", {"devices": devices})
+        data["devices_html"] = devices_html
+        return JsonResponse(data)
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))

@@ -154,6 +154,16 @@ class DDS(models.Model):
         log = self.xml.validate_mappings(dtf_xml, pnts)
         return log
 
+    def import_facilites(self, fac_data):
+        facs = pd.read_excel(fac_data, sheet_name="Sheet1")
+        dds_xml = self.xml
+        log = []
+        for i, f in facs.iterrows():
+            outcome = dds_xml.add_facility(f["facility"], f["device"])
+            log.append({"outcome": outcome})
+        dds_xml.save()
+        return log
+
     def save_document(self):
         self.xml.save()
 

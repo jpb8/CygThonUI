@@ -151,7 +151,6 @@ def export_dtf_data(request):
 
 
 def import_arrays(request):
-    # TODO: Create error log? Reload page with updated data
     if request.method != "POST":
         return redirect("home")
     dg_data = request.FILES["dg-data"]

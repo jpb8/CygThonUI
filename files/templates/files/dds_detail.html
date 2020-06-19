@@ -13,7 +13,7 @@
         </button>
     </div>
     <div class="row">
-        <div class="col">
+        <div class="col-sm-7">
             <div class="function-container">
                 <h2>Validation Functions</h2>
                 <div class="card mb-3">
@@ -185,8 +185,36 @@
                     <button class="btn btn-primary" type="submit">Map!</button>
                 </form>
             </div>
+            <div class="card mb-3 text-center">
+                <div class="card-header">
+                    <h2>Map Facilities from Excel Import</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data"
+                          action="{% url 'files:import_facs' %}" id="import-facs">
+                        {% csrf_token %}
+                        <input hidden name="dds-id" value="{{ dds.pk }}">
+                        <div class="form-group row">
+                            <div class="col-sm-12 text-center">
+                                <a href="">Download Excel Import Template</a>
+                            </div>
+                        </div>
+                         <div class="form-group row">
+                            <label for="fac-data" class="col-sm-4 col-form-label">Import Excel</label>
+                            <div class="col-sm-8">
+                                <input type="file" class="form-control" id="fac-data" name="fac-data">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-10">
+                                <button type="submit" class="btn btn-primary">Map Facilities</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="col" id="device-info">
+        <div class="col-sm-5" id="device-info">
             <h1>All Devices</h1>
             {% if devices %}
             {% include 'files/snippets/device_accord.html' with devices=devices %}
