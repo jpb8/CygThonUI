@@ -145,6 +145,33 @@
                     </form>
                 </div>
             </div>
+            <div class="card mb-3 text-center">
+                <div class="card-header">
+                    <h2>Import String Enumerations from Excel</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="dtf-import-enums">
+                        {% csrf_token %}
+                        <input hidden name="dtf-id" value="{{ dtf.pk }}">
+                        <div class="form-group row">
+                            <div class="col-sm-12 text-center">
+                                <a href="{% url 'files:dtf_dg_import' %}">Download Excel Import Template</a>
+                            </div>
+                        </div>
+                         <div class="form-group row">
+                            <label for="dg-data" class="col-sm-4 col-form-label">Import Excel</label>
+                            <div class="col-sm-8">
+                                <input type="file" class="form-control" id="dg-data" name="dg-data">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-10">
+                                <button type="submit" class="btn btn-primary">Create</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
         <div class="col-sm-4" id="device-info">
             {% if arrays %}
