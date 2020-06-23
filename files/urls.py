@@ -38,4 +38,5 @@ urlpatterns = [
     path('dds/mapping_validation_template/', mapping_validation_template, name="mapping_validation_template"),
     path('dds/commands_template/', command_import_template, name="command_template"),
     path('dds/commands_validation_template/', command_validation_template, name="command_validation_template"),
+    path('dds/facility_import_template/', facility_import_template, name="facility_import_template"),
 ]

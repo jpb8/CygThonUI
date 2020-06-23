@@ -33,6 +33,17 @@ def command_validation_template(request):
     return response
 
 
+def facility_import_template(request):
+    sheet = {
+        "device": ["TEST_DEV", "TEST2_DEV", "TEST2_DEV"],
+        "facility": ["TEST_FAC_ONE", "TEST2_FAC_ONE", "TEST2_FAC_TWO"],
+    }
+    sheets = [sheet, ]
+    workbook = XmlFile.template_export(sheets)
+    response = build_http_response(workbook, "facility_import_template.xlsx")
+    return response
+
+
 def mapping_validation_template(request):
     sheet = {
         "point": ["EAGL_A_VSTATION_TEMP", "MID2_VALVE27_DISABLE", "EBE2_VALVE34_VSTATUS"],
