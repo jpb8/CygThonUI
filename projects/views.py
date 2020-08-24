@@ -165,7 +165,8 @@ class BigtimeUpdate(DetailView):
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        task_breakdown, bigtime_tasks = self.object.bigtime_devops_sync()
-        data['task_breakdown'] = task_breakdown
-        data['bigtime_tasks'] = bigtime_tasks
+        sync_data = self.object.bigtime_devops_sync()
+        data['task_breakdown'] = sync_data["task_breakdown"]
+        data['bigtime_tasks'] = sync_data["bigtime_tasks"]
+        data['bigtime_id'] = sync_data["bigtime_id"]
         return data

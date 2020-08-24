@@ -33,4 +33,11 @@ class BigTime:
         project_id = self.project_search_from_tiga_id(tiga_id)
         if not project_id:
             return False
-        return self.project_task_breakdown(project_id)
+        return self.project_task_breakdown(project_id), project_id
+
+    def create_tasks(self, project_id, tasks):
+        url = "{}task/detail".format(self.base_url)
+        for task in tasks:
+            post_content = {"TaskSid": 0, "ProjectSid": project_id, "Tasknm": task}
+            requests.post(url, data=post_content, headers=self.headers)
+

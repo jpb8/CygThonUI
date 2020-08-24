@@ -32,7 +32,7 @@ class Project(models.Model):
         task_breakdown = devops_api.get_task_with_service_disciplines(self.devops_name,
                                                                       parse_tiga_id(self.devops_name),
                                                                       project_features)
-        bigtime_tasks = bigtime_api.task_breakdown_from_tiga_id(parse_tiga_id(self.devops_name))
+        bigtime_tasks, bigtime_id = bigtime_api.task_breakdown_from_tiga_id(parse_tiga_id(self.devops_name))
         for service, tasks in task_breakdown.items():
             if service in bigtime_tasks:
                 for task in tasks:
@@ -40,4 +40,4 @@ class Project(models.Model):
             else:
                 for task in tasks:
                     task["in_bigtime"] = False
-        return task_breakdown, bigtime_tasks
+        return {"task_breakdown": task_breakdown, "bigtime_tasks": bigtime_tasks, "bigtime_id": bigtime_id}
