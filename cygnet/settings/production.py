@@ -23,7 +23,7 @@ MEDIA_DIR = os.path.join(BASE_DIR, 'media')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
-DEVOPS_TOKEN = os.environ.get("DEVOP_TOKEN")
+DEVOPS_TOKEN = os.environ.get("DEVOPS_TOKEN")
 BIGTIME_TOKEN = os.environ.get("BIGTIME_TOKEN")
 BIGTIME_FIRM_KEY = os.environ.get("BIGTIME_FIRM_KEY")
 
