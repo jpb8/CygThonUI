@@ -2,16 +2,26 @@
 {% block body_block %}
 <div class="container" style="width: 100%; margin: 0px; max-width: 100%; text-align: center;">
     <h1>{{ project.name }}</h1>
+    {% if task_breakdown %}
     <div class="row">
         <div class="col file-container">
-            {% if task_breakdown %}
-            {% for key, values in task_breakdown.items %}
-            <h1>{{ key }}</h1>
-            {% for task in values %}
-            <p>ID: {{ task.task_id }} Name: {{ task.task_name }} In BigTime: {{ task.in_bigtime }}</p>
-            {% endfor %}
-            {% endfor %}
-            {% endif %}
+            <form action="{% url 'projects:add_bigtime_tasks' %}" method="POST">{% csrf_token %}
+                <input type="hidden" name="bigtime_id" value="{{ bigtime_id }}">
+                {% if task_breakdown %}
+                {% for key, values in task_breakdown.items %}
+                <h1>{{ key }}</h1>
+                {% for task in values %}
+                <p>
+                    ID: {{ task.task_id }} Name: {{ task.task_name }} In BigTime: {{ task.in_bigtime }}
+                    {% if not task.in_bigtime %}
+                    <input type="checkbox" name="task{{ forloop.counter }}_{{ key }}" value="{{ task.task_name }}">
+                    {% endif %}
+                </p>
+                {% endfor %}
+                {% endfor %}
+                {% endif %}
+                <button class="btn btn-primary" type="submit">Create BigTime Tasks</button>
+            </form>
         </div>
         <div class="col file-container">
             {% if bigtime_tasks %}
@@ -24,5 +34,8 @@
             {% endif %}
         </div>
     </div>
+    {% else %}
+    <h3>Please add DevOps Project Name to Project</h3>
+    {% endif %}
 </div>
 {% endblock %}

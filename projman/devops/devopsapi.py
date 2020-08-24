@@ -65,7 +65,6 @@ class DevopsData:
         :param task_ids: List of DevOps WorkItem Ids
         :return:
         """
-        classified_project = {}
         wi_request = {
             "ids": task_ids,
             "fields": ["System.Id", "System.Title", "System.WorkItemType", "Custom.ServiceDisciplines"]

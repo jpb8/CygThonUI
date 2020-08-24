@@ -165,8 +165,22 @@ class BigtimeUpdate(DetailView):
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        sync_data = self.object.bigtime_devops_sync()
-        data['task_breakdown'] = sync_data["task_breakdown"]
-        data['bigtime_tasks'] = sync_data["bigtime_tasks"]
-        data['bigtime_id'] = sync_data["bigtime_id"]
+        if self.object.devops_name:
+            sync_data = self.object.bigtime_devops_sync()
+            data['task_breakdown'] = sync_data["task_breakdown"]
+            data['bigtime_tasks'] = sync_data["bigtime_tasks"]
+            data['bigtime_id'] = sync_data["bigtime_id"]
         return data
+
+
+def add_bigtime_tasks(request):
+    if request.method == "POST":
+        bigtime_id = request.POST.get("bigtime_id")
+        bigtime_api = BigTime(access_token=BIGTIME_TOKEN, firm_key=BIGTIME_FIRM_KEY)
+        tasks = []
+        for task, name in request.POST.items():
+            if task.startswith("task"):
+                service_disc = task.split("_")[-1]
+                tasks.append({"task_name": name, "service_disc": service_disc})
+        bigtime_api.create_tasks(bigtime_id, tasks)
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))

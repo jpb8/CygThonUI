@@ -1,4 +1,5 @@
 import requests
+import json
 from .utils import *
 
 
@@ -38,6 +39,12 @@ class BigTime:
     def create_tasks(self, project_id, tasks):
         url = "{}task/detail".format(self.base_url)
         for task in tasks:
-            post_content = {"TaskSid": 0, "ProjectSid": project_id, "Tasknm": task}
-            requests.post(url, data=post_content, headers=self.headers)
+            post_content = {
+                "TaskSid": 0,
+                "ProjectSid": project_id,
+                "Tasknm": task["task_name"],
+                "TaskGroup": task["service_disc"]
+            }
+            r = requests.post(url, data=post_content, headers=self.headers)
+            print(r)
 
