@@ -14,6 +14,9 @@ from cygdevices.substitutions import Substitutions
 from cygdevices.points import Points
 from cygdevices.galaxy import transform_galaxy
 from cygdevices.commdev import MasterComm
+from projman import DevopsData, BigTime
+from projman.devops.utils import parse_tiga_id
+from cygnet.settings import DEVOPS_TOKEN, BIGTIME_TOKEN, BIGTIME_FIRM_KEY
 
 
 @login_required()
@@ -148,3 +151,21 @@ def export_template(request):
         response['Content-Disposition'] = 'attachment; filename={}'.format(name)
         return response
     return redirect("home")
+
+
+class BigtimeUpdate(DetailView):
+    queryset = Project.objects.all()
+    template_name = 'projects/management.html'
+
+    def get_object(self, queryset=None):
+        obj = super(BigtimeUpdate, self).get_object(queryset=queryset)
+        if self.request.user not in obj.members.all():
+            raise Http404()
+        return obj
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        task_breakdown, bigtime_tasks = self.object.bigtime_devops_sync()
+        data['task_breakdown'] = task_breakdown
+        data['bigtime_tasks'] = bigtime_tasks
+        return data
