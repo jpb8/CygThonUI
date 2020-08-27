@@ -24,9 +24,11 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ project.get_absolute_url }}">Project</a>
                 </li>
+                {% if request.user.is_superuser %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ project.get_absolute_url }}management">Project Management</a>
                 </li>
+                {% endif %}
                 {% endif %}
             </ul>
         </div>

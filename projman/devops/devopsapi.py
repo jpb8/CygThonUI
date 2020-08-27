@@ -32,10 +32,13 @@ class DevopsData:
                           "includeFacets": True, "searchText": "Feature"}
         search_client = self.connection.clients_v6_0.get_search_client()
         features = []
-        for work_item in search_client.fetch_work_item_search_results(search_request, project=project_id).results:
-            fields = work_item.fields
-            if fields["system.workitemtype"] == "Feature":
-                features.append(fields["system.id"])
+        try:
+            for work_item in search_client.fetch_work_item_search_results(search_request, project=project_id).results:
+                fields = work_item.fields
+                if fields["system.workitemtype"] == "Feature":
+                    features.append(fields["system.id"])
+        except:
+            print("Project: {}".format(project_id))
         return features
 
     def features_for_project_list(self, project_list):
@@ -70,8 +73,12 @@ class DevopsData:
             "fields": ["System.Id", "System.Title", "System.WorkItemType", "Custom.ServiceDisciplines"]
         }
         work_item_client = self.connection.clients.get_work_item_tracking_client()
-        classificaitons = work_item_client.get_work_items_batch(project=proj_id, work_item_get_request=wi_request)
+
         classified_project = {}
+        try:
+            classificaitons = work_item_client.get_work_items_batch(project=proj_id, work_item_get_request=wi_request)
+        except:
+            return classified_project
         for c in classificaitons:
             wid, serv_disc, feat_name = get_feature_id_and_sevice_disc(c)
             if not serv_disc:

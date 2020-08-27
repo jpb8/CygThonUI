@@ -13,9 +13,13 @@ def create_task_object(data):
         if not task["TaskGroup"] or not devops_id:
             continue
         if task["TaskGroup"] not in task_object:
-            task_object[task["TaskGroup"]] = [devops_id,]
+            task_object[task["TaskGroup"]] = {
+                "ids": [devops_id, ],
+                "detailed": [{"task_id": task["TaskSid"], "name": task["TaskNm"]}, ]
+            }
         else:
-            task_object[task["TaskGroup"]].append(devops_id)
+            task_object[task["TaskGroup"]]["ids"].append(devops_id)
+            task_object[task["TaskGroup"]]["detailed"].append({"task_id": task["TaskSid"], "name": task["TaskNm"]})
     return task_object
 
 

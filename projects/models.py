@@ -36,7 +36,7 @@ class Project(models.Model):
         for service, tasks in task_breakdown.items():
             if service in bigtime_tasks:
                 for task in tasks:
-                    task["in_bigtime"] = True if task["task_id"] in bigtime_tasks[service] else False
+                    task["in_bigtime"] = True if task["task_id"] in bigtime_tasks[service]["ids"] else False
             else:
                 for task in tasks:
                     task["in_bigtime"] = False

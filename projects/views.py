@@ -4,6 +4,7 @@ from django.http import JsonResponse, HttpResponse, Http404, HttpResponseRedirec
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth.decorators import login_required
 from django.utils.encoding import codecs
+from django.contrib.auth.decorators import user_passes_test
 
 from .models import Project
 from .forms import ProjectForm
@@ -15,7 +16,6 @@ from cygdevices.points import Points
 from cygdevices.galaxy import transform_galaxy
 from cygdevices.commdev import MasterComm
 from projman import DevopsData, BigTime
-from projman.devops.utils import parse_tiga_id
 from cygnet.settings import DEVOPS_TOKEN, BIGTIME_TOKEN, BIGTIME_FIRM_KEY
 
 
@@ -166,13 +166,17 @@ class BigtimeUpdate(DetailView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         if self.object.devops_name:
-            sync_data = self.object.bigtime_devops_sync()
-            data['task_breakdown'] = sync_data["task_breakdown"]
-            data['bigtime_tasks'] = sync_data["bigtime_tasks"]
-            data['bigtime_id'] = sync_data["bigtime_id"]
+            try:
+                sync_data = self.object.bigtime_devops_sync()
+                data['task_breakdown'] = sync_data["task_breakdown"]
+                data['bigtime_tasks'] = sync_data["bigtime_tasks"]
+                data['bigtime_id'] = sync_data["bigtime_id"]
+            except:
+                pass
         return data
 
 
+@user_passes_test(lambda u: u.is_superuser)
 def add_bigtime_tasks(request):
     if request.method == "POST":
         bigtime_id = request.POST.get("bigtime_id")
@@ -183,4 +187,16 @@ def add_bigtime_tasks(request):
                 service_disc = task.split("_")[-1]
                 tasks.append({"task_name": name, "service_disc": service_disc})
         bigtime_api.create_tasks(bigtime_id, tasks)
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def delete_bigtime_tasks(request):
+    if request.method == "POST":
+        bigtime_api = BigTime(access_token=BIGTIME_TOKEN, firm_key=BIGTIME_FIRM_KEY)
+        tasks = []
+        for task, name in request.POST.items():
+            if task.startswith("task"):
+                tasks.append(name)
+        bigtime_api.delete_tasks(tasks)
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))

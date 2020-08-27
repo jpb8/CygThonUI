@@ -33,7 +33,7 @@ class BigTime:
     def task_breakdown_from_tiga_id(self, tiga_id):
         project_id = self.project_search_from_tiga_id(tiga_id)
         if not project_id:
-            return False
+            return False, tiga_id
         return self.project_task_breakdown(project_id), project_id
 
     def create_tasks(self, project_id, tasks):
@@ -46,5 +46,11 @@ class BigTime:
                 "TaskGroup": task["service_disc"]
             }
             r = requests.post(url, data=post_content, headers=self.headers)
+            print(r)
+
+    def delete_tasks(self, tasks):
+        for task in tasks:
+            url = "{}task/detail/{}".format(self.base_url, task)
+            r = requests.delete(url, headers=self.headers)
             print(r)
 

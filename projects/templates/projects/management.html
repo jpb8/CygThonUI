@@ -5,14 +5,15 @@
     {% if task_breakdown %}
     <div class="row">
         <div class="col file-container">
+            <h1>DevOps Task Breakdown</h1>
             <form action="{% url 'projects:add_bigtime_tasks' %}" method="POST">{% csrf_token %}
                 <input type="hidden" name="bigtime_id" value="{{ bigtime_id }}">
                 {% if task_breakdown %}
                 {% for key, values in task_breakdown.items %}
-                <h1>{{ key }}</h1>
+                <h3>{{ key }}</h3>
                 {% for task in values %}
                 <p>
-                    ID: {{ task.task_id }} Name: {{ task.task_name }} In BigTime: {{ task.in_bigtime }}
+                    ID: {{ task.task_id }} Name: {{ task.task_name }}
                     {% if not task.in_bigtime %}
                     <input type="checkbox" name="task{{ forloop.counter }}_{{ key }}" value="{{ task.task_name }}">
                     {% endif %}
@@ -24,14 +25,21 @@
             </form>
         </div>
         <div class="col file-container">
-            {% if bigtime_tasks %}
-            {% for key, values in bigtime_tasks.items %}
-            <h1>{{ key }}</h1>
-            {% for task in values %}
-            <p>{{ task }}</p>
-            {% endfor %}
-            {% endfor %}
-            {% endif %}
+            <h1>BigTime Task Breakdown</h1>
+            <form action="{% url 'projects:delete_bigtime_tasks' %}" method="POST">{% csrf_token %}
+                {% if bigtime_tasks %}
+                {% for key, values in bigtime_tasks.items %}
+                <h3>{{ key }}</h3>
+                {% for task in values.detailed %}
+                <p>
+                    {{ task.name }}
+                    <input type="checkbox" name="task{{ forloop.counter }}_{{ key }}" value="{{ task.task_id }}">
+                </p>
+                {% endfor %}
+                {% endfor %}
+                {% endif %}
+                <button class="btn btn-primary" type="submit">Delete BigTime Tasks</button>
+            <form>
         </div>
     </div>
     {% else %}
