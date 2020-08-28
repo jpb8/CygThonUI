@@ -235,15 +235,18 @@ class DTF(XmlFile):
                 dg_elems["dataType"].append(died.get("type"))
         return self.template_export([arrs, dg_elems])
 
-    def import_datagroups(self, data_elements, reg_gap):
-        error_df = self._check_dg_excel_import(data_elements)
+    def import_datagroups(self, data_elements, reg_gap, modbus=False):
+        error_df = self._check_dg_excel_import(data_elements, modbus)
         data_elements.drop(data_elements.index[[tuple(error_df.index.values)]], inplace=True)
         data_groups_xml = self.data_groups
         data_groups = data_elements.data_group.unique()
         def_data_groups = self.def_data_groups
         for dg in data_groups:
             deids = data_elements.loc[data_elements["data_group"] == dg]
-            dg_xml = DataGroup(dg, dg)
+            nicename = dg
+            if "nice_name" in deids:
+               nicename = deids['nice_name'].iloc[0]
+            dg_xml = DataGroup(dg, nicename, modbus)
             dg_xml.add_deids(deids, reg_gap)
             data_groups_xml.append(dg_xml.xml)
             SubElement(def_data_groups, dg)
@@ -252,46 +255,61 @@ class DTF(XmlFile):
         return error_df.to_dict('records'), self.all_arrays()
 
     @staticmethod
-    def _check_dg_excel_import(data_elements):
-        reg_str_df = data_elements.loc[~data_elements['reg_num'].astype(str).str.isdigit()]
-        reg_str_df["error"] = "reg_num must be integer"
+    def _check_dg_excel_import(data_elements, modbus=False):
+        if modbus:
+            reg_str_df = data_elements.loc[~data_elements['reg_num'].astype(str).str.isdigit()]
+            reg_str_df["error"] = "reg_num must be integer"
         bit_str_df = data_elements.loc[~data_elements['bit'].astype(str).str.isdigit()]
         bit_str_df.dropna(subset=['bit'], inplace=True)
         bit_str_df["error"] = "bit must be integer"
-        error_df = pd.concat([reg_str_df, bit_str_df])
-        return error_df
+        if modbus:
+            return pd.concat([reg_str_df, bit_str_df])
+        return bit_str_df
 
 
 class DataGroup:
-    def __init__(self, name, nice_name):
+    def __init__(self, name, nice_name, modbus=False):
         self.name = name
         self.nice_name = nice_name
+        self.modbus = modbus
+        self.data_name = "regNum" if modbus else "tagname"
         self.xml = self.create_datagroup_xml()
 
     def create_datagroup_xml(self):
-        dg = etree.Element(self.name, {"niceName": self.nice_name, "devDG": "false", "baseOrd": "0",
-                                       "canSend": "false", "canRecv": "true", "uccSend": "false", "uccRecv": "false"})
-        SubElement(dg, "dgElements", {"byteOrder": "bigEndian", "secLev": "4"})
-        SubElement(dg, "modbusReadBlocks")
+        dg = etree.Element(self.name, {
+            "niceName": self.nice_name, "canSend": "true", "canRecv": "true", "uccSend": "true", "uccRecv": "true"
+        })
+        SubElement(dg, "dgElements", {"type": "r4"})
+        if self.modbus:
+            SubElement(dg, "modbusReadBlocks")
         return dg
 
     def add_deids(self, deids, reg_gap):
         dg_elems = self.xml.find("dgElements")
-        analog_df = deids[deids["dtype"] != "boolean"]
+        if self.modbus:
+            analog_df = deids[deids["dtype"] != "boolean"]
+        else:
+            analog_df = deids
         digital_df = deids[deids["dtype"] == "boolean"]
+        self._add_analongs(dg_elems, analog_df)
+        if self.modbus:
+            self._add_digitals(dg_elems, digital_df)
+            self._add_read_blocks(deids.reg_num.unique(), reg_gap)
+
+    def _add_analongs(self, dg_elems, analog_df):
         for i, deid in analog_df.iterrows():
-            reg_num = deid.get("reg_num")
+            dataloc = deid.get(self.data_name)
             desc = deid.get("description")
             dtype = deid.get("dtype")
             udc = deid.get("udc") if not pd.isna(deid.get("udc")) else None
             if udc:
-                attrs = {"desc": desc, "udc": udc, "regNum": str(reg_num),
-                         "type": dtype if dtype != "digital" else "ui2"}
+                attrs = {"desc": desc, "udc": udc.strip(), self.data_name: str(dataloc), "type": dtype}
             else:
-                attrs = {"desc": desc, "regNum": str(reg_num), "type": dtype if dtype != "digital" else "ui2"}
-            SubElement(dg_elems, "R{}".format(reg_num), attrs)
-        self._add_digitals(dg_elems, digital_df)
-        self._add_read_blocks(deids.reg_num.unique(), reg_gap)
+                attrs = {"desc": desc, self.data_name: str(dataloc), "type": dtype if dtype != "digital" else "ui2"}
+            if self.modbus:
+                SubElement(dg_elems, "R{}".format(dataloc), attrs)
+            else:
+                SubElement(dg_elems, deid.get("deid").strip(), attrs)
 
     @staticmethod
     def _add_bits(dg_elems, ref):
@@ -300,9 +318,11 @@ class DataGroup:
             attrs = {"desc": "Reg {} bit {}".format(ref, bit_str), "ref": ref, "bPos": str(i), "type": "Boolean"}
             SubElement(dg_elems, "{}B{}".format(ref, bit_str), attrs)
 
-    @staticmethod
-    def _add_digitals(dg_elems, digital_df):
-        registers = digital_df.reg_num.unique()
+    def _add_digitals(self, dg_elems, digital_df):
+        if self.modbus:
+            registers = digital_df.reg_num.unique()
+        else:
+            registers = digital_df.tagname.unique()
         for reg in registers:
             attrs = {"desc": "Digital Registers {}".format(reg), "regNum": str(reg), "type": "ui2"}
             SubElement(dg_elems, "R{}".format(reg), attrs)

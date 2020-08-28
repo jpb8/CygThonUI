@@ -155,12 +155,13 @@ def import_arrays(request):
         return redirect("home")
     dg_data = request.FILES["dg-data"]
     reg_gap = int(request.POST.get("reg-gap"))
+    modbus = "modbus" in request.POST
     try:
         dtf = DTF.objects.get(pk=int(request.POST.get("dtf-id")))
     except ObjectDoesNotExist:
         print("DTF or DDS not found")
         return redirect("files:upload")
-    errors, arrays = dtf.import_datagroups(dg_data, reg_gap)
+    errors, arrays = dtf.import_datagroups(dg_data, reg_gap, modbus)
     if request.is_ajax():
         data = build_ajax_response_dict(data=errors, header="Import Errors")
         array_html = render_to_string("files/snippets/dtf_arrays.html", {"arrays": arrays, "dtf": dtf}, request=request)
