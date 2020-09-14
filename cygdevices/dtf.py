@@ -246,7 +246,7 @@ class DTF(XmlFile):
             nicename = dg
             if "nice_name" in deids:
                nicename = deids['nice_name'].iloc[0]
-            dg_xml = DataGroup(dg, nicename, modbus)
+            dg_xml = DataGroup(dg.strip(), nicename.strip(), modbus)
             dg_xml.add_deids(deids, reg_gap)
             data_groups_xml.append(dg_xml.xml)
             SubElement(def_data_groups, dg)
@@ -298,18 +298,18 @@ class DataGroup:
 
     def _add_analongs(self, dg_elems, analog_df):
         for i, deid in analog_df.iterrows():
-            dataloc = deid.get(self.data_name)
-            desc = deid.get("description")
-            dtype = deid.get("dtype")
-            udc = deid.get("udc") if not pd.isna(deid.get("udc")) else None
+            dataloc = str(deid.get(self.data_name)).strip()
+            desc = str(deid.get("description")).strip()
+            dtype = str(deid.get("dtype")).strip()
+            udc = str(deid.get("udc")).strip() if not pd.isna(deid.get("udc")) else None
             if udc:
-                attrs = {"desc": desc, "udc": udc.strip(), self.data_name: str(dataloc), "type": dtype}
+                attrs = {"desc": desc, "udc": udc, self.data_name: str(dataloc), "type": dtype}
             else:
                 attrs = {"desc": desc, self.data_name: str(dataloc), "type": dtype if dtype != "digital" else "ui2"}
             if self.modbus:
                 SubElement(dg_elems, "R{}".format(dataloc), attrs)
             else:
-                SubElement(dg_elems, deid.get("deid").strip(), attrs)
+                SubElement(dg_elems, deid.get("deid"), attrs)
 
     @staticmethod
     def _add_bits(dg_elems, ref):
