@@ -1,45 +1,70 @@
 {% extends 'base.html' %}
 {% block body_block %}
 <div class="container" style="width: 100%; margin: 0px; max-width: 100%; text-align: center;">
-    <h1>{{ project.name }}</h1>
+    <div class="row" >
+        <h1 class="mx-auto my-3">{{ project.name }}</h1>
+    </div>
     {% if task_breakdown %}
     <div class="row">
-        <div class="col file-container">
-            <h1>DevOps Task Breakdown</h1>
-            <form action="{% url 'projects:add_bigtime_tasks' %}" method="POST">{% csrf_token %}
-                <input type="hidden" name="bigtime_id" value="{{ bigtime_id }}">
-                {% if task_breakdown %}
-                {% for key, values in task_breakdown.items %}
-                <h3>{{ key }}</h3>
-                {% for task in values %}
-                <p>
-                    ID: {{ task.task_id }} Name: {{ task.task_name }}
-                    {% if not task.in_bigtime %}
-                    <input type="checkbox" name="task{{ forloop.counter }}_{{ key }}" value="{{ task.task_name }}">
-                    {% endif %}
-                </p>
-                {% endfor %}
-                {% endfor %}
-                {% endif %}
-                <button class="btn btn-primary" type="submit">Create BigTime Tasks</button>
-            </form>
+        <div class="col-sm-6">
+            <div class="card text-center">
+                <div class="card-header">
+                    DevOps Task Breakdown
+                </div>
+                <form action="{% url 'projects:add_bigtime_tasks' %}" method="POST">{% csrf_token %}
+                    <div class="card-body">
+                        <input type="hidden" name="bigtime_id" value="{{ bigtime_id }}">
+                        {% if task_breakdown %}
+                        {% for key, values in task_breakdown.items %}
+                        <h5 class="card-title">{{ key }}</h5>
+                        {% for task in values %}
+                        <div class="form-check card-text">
+                            {% if not task.in_bigtime %}
+                            <input class="form-check-input" type="checkbox" id="task{{ forloop.counter }}_{{ key }}"
+                                   name="task{{ forloop.counter }}_{{ key }}" value="{{ task.task_name }}">
+                            {% endif %}
+                            <label class="form-check-label" for="task{{ forloop.counter }}_{{ key }}">
+                                ID: {{ task.task_id }} Name: {{ task.task_name }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="card-footer text-muted">
+                        <button class="btn btn-primary" type="submit">Create BigTime Tasks</button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="col file-container">
-            <h1>BigTime Task Breakdown</h1>
-            <form action="{% url 'projects:delete_bigtime_tasks' %}" method="POST">{% csrf_token %}
-                {% if bigtime_tasks %}
-                {% for key, values in bigtime_tasks.items %}
-                <h3>{{ key }}</h3>
-                {% for task in values.detailed %}
-                <p>
-                    {{ task.name }}
-                    <input type="checkbox" name="task{{ forloop.counter }}_{{ key }}" value="{{ task.task_id }}">
-                </p>
-                {% endfor %}
-                {% endfor %}
-                {% endif %}
-                <button class="btn btn-primary" type="submit">Delete BigTime Tasks</button>
-            <form>
+        <div class="col-sm-6">
+            <div class="card text-center">
+                <div class="card-header">
+                    BigTime Task Breakdown
+                </div>
+                <form action="{% url 'projects:delete_bigtime_tasks' %}" method="POST">{% csrf_token %}
+                    <div class="card-body">
+                        <input type="hidden" name="bigtime_id" value="{{ bigtime_id }}">
+                        {% if bigtime_tasks %}
+                        {% for k, values in bigtime_tasks.items %}
+                        <h5 class="card-title">{{ k }}</h5>
+                        {% for task in values.detailed %}
+                        <div class="form-check card-text">
+                            <input class="form-check-input" type="checkbox" id="task{{ forloop.counter }}_{{ k }}"
+                                   name="task{{ forloop.counter }}_{{ k }}" value="{{ task.task_id }}">
+                            <label class="form-check-label" for="task{{ forloop.counter }}_{{ k }}">
+                                {{ task.name }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="card-footer text-muted">
+                        <button class="btn btn-primary" type="submit">Delete BigTime Tasks</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
     {% else %}
