@@ -2,41 +2,89 @@
 {% block body_block %}
 <div class="container" style="width: 100%; margin: 0px; max-width: 100%; text-align: center;">
     <h1>{{ project.name }}</h1>
+<!--    <div class="row">-->
+<!--        <div class="col file-container">-->
+<!--            <h2>DDS</h2>-->
+<!--            <div id="dds-form" style="float: left; width: 100%; margin: 10px;">-->
+<!--                <h4>Upload DDS</h4>-->
+<!--                <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_upload' %}">-->
+<!--                    {% csrf_token %}-->
+<!--                    {{ dds_form }}-->
+<!--                    <input type="hidden" name="next" value="{{ request.path }}">-->
+<!--                    <button type="submit">Upload</button>-->
+<!--                </form>-->
+<!--            </div>-->
+<!--            <div style="margin-top: 50px;">-->
+<!--                {% include 'projects/snippets/file_table.html' with files=project.dds_set.all dds=True %}-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div class="col file-container">-->
+<!--            <h2>DTF</h2>-->
+<!--            <div id="dtf-form" style="float: left; width: 100%; margin: 10px;">-->
+<!--                <h4>Upload DTF</h4>-->
+<!--                <form method="post" enctype="multipart/form-data" action="{% url 'files:dtf_upload' %}">-->
+<!--                    {% csrf_token %}-->
+<!--                    {{ dtf_form }}-->
+<!--                    <input type="hidden" name="next" value="{{ request.path }}">-->
+<!--                    <button type="submit">Upload</button>-->
+<!--                </form>-->
+<!--            </div>-->
+<!--            <br>-->
+<!--            <div style="margin-top: 50px;">-->
+<!--                {% include 'projects/snippets/file_table.html' with files=project.dtf_set.all dtf=True %}-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
     <div class="row">
-        <div class="col file-container">
-            <h2>DDS</h2>
-            <div id="dds-form" style="float: left; width: 100%; margin: 10px;">
-                <h4>Upload DDS</h4>
-                <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_upload' %}">
-                    {% csrf_token %}
-                    {{ dds_form }}
-                    <input type="hidden" name="next" value="{{ request.path }}">
-                    <button type="submit">Upload</button>
-                </form>
-            </div>
-            <div style="width: 90%; margin-top: 50px;">
-                <h4>Files</h4>
-                {% include 'projects/snippets/file_table.html' with files=project.dds_set.all dds=True %}
+        <div class="col-sm-6">
+            <div class="card text-center">
+                <div class="card-header">
+                    DDS
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Upload DDS</h5>
+                    <div class="card-text">
+                        <div id="dds-form">
+                            <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_upload' %}">
+                                {% csrf_token %}
+                                {{ dds_form }}
+                                <input type="hidden" name="next" value="{{ request.path }}">
+                                <button type="submit">Upload</button>
+                            </form>
+                        </div>
+                        <div style="margin-top: 25px;">
+                            {% include 'projects/snippets/file_table.html' with files=project.dds_set.all dds=True %}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col file-container">
-            <h2>DTF</h2>
-            <div id="dtf-form" style="float: left; width: 100%; margin: 10px;">
-                <h4>Upload DTF</h4>
-                <form method="post" enctype="multipart/form-data" action="{% url 'files:dtf_upload' %}">
-                    {% csrf_token %}
-                    {{ dtf_form }}
-                    <input type="hidden" name="next" value="{{ request.path }}">
-                    <button type="submit">Upload</button>
-                </form>
-            </div>
-            <br>
-            <div style="width: 90%; margin-top: 50px;">
-                <h4>Files</h4>
-                {% include 'projects/snippets/file_table.html' with files=project.dtf_set.all dtf=True %}
+        <div class="col-sm-6">
+            <div class="card text-center">
+                <div class="card-header">
+                    DTF Template
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Upload DTF</h5>
+                    <div class="card-text">
+                        <div id="dtf-form">
+                            <form method="post" enctype="multipart/form-data" action="{% url 'files:dtf_upload' %}">
+                                {% csrf_token %}
+                                {{ dtf_form }}
+                                <input type="hidden" name="next" value="{{ request.path }}">
+                                <button type="submit">Upload</button>
+                            </form>
+                        </div>
+                        <div style="margin-top: 25px;">
+                            {% include 'projects/snippets/file_table.html' with files=project.dtf_set.all dtf=True %}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
     <div class="row">
         <div class="col util-container">
             <div class="project-util">
@@ -76,22 +124,22 @@
                     <label>Parse Galaxy Dump</label><br>
                     <input type="file" name="galaxy"><br>
                     <div class="form-check">
-                      <input class="form-check-input" type="radio" name="parseType" id="full" value="full" checked>
-                      <label class="form-check-label" for="full">
-                        Full Parse
-                      </label>
+                        <input class="form-check-input" type="radio" name="parseType" id="full" value="full" checked>
+                        <label class="form-check-label" for="full">
+                            Full Parse
+                        </label>
                     </div>
                     <div class="form-check">
-                      <input class="form-check-input" type="radio" name="parseType" id="regonly" value="regonly">
-                      <label class="form-check-label" for="regonly">
-                        Register and Source Info Only
-                      </label>
+                        <input class="form-check-input" type="radio" name="parseType" id="regonly" value="regonly">
+                        <label class="form-check-label" for="regonly">
+                            Register and Source Info Only
+                        </label>
                     </div>
                     <div class="form-check">
-                      <input class="form-check-input" type="radio" name="parseType" id="scaling" value="scaling">
-                      <label class="form-check-label" for="scaling">
-                        Scaling Only
-                      </label>
+                        <input class="form-check-input" type="radio" name="parseType" id="scaling" value="scaling">
+                        <label class="form-check-label" for="scaling">
+                            Scaling Only
+                        </label>
                     </div>
                     <button type="submit">Parse</button>
                 </form>

@@ -66,6 +66,7 @@ def command_import_template(request):
         "description": ["Flow Setpoint", "Station Reset", "Station Reset"],
         "comp_type": ["DG_T_DEV", "DG_T_DEV", "CYUPDTPT"],
         "data_group": ["CMD_N453", "CMD_N4413", ""],
+        "reg_number": ["43000", "43001", ""],
         "value": ["", "1", ""],
         "update_fac": ["", "", "KLLR_A_PSTATION"],
         "udc": ["", "", "RESET"],
@@ -83,6 +84,9 @@ def command_import_template(request):
 def dtf_data_group_import(request):
     sheet = {
         "data_group": ["DG1", "DG2", "DG2"],
+        "nice_name": ["Nice Name 1", "Nice Name 2", "Nice Name 2"],
+        "deid": ["DEID1", "DEID1", "DEID2"],
+        "tagname": ["DeviceTag[0]", "DeviceTag[1]", "DeviceTag[2]"],
         "reg_num": ["44006", "44002", "44003"],
         "bit": ["", "", "1"],
         "description": ["Test Desc 1", "Test Desc 2", "Test Desc 3"],

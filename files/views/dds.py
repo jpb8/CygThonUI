@@ -83,6 +83,7 @@ def dds_add_mapping(request):
         mappings = request.FILES["mappings"]
         deid_only = True if "deid-only" in request.POST else False
         add_dgs = True if "add-dgs" in request.POST else False
+        fac_type = request.POST.get("facility-type", "point")
         try:
             dtf = DTF.objects.get(pk=int(request.POST.get("dtf-id")))
             dds = DDS.objects.get(pk=int(request.POST.get("dds-id")))
@@ -90,7 +91,7 @@ def dds_add_mapping(request):
             print("DTF or DDS not found")
             return redirect("files:upload")
         try:
-            errors = dds.add_mappings(dtf, mappings, deid_only, add_dgs)
+            errors = dds.add_mappings(dtf, mappings, deid_only, add_dgs, fac_type)
         except:
             errors = ["Error Handling Excel File. Please use template file"]
         if request.is_ajax():
@@ -102,7 +103,7 @@ def dds_add_mapping(request):
             devices_html = render_to_string("files/snippets/device_accord.html", {"devices": devices})
             data["devices_html"] = devices_html
             return JsonResponse(data)
-    return redirect("files:upload")
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 
 def dds_add_commands(request):
@@ -119,10 +120,10 @@ def dds_add_commands(request):
         except ObjectDoesNotExist:
             print("DTF or DDS not found")
             return redirect("files:upload")
-        try:
-            errors = dds.add_commands(dtf, cmds, modbus)
-        except:
-            errors = ["Error Handling Excel File. Please use template file"]
+        # try:
+        errors = dds.add_commands(dtf, cmds, modbus)
+        # except:
+        # errors = ["Error Handling Excel File. Please use template file"]
         if request.is_ajax():
             errs = []
             for e in errors:

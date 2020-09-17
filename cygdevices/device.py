@@ -138,10 +138,11 @@ class DeviceDef(XmlFile):
             maps.append({"ERROR": error})
         return maps
 
-    def add_maps(self, device_id, array_type, maps, create=False, dtf=None):
+    def add_maps(self, device_id, array_type, maps, create=False, dtf=None, dg_fac_type="device"):
         """
         Maps all supplied UDCs the given Device's Array.
         Checks all UCDs to see they already exist
+        :param dg_fac_type: string to determine whether to use device or point fac
         :param device_id: CygNet Device name
         :param array_type: The array name inside the device
         :param maps: List of UDCs to be mapped
@@ -155,7 +156,8 @@ class DeviceDef(XmlFile):
             if create:
                 desc = dtf.get_array_description(array_type)
                 if desc:
-                    dg = self.add_datagroup(desc, array_type, device_id)
+                    dg_facility = device_id if dg_fac_type == "device" else maps[0].fac
+                    dg = self.add_datagroup(desc, array_type, device_id, dg_facility)
                     errs.append("{} DataGroup created for device: {}".format(array_type, device_id))
                     mappings, err = self.device_dg_mappings(device_id, array_type)
                 else:
@@ -179,8 +181,9 @@ class DeviceDef(XmlFile):
                 errs.append("{} {} {} mapping already exists".format(m.udc, m.data_id, m.fac))
         return errs
 
-    def add_datagroup(self, description, data_group_type, device_id):
-        dg = DataGroup(description, device_id, data_group_type)
+    def add_datagroup(self, description, data_group_type, device_id, data_group_fac=None):
+        fac = device_id if not data_group_fac else data_group_fac
+        dg = DataGroup(description, fac, data_group_type)
         current_dgs = self.device_dgs_element(device_id)
         current_dgs.append(dg.dg_element)
         return current_dgs
@@ -349,14 +352,14 @@ class DeviceDef(XmlFile):
             name = cmd.get("name")
             data_group = cmd.get("data_group")
             comp_type = cmd.get("comp_type")
-            update_fac = cmd.get("update_fac")
-            udc = cmd.get("udc")
-            site = cmd.get("site")
-            service = cmd.get("service")
-            utype = cmd.get("utype")
-            value = cmd.get("value") if not math.isnan(cmd.get("value")) else False
-            reg_number = cmd.get("reg_number") if not math.isnan(cmd.get("reg_number")) else False
-            dtype = cmd.get("dtype") if not math.isnan(cmd.get("reg_number")) else False
+            update_fac = cmd.get("update_fac", None)
+            udc = cmd.get("udc", None)
+            site = cmd.get("site", None)
+            service = cmd.get("service", None)
+            utype = cmd.get("utype", None)
+            value = cmd.get("value", None) if not math.isnan(cmd.get("value")) else False
+            reg_number = cmd.get("reg_number", None) if not math.isnan(cmd.get("reg_number", None)) else False
+            dtype = cmd.get("dtype", None) if not math.isnan(cmd.get("reg_number", None)) else False
             cmd_xml = self.find_command(device_id, name, facility)
             if cmd_xml is None:
                 cmd_xml = self.create_command(device_id, name, facility, cmd.get("description"))
@@ -385,6 +388,9 @@ class DeviceDef(XmlFile):
                             errs.append("{} Not Found in DTF".format(data_group))
                 elif comp_type == "CYUPDTPT":
                     comp = Command.create_cyuptpt_comp(ord, update_fac, service, site, udc, utype, value)
+                    cmd_comp_xml.append(comp)
+                elif comp_type == "DG_F_DEV":
+                    comp = Command.create_dg_f_dev_comp(ord, data_group)
                     cmd_comp_xml.append(comp)
         self.save()
         return errs
@@ -599,7 +605,7 @@ class DeviceDef(XmlFile):
             deids = list(set(deids) - set(a_deieds))
         return deids
 
-    def mapping_excel_import(self, mappings, dtfxml, deid_only, add_dgs=False):
+    def mapping_excel_import(self, mappings, dtfxml, deid_only, add_dgs=False, dg_fac_type="device"):
         """
         Add all mappings supplied in pandas object (create pandas object in method?)
         :param mappings: pandas dataframe with all mappings
@@ -622,7 +628,7 @@ class DeviceDef(XmlFile):
                         udc, pnt_err = UdcMap.safe_create(dtfxml, p, da, deid_only)
                         maps.append(udc) if not pnt_err else errs.append(udc)
                         facs.append(p["facilityid"]) if p["facilityid"] not in facs else None
-                    map_log = self.add_maps(d, da, maps, add_dgs, dtfxml)
+                    map_log = self.add_maps(d, da, maps, add_dgs, dtfxml, dg_fac_type)
                     fac_log = self.add_facs(facs, d)
                     errs = errs + map_log + fac_log
             else:
@@ -724,6 +730,13 @@ class Command:
             SubElement(component, "Param", {"key": "RegNum", "value": str(int(reg_num))})
             if value:
                 SubElement(component, "Param", {"key": "Value", "value": str(int(value))})
+        return component
+
+    @classmethod
+    def create_dg_f_dev_comp(cls, pos, data_group):
+        component = etree.Element("Component", {"type": "DG_F_DEV", "position": str(pos)})
+        SubElement(component, "Param", {"key": "DGORD", "value": "0"})
+        SubElement(component, "Param", {"key": "DGTYPE", "value": data_group})
         return component
 
     @classmethod

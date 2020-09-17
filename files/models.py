@@ -44,12 +44,12 @@ class DDS(models.Model):
     def get_absolute_url(self):
         return reverse('files:dds', args=[str(self.pk)])
 
-    def add_mappings(self, dtf_obj, excel, deid_only, add_dgs):
+    def add_mappings(self, dtf_obj, excel, deid_only, add_dgs, dg_fac_type="point"):
         dtf_xml = dtf_obj.xml
         dds_xml = self.xml
         if dtf_xml is not None and dds_xml is not None:
             mappings = pd.read_excel(excel, sheet_name="Sheet1")
-            error_log = dds_xml.mapping_excel_import(mappings, dtf_xml, deid_only, add_dgs)
+            error_log = dds_xml.mapping_excel_import(mappings, dtf_xml, deid_only, add_dgs, dg_fac_type)
         else:
             error_log = ["DDS or DTF File not found"]
         return error_log

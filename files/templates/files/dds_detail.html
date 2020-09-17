@@ -23,7 +23,7 @@
                     <div class="card-body">
                         <form method="POST" action="{% url 'files:orphans' %}" id="dds-orphans">
                             {% csrf_token %}
-                            <label for="dtf-id">Import Mappings</label>
+                            <label for="dtf-id">Choose DTF</label>
                             <select name="dtf-id" id="dtf-id">
                                 {% if dtfs %}
                                 {% for d in dtfs %}
@@ -150,8 +150,8 @@
                     <h2>Import Point Mappings</h2>
                 </div>
                 <div class="card-body">
-                   <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_add_mappings' %}"
-                      id="dds-mapping">
+                    <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_add_mappings' %}"
+                          id="dds-mapping">
                         {% csrf_token %}
                         <input hidden name="dds-id" value="{{ dds.pk }}">
                         <div class="form-group row">
@@ -159,25 +159,37 @@
                                 <a href="{% url 'files:mapping_template' %}">Download Template</a>
                             </div>
                         </div>
-                         <div class="form-group row">
+                        <div class="form-group row">
                             <label for="map-data" class="col-sm-4 col-form-label">Mappings Excel Import</label>
                             <div class="col-sm-8">
                                 <input type="file" class="form-control" id="map-data" name="mappings">
                             </div>
                         </div>
-                       <div class="form-group row">
+                        <div class="form-group row">
                             <label for="deid-only" class="col-sm-4 col-form-label">DEID Only</label>
                             <div class="col-sm-8">
                                 <input type="checkbox" class="form-control" name="deid-only" id="deid-only">
                             </div>
                         </div>
-                       <div class="form-group row">
+                        <div class="form-group row">
                             <label for="add-dgs" class="col-sm-4 col-form-label">Create Data Groups?</label>
                             <div class="col-sm-8">
                                 <input type="checkbox" class="form-control" name="add-dgs" id="add-dgs">
                             </div>
                         </div>
-                       <div class="form-group row">
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="facility-type" id="udc-fac"
+                                       value="point">
+                                <label class="form-check-label" for="udc-fac">Use Point Facilities for DG Facility</label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="facility-type" id="device-fac"
+                                       value="device">
+                                <label class="form-check-label" for="device-fac">Use Device for DG Facility</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
                             <label for="map-dtf" class="col-sm-4 col-form-label">Select DTF</label>
                             <div class="col-sm-8">
                                 <select name="dtf-id" class="form-control" id="map-dtf">
@@ -202,8 +214,8 @@
                     <h2>Import Commands</h2>
                 </div>
                 <div class="card-body">
-                   <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_add_commands' %}"
-                      id="dds-commands">
+                    <form method="post" enctype="multipart/form-data" action="{% url 'files:dds_add_commands' %}"
+                          id="dds-commands">
                         {% csrf_token %}
                         <input hidden name="dds-id" value="{{ dds.pk }}">
                         <div class="form-group row">
@@ -211,13 +223,13 @@
                                 <a href="{% url 'files:command_template' %}">Download Template</a>
                             </div>
                         </div>
-                         <div class="form-group row">
+                        <div class="form-group row">
                             <label for="cmd-data" class="col-sm-4 col-form-label">Commands Excel Import</label>
                             <div class="col-sm-8">
                                 <input type="file" class="form-control" id="cmd-data" name="commands">
                             </div>
                         </div>
-                       <div class="form-group row">
+                        <div class="form-group row">
                             <label for="cmd-dtf" class="col-sm-4 col-form-label">Select DTF</label>
                             <div class="col-sm-8">
                                 <select name="dtf-id" class="form-control" id="cmd-dtf">
@@ -251,7 +263,7 @@
                                 <a href="{% url 'files:facility_import_template' %}">Download Excel Import Template</a>
                             </div>
                         </div>
-                         <div class="form-group row">
+                        <div class="form-group row">
                             <label for="fac-data" class="col-sm-4 col-form-label">Import Excel</label>
                             <div class="col-sm-8">
                                 <input type="file" class="form-control" id="fac-data" name="fac-data">

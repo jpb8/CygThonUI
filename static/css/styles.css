@@ -41,7 +41,7 @@
 }
 
 .file-selector:hover {
-    background: #cde2ff;
+    background: #cde2ff !important;
 }
 
 .file-name {
