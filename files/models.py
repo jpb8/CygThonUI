@@ -202,7 +202,7 @@ class DTF(models.Model):
         return reverse('files:dtf', args=[str(self.pk)])
 
     def import_datagroups(self, excel_data, reg_gap, modbus=False):
-        dgs_data = pd.read_excel(excel_data, sheet_name="Sheet1")
+        dgs_data = pd.read_excel(excel_data, sheet_name="Sheet1", converters={"bit": str})
         return self.xml.import_datagroups(dgs_data, reg_gap, modbus)
 
 
