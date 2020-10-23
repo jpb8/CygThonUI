@@ -226,13 +226,14 @@ class DTF(XmlFile):
         for elem in data_groups:
             arrs["id"].append(elem.tag)
             arrs["niceName"].append(elem.get("niceName"))
-            for died in elem.find("dgElements"):
-                dg_elems["deid"].append(died.tag)
-                dg_elems["array_id"].append(elem.tag)
-                dg_elems["tagName"].append(died.get("tagname"))
-                dg_elems["niceName"].append(died.get("niceName"))
-                dg_elems["desc"].append(died.get("desc"))
-                dg_elems["dataType"].append(died.get("type"))
+            if elem.find("dgElements"):
+                for died in elem.find("dgElements"):
+                    dg_elems["deid"].append(died.tag)
+                    dg_elems["array_id"].append(elem.tag)
+                    dg_elems["tagName"].append(died.get("tagname"))
+                    dg_elems["niceName"].append(died.get("niceName"))
+                    dg_elems["desc"].append(died.get("desc"))
+                    dg_elems["dataType"].append(died.get("type"))
         return self.template_export([arrs, dg_elems])
 
     def import_datagroups(self, data_elements, reg_gap, modbus=False):
