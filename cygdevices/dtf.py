@@ -274,6 +274,7 @@ class DataGroup:
         self.nice_name = nice_name
         self.modbus = modbus
         self.data_name = "regNum" if modbus else "tagname"
+        self.data_name_excel = "reg_num" if modbus else "tagname"
         self.xml = self.create_datagroup_xml()
 
     def create_datagroup_xml(self):
@@ -288,7 +289,7 @@ class DataGroup:
     def add_deids(self, deids, reg_gap):
         dg_elems = self.xml.find("dgElements")
         if self.modbus:
-            analog_df = deids[deids["dtype"] != "boolean"]
+            analog_df = deids[(deids["dtype"] != "boolean") | (deids["bit"].isna())]
         else:
             analog_df = deids[(deids["dtype"] != "boolean") | (deids["bit"].isna())]
         digital_df = deids[(deids["dtype"] == "boolean") & (deids["bit"].notna())]
@@ -301,7 +302,7 @@ class DataGroup:
 
     def _add_analongs(self, dg_elems, analog_df):
         for i, deid in analog_df.iterrows():
-            dataloc = str(deid.get(self.data_name)).strip()
+            dataloc = str(deid.get(self.data_name_excel)).strip()
             desc = str(deid.get("description")).strip()
             dtype = str(deid.get("dtype")).strip()
             udc = str(deid.get("udc")).strip() if not pd.isna(deid.get("udc")) else None
@@ -309,10 +310,7 @@ class DataGroup:
                 attrs = {"desc": desc, "udc": udc, self.data_name: str(dataloc), "type": dtype}
             else:
                 attrs = {"desc": desc, self.data_name: str(dataloc), "type": dtype if dtype != "digital" else "ui2"}
-            if self.modbus:
-                SubElement(dg_elems, "R{}".format(dataloc), attrs)
-            else:
-                SubElement(dg_elems, str(deid.get("deid")).strip(), attrs)
+            SubElement(dg_elems, str(deid.get("deid")).strip(), attrs)
 
     @staticmethod
     def _add_bits(dg_elems, ref):
