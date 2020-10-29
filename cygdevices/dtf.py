@@ -281,7 +281,8 @@ class DataGroup:
         dg = etree.Element(self.name, {
             "niceName": self.nice_name, "canSend": "true", "canRecv": "true", "uccSend": "true", "uccRecv": "true"
         })
-        SubElement(dg, "dgElements", {"type": "r4"})
+        attrs = {"type": "r4"} if not self.modbus else {"type": "r4", "devDG": "false"}
+        SubElement(dg, "dgElements", attrs)
         if self.modbus:
             SubElement(dg, "modbusReadBlocks")
         return dg
@@ -365,7 +366,6 @@ class DataGroup:
         block_number = 1
         register_numbs.sort()
         reg_numb = register_numbs[0]
-        new = False
         for i in range(1, len(register_numbs)):
             if (register_numbs[i] - reg_gap) > register_numbs[i - 1]:
                 reg_cnt = (register_numbs[i - 1] - reg_numb) + 1
@@ -376,13 +376,9 @@ class DataGroup:
                 SubElement(blocks, "block{}".format(block_number), attrs)
                 reg_numb = register_numbs[i]
                 block_number += 1
-                new = True
-            else:
-                new = False
-        if not new:
-            reg_cnt = (register_numbs[-1] - reg_numb) + 1
-            attrs = {
-                "regCnt": str(reg_cnt), "funcCode": "3", "regNum": str(reg_numb), "regOff": "-40001",
-                "regByteLen": "2"
-            }
-            SubElement(blocks, "block{}".format(block_number), attrs)
+        reg_cnt = (register_numbs[-1] - reg_numb) + 1
+        attrs = {
+            "regCnt": str(reg_cnt), "funcCode": "3", "regNum": str(reg_numb), "regOff": "-40001",
+            "regByteLen": "2"
+        }
+        SubElement(blocks, "block{}".format(block_number), attrs)
