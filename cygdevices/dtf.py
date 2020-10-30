@@ -278,11 +278,11 @@ class DataGroup:
         self.xml = self.create_datagroup_xml()
 
     def create_datagroup_xml(self):
-        dg = etree.Element(self.name, {
-            "niceName": self.nice_name, "canSend": "true", "canRecv": "true", "uccSend": "true", "uccRecv": "true"
-        })
-        attrs = {"type": "r4"} if not self.modbus else {"type": "r4", "devDG": "false"}
-        SubElement(dg, "dgElements", attrs)
+        dg_attrs = {"niceName": self.nice_name, "canSend": "true", "canRecv": "true", "uccSend": "true", "uccRecv": "true"}
+        if self.modbus:
+            dg_attrs["devDG"] = "false"
+        dg = etree.Element(self.name, dg_attrs)
+        SubElement(dg, "dgElements", {"type": "r4"})
         if self.modbus:
             SubElement(dg, "modbusReadBlocks")
         return dg
