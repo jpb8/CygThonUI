@@ -33,6 +33,7 @@ urlpatterns = [
     path('dtf/add_array/', add_array, name="add_array"),
     path('dtf/import_arrays/', import_arrays, name="import_arrays"),
     path('dtf/dtf_dg_import/', dtf_data_group_import, name="dtf_dg_import"),
+    path('dtf/dtf_dg_modbus_import/', dtf_data_group_modbus_import, name="dtf_dg_import_modbus"),
     path('dtf/delete_datagroup/', delete_datagroup, name="delete_datagroup"),
     ## TEMPLATES ##
     path('dds/mapping_template/', mapping_template, name="mapping_template"),

@@ -87,7 +87,6 @@ def dtf_data_group_import(request):
         "nice_name": ["Nice Name 1", "Nice Name 2", "Nice Name 2"],
         "deid": ["DEID1", "DEID1", "DEID2"],
         "tagname": ["DeviceTag[0]", "DeviceTag[1]", "DeviceTag[2]"],
-        "reg_num": ["44006", "44002", "44003"],
         "bit": ["", "", "1"],
         "description": ["Test Desc 1", "Test Desc 2", "Test Desc 3"],
         "udc": ["TESTPSI", "TESTDENS", ""],
@@ -97,4 +96,24 @@ def dtf_data_group_import(request):
     workbook = XmlFile.template_export(sheets)
     response = HttpResponse(workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename={}'.format("dtf_dg_import_template.xlsx")
+    return response
+
+def dtf_data_group_modbus_import(request):
+    sheet = {
+        "data_group": ["DG1", "DG2", "DG2"],
+        "nice_name": ["Nice Name 1", "Nice Name 2", "Nice Name 2"],
+        "deid": ["DEID1", "DEID1", "DEID2"],
+        "reg_num": ["44006", "44002", "101"],
+        "bit": ["", "", "1"],
+        "description": ["Test Desc 1", "Test Desc 2", "Test Desc 3"],
+        "udc": ["TESTPSI", "TESTDENS", ""],
+        "dtype": ["i2", "ui4", "boolean"],
+        "offset": ["-40001", "-40001", "-1"],
+        "func_code": ["3", "3", "1"],
+        "reg_byte_len": ["2", "4", "2"],
+    }
+    sheets = [sheet, ]
+    workbook = XmlFile.template_export(sheets)
+    response = HttpResponse(workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename={}'.format("dtf_dg_modbus_import_template.xlsx")
     return response

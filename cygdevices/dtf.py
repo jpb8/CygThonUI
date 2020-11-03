@@ -246,7 +246,7 @@ class DTF(XmlFile):
             deids = data_elements.loc[data_elements["data_group"] == dg]
             nicename = dg
             if "nice_name" in deids:
-               nicename = deids['nice_name'].iloc[0]
+                nicename = deids['nice_name'].iloc[0]
             dg_xml = DataGroup(dg.strip(), nicename.strip(), modbus)
             dg_xml.add_deids(deids, reg_gap)
             data_groups_xml.append(dg_xml.xml)
@@ -278,7 +278,8 @@ class DataGroup:
         self.xml = self.create_datagroup_xml()
 
     def create_datagroup_xml(self):
-        dg_attrs = {"niceName": self.nice_name, "canSend": "true", "canRecv": "true", "uccSend": "true", "uccRecv": "true"}
+        dg_attrs = {"niceName": self.nice_name, "canSend": "true", "canRecv": "true", "uccSend": "true",
+                    "uccRecv": "true"}
         if self.modbus:
             dg_attrs["devDG"] = "false"
         dg = etree.Element(self.name, dg_attrs)
@@ -297,7 +298,8 @@ class DataGroup:
         self._add_analongs(dg_elems, analog_df)
         if self.modbus:
             self._add_digitals_modbus(dg_elems, digital_df)
-            self._add_read_blocks(deids.reg_num.unique(), reg_gap)
+            regs_df = deids[["reg_num", "offset", "func_code", "reg_byte_len"]].drop_duplicates()
+            self._add_read_blocks(regs_df, reg_gap)
         else:
             self._add_digitals(dg_elems, digital_df)
 
@@ -345,7 +347,8 @@ class DataGroup:
     def _add_digitals(self, dg_elems, digital_df):
         registers = digital_df.tagname.unique()
         for i, reg in enumerate(registers):
-            attrs = {"desc": "Dig Reg {}".format(str(reg).strip()), "tagname": str(reg).strip(), "type": "ui4", "hidden": "true"}
+            attrs = {"desc": "Dig Reg {}".format(str(reg).strip()), "tagname": str(reg).strip(), "type": "ui4",
+                     "hidden": "true"}
             reg_deid = "E1_{}".format(str(i))
             SubElement(dg_elems, "E1_{}".format(str(i)), attrs)
             reg_digitals = digital_df[digital_df["tagname"] == reg]
@@ -364,21 +367,30 @@ class DataGroup:
     def _add_read_blocks(self, register_numbs, reg_gap):
         blocks = self.xml.find("modbusReadBlocks")
         block_number = 1
-        register_numbs.sort()
-        reg_numb = register_numbs[0]
-        for i in range(1, len(register_numbs)):
-            if (register_numbs[i] - reg_gap) > register_numbs[i - 1]:
-                reg_cnt = (register_numbs[i - 1] - reg_numb) + 1
+        register_numbs.sort_values(by=["reg_num"], inplace=True, ascending=True)
+        reg_numb = register_numbs["reg_num"].iloc[0]
+        for i in range(1, len(register_numbs.index)):
+            if ((register_numbs["reg_num"].iloc[i] - reg_gap) > register_numbs["reg_num"].iloc[i - 1] or
+                    register_numbs["offset"].iloc[i] != register_numbs["offset"].iloc[i - 1] or
+                    register_numbs["func_code"].iloc[i] != register_numbs["func_code"].iloc[i - 1] or
+                    register_numbs["reg_byte_len"].iloc[i] != register_numbs["reg_byte_len"].iloc[i - 1]):
+                reg_cnt = (register_numbs["reg_num"].iloc[i - 1] - reg_numb) + 1
                 attrs = {
-                    "regCnt": str(reg_cnt), "funcCode": "3", "regNum": str(reg_numb), "regOff": "-40001",
-                    "regByteLen": "2"
+                    "regCnt": str(reg_cnt),
+                    "funcCode": str(register_numbs["func_code"].iloc[i - 1]),
+                    "regNum": str(reg_numb),
+                    "regOff": str(register_numbs["offset"].iloc[i - 1]),
+                    "regByteLen": str(register_numbs["reg_byte_len"].iloc[i - 1])
                 }
                 SubElement(blocks, "block{}".format(block_number), attrs)
-                reg_numb = register_numbs[i]
+                reg_numb = register_numbs["reg_num"].iloc[i]
                 block_number += 1
-        reg_cnt = (register_numbs[-1] - reg_numb) + 1
+        reg_cnt = (register_numbs["reg_num"].iloc[-1] - reg_numb) + 1
         attrs = {
-            "regCnt": str(reg_cnt), "funcCode": "3", "regNum": str(reg_numb), "regOff": "-40001",
-            "regByteLen": "2"
+            "regCnt": str(reg_cnt),
+            "funcCode": str(register_numbs["func_code"].iloc[-1]),
+            "regNum": str(reg_numb),
+            "regOff": str(register_numbs["offset"].iloc[-1]),
+            "regByteLen": str(register_numbs["reg_byte_len"].iloc[-1])
         }
         SubElement(blocks, "block{}".format(block_number), attrs)
