@@ -216,9 +216,10 @@ class DeviceDef(XmlFile):
             log.append("Device {} was not found to add facilities".format(device_id))
         return log
 
-    def add_facility(self, facility, device_id):
+    def add_facility(self, facility, device_id, ordinal=None):
         """
         Adds a facility to the device's FacilityLinks Element
+        :param ordinal: Optional parameter to place Facility in specific Ordinal
         :param facility: Facility to be added
         :param device_id: Device the facilities should be mapped too
         :return: Any errors
@@ -226,8 +227,15 @@ class DeviceDef(XmlFile):
         fac_elem = self.device_facs_element(device_id)
         if fac_elem is not None:
             if fac_elem.find("./FacilityLink[@id='{}']".format(facility)) is None:
-                SubElement(fac_elem, "FacilityLink", {"id": facility, "ordinal": self._ordinal_finder(fac_elem)})
-                outcome = "Facility {} was linkded to {} device".format(facility, device_id)
+                if ordinal is None:
+                    ordinal = self._ordinal_finder(fac_elem)
+                    outcome = "Facility {} was linkded to {} device".format(facility, device_id)
+                elif fac_elem.find("./FacilityLink[@ordinal='{}']".format(str(ordinal))) is not None:
+                    outcome = "Ordinal {} was taken in {} Device for Facility {}".format(ordinal, device_id, facility)
+                    ordinal = self._ordinal_finder(fac_elem)
+                else:
+                    outcome = "Facility {} was linkded to {} device".format(facility, device_id)
+                SubElement(fac_elem, "FacilityLink", {"id": facility, "ordinal": str(ordinal)})
             else:
                 outcome = "{} is already linked in device {}".format(facility, device_id)
         else:
@@ -358,8 +366,8 @@ class DeviceDef(XmlFile):
             service = cmd.get("service", None)
             utype = cmd.get("utype", None)
             value = cmd.get("value", None) if not math.isnan(cmd.get("value")) else False
-            reg_number = cmd.get("reg_number", None) if not math.isnan(cmd.get("reg_number", None)) else False
-            dtype = cmd.get("dtype", None) if not math.isnan(cmd.get("reg_number", None)) else False
+            reg_number = math.isnan(cmd.get("reg_number", None)) if "reg_number" in cmd else False
+            dtype = cmd.get("dtype", None) if "dtype" in cmd else False
             cmd_xml = self.find_command(device_id, name, facility)
             if cmd_xml is None:
                 cmd_xml = self.create_command(device_id, name, facility, cmd.get("description"))
@@ -466,6 +474,7 @@ class DeviceDef(XmlFile):
                     cmd_dict[k].append(v)
                 except KeyError:
                     print(k, v)
+
         cmd_dict = {
             "dev_id": [],
             "comm_id": [],

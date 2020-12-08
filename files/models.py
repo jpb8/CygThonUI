@@ -159,7 +159,10 @@ class DDS(models.Model):
         dds_xml = self.xml
         log = []
         for i, f in facs.iterrows():
-            outcome = dds_xml.add_facility(f["facility"], f["device"])
+            if "ordinal" in f:
+                outcome = dds_xml.add_facility(f["facility"], f["device"], f["ordinal"])
+            else:
+                outcome = dds_xml.add_facility(f["facility"], f["device"])
             log.append({"outcome": outcome})
         dds_xml.save()
         return log

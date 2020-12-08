@@ -37,6 +37,7 @@ def facility_import_template(request):
     sheet = {
         "device": ["TEST_DEV", "TEST2_DEV", "TEST2_DEV"],
         "facility": ["TEST_FAC_ONE", "TEST2_FAC_ONE", "TEST2_FAC_TWO"],
+        "ordinal": ["1", "20", "40"]
     }
     sheets = [sheet, ]
     workbook = XmlFile.template_export(sheets)
@@ -97,6 +98,7 @@ def dtf_data_group_import(request):
     response = HttpResponse(workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename={}'.format("dtf_dg_import_template.xlsx")
     return response
+
 
 def dtf_data_group_modbus_import(request):
     sheet = {
