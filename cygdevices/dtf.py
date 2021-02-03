@@ -213,27 +213,34 @@ class DTF(XmlFile):
                 unused.append({"ARRAY": array_name, "DEID": u})
         return unused
 
-    def create_array_excel(self):
+    def create_array_excel(self, type=None):
         """
         Exports all the of Arrays and DEID for a supplied DTF
         :param array_file_name: Excel file name
         :param deid_file_name: Excel file name
         :return: None
         """
-        data_groups = self.xml.find('dataGroups')
-        arrs = {"id": [], "niceName": []}
-        dg_elems = {"deid": [], "array_id": [], "tagName": [], "niceName": [], "desc": [], "dataType": []}
-        for elem in data_groups:
-            arrs["id"].append(elem.tag)
-            arrs["niceName"].append(elem.get("niceName"))
-            if elem.find("dgElements"):
-                for died in elem.find("dgElements"):
-                    dg_elems["deid"].append(died.tag)
-                    dg_elems["array_id"].append(elem.tag)
-                    dg_elems["tagName"].append(died.get("tagname"))
-                    dg_elems["niceName"].append(died.get("niceName"))
-                    dg_elems["desc"].append(died.get("desc"))
-                    dg_elems["dataType"].append(died.get("type"))
+        if not type:
+            data_groups = self.xml.find('dataGroups')
+            arrs = {"id": [], "niceName": [], "appId": []}
+            dg_elems = {"deid": [], "array_id": [], "tagName": [], "niceName": [], "regNum": [], "desc": [], "dataType": []}
+            for elem in data_groups:
+                arrs["id"].append(elem.tag)
+                arrs["niceName"].append(elem.get("niceName"))
+                arrs["appId"].append(elem.get("appId"))
+                if elem.find("dgElements"):
+                    curr_elm = elem.find("dgElements")
+                    data_type = curr_elm.get("type")
+                    for died in elem.find("dgElements"):
+                        if died.get("type"):
+                            data_type = died.get("type")
+                        dg_elems["deid"].append(died.tag)
+                        dg_elems["array_id"].append(elem.tag)
+                        dg_elems["tagName"].append(died.get("tagname"))
+                        dg_elems["regNum"].append(died.get("regNum"))
+                        dg_elems["niceName"].append(died.get("niceName"))
+                        dg_elems["desc"].append(died.get("desc"))
+                        dg_elems["dataType"].append(data_type)
         return self.template_export([arrs, dg_elems])
 
     def import_datagroups(self, data_elements, reg_gap, modbus=False):
