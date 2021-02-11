@@ -223,7 +223,7 @@ class DTF(XmlFile):
         if not type:
             data_groups = self.xml.find('dataGroups')
             arrs = {"id": [], "niceName": [], "appId": []}
-            dg_elems = {"deid": [], "array_id": [], "tagName": [], "niceName": [], "regNum": [], "desc": [], "dataType": []}
+            dg_elems = {"deid": [], "array_id": [], "tagName": [], "niceName": [], "regNum": [], "desc": [], "dataType": [], "udc": []}
             for elem in data_groups:
                 arrs["id"].append(elem.tag)
                 arrs["niceName"].append(elem.get("niceName"))
@@ -241,6 +241,7 @@ class DTF(XmlFile):
                         dg_elems["niceName"].append(died.get("niceName"))
                         dg_elems["desc"].append(died.get("desc"))
                         dg_elems["dataType"].append(data_type)
+                        dg_elems["udc"].append(died.get("udc"))
         return self.template_export([arrs, dg_elems])
 
     def import_datagroups(self, data_elements, reg_gap, modbus=False):
