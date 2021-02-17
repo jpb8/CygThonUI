@@ -240,7 +240,6 @@ class DTF(XmlFile):
             if elem.find("dgElements"):
                 dg_dict = {"id": elem.tag}
                 dtype = elem.get("type")
-                # loop through each attr in dg element (not sure if this will work)
                 for k, v in elem.items():
                     if k not in dg_keys:
                         dg_keys.append(k)
@@ -248,7 +247,6 @@ class DTF(XmlFile):
                 dg_data.append(dg_dict)
                 for deid in elem.find("dgElements"):
                     deid_dict = {"deid": deid.tag, "array_id": elem.tag}
-                    # loop through each attr in deid element (not sure if this will work)
                     for k, v in deid.items():
                         if k not in deid_keys:
                             deid_keys.append(k)
