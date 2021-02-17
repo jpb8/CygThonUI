@@ -11,6 +11,8 @@
         <button onclick="window.location.href = '{% url 'files:export_dtf_data' %}?id={{ dtf.pk }}';">Export Data to
             Excel!
         </button>
+        <button onclick="window.location.href = '{% url 'files:generic_dtf_data' %}?id={{ dtf.pk }}';">Generic Excel Export
+        </button>
     </div>
     <div class="row">
         <div class="col-sm-8">

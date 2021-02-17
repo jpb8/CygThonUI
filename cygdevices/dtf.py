@@ -213,17 +213,60 @@ class DTF(XmlFile):
                 unused.append({"ARRAY": array_name, "DEID": u})
         return unused
 
+    def _convert_generic_export(self, data, keys):
+        """
+        Converts the data structure from generic_export method to pandas readable data structure
+        start => list of dicts
+        end => dict of lists
+        :param data: List of dictionaries with variable keys
+        :param keys: Unique list of keys in all items in data
+        :return: A dictionary of list
+        """
+        export_data = {}
+        for k in keys:
+            export_data[k] = []
+        for item in data:
+            for k in keys:
+                export_data[k].append(item.get(k, ""))
+        return export_data
+
+    def generic_export(self):
+        data_groups = self.xml.find('dataGroups')
+        deid_keys = ["deid", "array_id"]
+        dg_keys = ["id"]
+        deid_data = []
+        dg_data = []
+        for elem in data_groups:
+            if elem.find("dgElements"):
+                dg_dict = {"id": elem.tag}
+                dtype = elem.get("type")
+                # loop through each attr in dg element (not sure if this will work)
+                for k, v in elem.items():
+                    if k not in dg_keys:
+                        dg_keys.append(k)
+                    dg_dict[k] = v
+                dg_data.append(dg_dict)
+                for deid in elem.find("dgElements"):
+                    deid_dict = {"deid": deid.tag, "array_id": elem.tag}
+                    # loop through each attr in deid element (not sure if this will work)
+                    for k, v in deid.items():
+                        if k not in deid_keys:
+                            deid_keys.append(k)
+                        deid_dict[k] = v
+                    if "type" not in deid_dict:
+                        deid_dict["type"] = dtype
+                    deid_data.append(deid_dict)
+        dg_export_data = self._convert_generic_export(dg_data, dg_keys)
+        deid_export_data = self._convert_generic_export(deid_data, deid_keys)
+        return self.template_export([dg_export_data, deid_export_data])
+
     def create_array_excel(self, type=None):
-        """
-        Exports all the of Arrays and DEID for a supplied DTF
-        :param array_file_name: Excel file name
-        :param deid_file_name: Excel file name
-        :return: None
-        """
+        # TODO: Append read/write block info for modbus
+        arrs = {"id": [], "niceName": [], "appId": []}
+        dg_elems = {"deid": [], "array_id": [], "tagName": [], "niceName": [], "regNum": [], "desc": [], "dataType": [],
+                    "udc": []}
         if not type:
             data_groups = self.xml.find('dataGroups')
-            arrs = {"id": [], "niceName": [], "appId": []}
-            dg_elems = {"deid": [], "array_id": [], "tagName": [], "niceName": [], "regNum": [], "desc": [], "dataType": [], "udc": []}
             for elem in data_groups:
                 arrs["id"].append(elem.tag)
                 arrs["niceName"].append(elem.get("niceName"))

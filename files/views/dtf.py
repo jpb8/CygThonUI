@@ -150,6 +150,19 @@ def export_dtf_data(request):
     return response
 
 
+def generic_dtf_data(request):
+    dtf_id = request.GET.get("id")
+    try:
+        dtf = DTF.objects.get(pk=int(dtf_id))
+    except ObjectDoesNotExist:
+        print("DTF or DDS not found")
+        return redirect("files:upload")
+    workbook = dtf.xml.generic_export()
+    response = HttpResponse(workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename={}'.format("dtf_array_data.xlsx")
+    return response
+
+
 def import_arrays(request):
     if request.method != "POST":
         return redirect("home")
