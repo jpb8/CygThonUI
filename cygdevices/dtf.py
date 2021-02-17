@@ -213,7 +213,8 @@ class DTF(XmlFile):
                 unused.append({"ARRAY": array_name, "DEID": u})
         return unused
 
-    def _convert_generic_export(self, data, keys):
+    @staticmethod
+    def _convert_generic_export(data, keys):
         """
         Converts the data structure from generic_export method to pandas readable data structure
         start => list of dicts
@@ -230,6 +231,17 @@ class DTF(XmlFile):
                 export_data[k].append(item.get(k, ""))
         return export_data
 
+    @staticmethod
+    def _pull_mb_readblocks(dg):
+        rbs = {}
+        if dg.find("modbusReadBlocks"):
+            for rb in dg.find("modbusReadBlocks"):
+                block_num = str(rb.tag).replace("block", "")
+                rbs[block_num] = {}
+                for k, v in rb.items():
+                    rbs[block_num][k] = v
+        return rbs
+
     def generic_export(self):
         data_groups = self.xml.find('dataGroups')
         deid_keys = ["deid", "array_id"]
@@ -237,9 +249,13 @@ class DTF(XmlFile):
         deid_data = []
         dg_data = []
         for elem in data_groups:
+            rbs = {}
+            if elem.find("modbusReadBlocks"):
+                rbs = self._pull_mb_readblocks(elem)
             if elem.find("dgElements"):
+                curr_elm = elem.find("dgElements")
                 dg_dict = {"id": elem.tag}
-                dtype = elem.get("type")
+                dtype = curr_elm.get("type")
                 for k, v in elem.items():
                     if k not in dg_keys:
                         dg_keys.append(k)
@@ -253,6 +269,12 @@ class DTF(XmlFile):
                         deid_dict[k] = v
                     if "type" not in deid_dict:
                         deid_dict["type"] = dtype
+                    if "regDef" in deid_dict:
+                        rb_num = str(deid_dict["regDef"].split(":")[0])
+                        if rb_num in rbs:
+                            deid_dict.update(rbs[rb_num])
+                            for k in rbs[rb_num].keys():
+                                deid_keys.append(k) if k not in deid_keys else deid_keys
                     deid_data.append(deid_dict)
         dg_export_data = self._convert_generic_export(dg_data, dg_keys)
         deid_export_data = self._convert_generic_export(deid_data, deid_keys)
