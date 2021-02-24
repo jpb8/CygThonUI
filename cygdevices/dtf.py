@@ -244,7 +244,7 @@ class DTF(XmlFile):
 
     def generic_export(self):
         data_groups = self.xml.find('dataGroups')
-        deid_keys = ["deid", "array_id"]
+        deid_keys = ["array_id", "deid"]
         dg_keys = ["id"]
         deid_data = []
         dg_data = []
@@ -281,7 +281,6 @@ class DTF(XmlFile):
         return self.template_export([dg_export_data, deid_export_data])
 
     def create_array_excel(self, type=None):
-        # TODO: Append read/write block info for modbus
         arrs = {"id": [], "niceName": [], "appId": []}
         dg_elems = {"deid": [], "array_id": [], "tagName": [], "niceName": [], "regNum": [], "desc": [], "dataType": [],
                     "udc": []}

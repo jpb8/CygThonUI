@@ -94,8 +94,9 @@ class DeviceDef(XmlFile):
             data["udc"] = cmd_comp.find("Param[@key='UDC']").get("value")
         return data
 
-    def device_dg_mappings(self, device_id, array_type):
+    def device_dg_mappings(self, device_id, array_type, ordinal=None):
         """
+        :param ordinal:
         :param device_id: CygNet Device name
         :param array_type: The array name inside the device
         :return: Tuple of the DataGroup UdcMappings Element and Error message
@@ -103,9 +104,14 @@ class DeviceDef(XmlFile):
         dgs = self.device_dgs_element(device_id)
         if dgs is None:
             return None, "Device {} Not Found".format(device_id)
-        if dgs.find('./DataGroup/DataGroupAttributes/[DataGroupType="{}"].../UdcMappings'.format(array_type)) is None:
+        if ordinal:
+            search = f"./DataGroup/DataGroupAttributes/[Ordinal='{str(ordinal)}'][DataGroupType='{array_type}'].../UdcMappings"
+            # search = f"./DataGroup/DataGroupAttributes/[DataGroupType='{array_type}'].../UdcMappings"
+        else:
+            search = f"./DataGroup/DataGroupAttributes/[DataGroupType='{array_type}'].../UdcMappings"
+        if dgs.find(search) is None:
             return None, "Array {} not found in Device {}".format(array_type, device_id)
-        return dgs.find('./DataGroup/DataGroupAttributes/[DataGroupType="{}"].../UdcMappings'.format(array_type)), ""
+        return dgs.find(search), ""
 
     def all_devices(self):
         devices = []
@@ -138,7 +144,7 @@ class DeviceDef(XmlFile):
             maps.append({"ERROR": error})
         return maps
 
-    def add_maps(self, device_id, array_type, maps, create=False, dtf=None, dg_fac_type="device"):
+    def add_maps(self, device_id, array_type, maps, create=False, dtf=None, dg_fac_type="device", ordinal=0):
         """
         Maps all supplied UDCs the given Device's Array.
         Checks all UCDs to see they already exist
@@ -150,16 +156,16 @@ class DeviceDef(XmlFile):
         :param dtf: DTF object
         :return: Any errors
         """
-        mappings, err = self.device_dg_mappings(device_id, array_type)
+        mappings, err = self.device_dg_mappings(device_id, array_type, ordinal)
         errs = []
         if mappings is None:
             if create:
                 desc = dtf.get_array_description(array_type)
                 if desc:
                     dg_facility = device_id if dg_fac_type == "device" else maps[0].fac
-                    dg = self.add_datagroup(desc, array_type, device_id, dg_facility)
+                    dgs = self.add_datagroup(desc, array_type, device_id, dg_facility, ordinal)
                     errs.append("{} DataGroup created for device: {}".format(array_type, device_id))
-                    mappings, err = self.device_dg_mappings(device_id, array_type)
+                    mappings, err = self.device_dg_mappings(device_id, array_type, ordinal)
                 else:
                     errs.append("{} Not Found in DTF".format(array_type))
                     return errs
@@ -181,9 +187,9 @@ class DeviceDef(XmlFile):
                 errs.append("{} {} {} mapping already exists".format(m.udc, m.data_id, m.fac))
         return errs
 
-    def add_datagroup(self, description, data_group_type, device_id, data_group_fac=None):
+    def add_datagroup(self, description, data_group_type, device_id, data_group_fac=None, ordinal="0"):
         fac = device_id if not data_group_fac else data_group_fac
-        dg = DataGroup(description, fac, data_group_type)
+        dg = DataGroup(description, fac, data_group_type, str(ordinal))
         current_dgs = self.device_dgs_element(device_id)
         current_dgs.append(dg.dg_element)
         return current_dgs
@@ -596,7 +602,6 @@ class DeviceDef(XmlFile):
                 for m in data_group.find("UdcMappings"):
                     chck = dtf.check_dg_element(dg_type, m.get("data_element_id"))
                     if not chck:
-                        print(m.get("data_element_id"), m.get("facility"), m.get("UDC"))
                         orphans.append({
                             "device": dev_id,
                             "array": dg_type,
@@ -632,14 +637,17 @@ class DeviceDef(XmlFile):
             if self.check_device(d) is not None:
                 for da in dev_arr:
                     arr_points = dev_points.loc[dev_points['array'] == da]
-                    maps = []
-                    for i, p in arr_points.iterrows():
-                        udc, pnt_err = UdcMap.safe_create(dtfxml, p, da, deid_only)
-                        maps.append(udc) if not pnt_err else errs.append(udc)
-                        facs.append(p["facilityid"]) if p["facilityid"] not in facs else None
-                    map_log = self.add_maps(d, da, maps, add_dgs, dtfxml, dg_fac_type)
-                    fac_log = self.add_facs(facs, d)
-                    errs = errs + map_log + fac_log
+                    ords = arr_points.ordinal.unique()
+                    for ord in ords:
+                        ord_points = arr_points.loc[arr_points['ordinal'] == ord]
+                        maps = []
+                        for i, p in ord_points.iterrows():
+                            udc, pnt_err = UdcMap.safe_create(dtfxml, p, da, deid_only)
+                            maps.append(udc) if not pnt_err else errs.append(udc)
+                            facs.append(p["facilityid"]) if p["facilityid"] not in facs else None
+                        map_log = self.add_maps(d, da, maps, add_dgs, dtfxml, dg_fac_type, ord)
+                        fac_log = self.add_facs(facs, d)
+                        errs = errs + map_log + fac_log
             else:
                 errs.append("Device {} is not in XML".format(d))
         self.save()
@@ -659,7 +667,8 @@ class DeviceDef(XmlFile):
             'tag': ['N40', 'AI_MT_TK_N4X'],
             'register': [0, 0],
             'bit1': [4, 0],
-            'bit2': [5, None]
+            'bit2': [5, None],
+            'ordinal': [0, 1]
         })
         return cls.template_export(sheets)
 
@@ -689,10 +698,11 @@ class DeviceDef(XmlFile):
 
 
 class DataGroup:
-    def __init__(self, description, fac_id, dg_type):
+    def __init__(self, description, fac_id, dg_type, ordinal="0"):
         self.description = description
         self.fac_id = fac_id
         self.dg_type = dg_type
+        self.ordinal = str(ordinal)
         self.dg_element = None
         self.create_element()
 
@@ -703,6 +713,7 @@ class DataGroup:
         root.find("DataGroupAttributes/Description").text = self.description
         root.find("DataGroupAttributes/FacilityId").text = self.fac_id
         root.find("DataGroupAttributes/DataGroupType").text = self.dg_type
+        root.find("DataGroupAttributes/Ordinal").text = self.ordinal
         self.dg_element = root
 
     @property
