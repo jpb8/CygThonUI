@@ -29,6 +29,9 @@ class DTF(XmlFile):
     def check_dg_element(self, array_type, element):
         return True if self.find_dg_element(array_type, element) is not None else False
 
+    def get_data_group(self, array_type):
+        return self.xml.find('dataGroups/{}'.format(array_type))
+
     def get_analog_deid(self, array_name, index, reg):
         """
         :param array_name: CygNet Array Name
@@ -317,10 +320,16 @@ class DTF(XmlFile):
             nicename = dg
             if "nice_name" in deids:
                 nicename = deids['nice_name'].iloc[0]
-            dg_xml = DataGroup(dg.strip(), nicename.strip(), modbus)
-            dg_xml.add_deids(deids, reg_gap)
-            data_groups_xml.append(dg_xml.xml)
-            SubElement(def_data_groups, dg)
+            dg_xml = self.get_data_group(dg)
+            print(dg_xml)
+            if dg_xml is None:
+                dg_xml = DataGroup(dg.strip(), nicename.strip(), modbus)
+                dg_xml.add_deids(deids, reg_gap)
+                data_groups_xml.append(dg_xml.xml)
+                SubElement(def_data_groups, dg)
+            else:
+                dg_xml = DataGroup(dg.strip(), nicename.strip(), modbus, xml=dg_xml)
+                dg_xml.add_deids(deids, reg_gap)
         self.save()
         error_df.fillna('None', inplace=True)
         return error_df.to_dict('records'), self.all_arrays()
@@ -339,13 +348,16 @@ class DTF(XmlFile):
 
 
 class DataGroup:
-    def __init__(self, name, nice_name, modbus=False):
+    def __init__(self, name, nice_name, modbus=False, xml=None):
         self.name = name
         self.nice_name = nice_name
         self.modbus = modbus
         self.data_name = "regNum" if modbus else "tagname"
         self.data_name_excel = "reg_num" if modbus else "tagname"
-        self.xml = self.create_datagroup_xml()
+        if xml is None:
+            self.xml = self.create_datagroup_xml()
+        else:
+            self.xml = xml
 
     def create_datagroup_xml(self):
         dg_attrs = {"niceName": self.nice_name, "canSend": "true", "canRecv": "true", "uccSend": "true",
