@@ -391,10 +391,12 @@ class DataGroup:
             desc = str(deid.get("description")).strip()
             dtype = str(deid.get("dtype")).strip()
             udc = str(deid.get("udc")).strip() if not pd.isna(deid.get("udc")) else None
+            read_only = str(deid.get("read_only")).strip() if not pd.isna(deid.get("read_only")) else None
+            attrs = {"desc": desc, self.data_name: str(dataloc), "type": dtype if dtype != "digital" else "ui2"}
             if udc:
-                attrs = {"desc": desc, "udc": udc, self.data_name: str(dataloc), "type": dtype}
-            else:
-                attrs = {"desc": desc, self.data_name: str(dataloc), "type": dtype if dtype != "digital" else "ui2"}
+                attrs["udc"] = udc
+            if read_only is not None:
+                attrs["readOnly"] = "true" if read_only else "false"
             SubElement(dg_elems, str(deid.get("deid")).strip(), attrs)
 
     @staticmethod
