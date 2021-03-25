@@ -152,13 +152,14 @@ def mapping_export(request):
 def mapping_export_with_regs(request):
     dds_id = request.POST.get("dds-id")
     dtf_id = request.POST.get("dtf-id")
+    generic = True if "generic" in request.POST else False
     try:
         dds = DDS.objects.get(pk=int(dds_id))
         dtf = DTF.objects.get(pk=int(dtf_id))
     except ObjectDoesNotExist:
         print("DTF or DDS not found")
         return redirect("files:upload")
-    workbook = dds.xml.export_mappings(dtf.xml)
+    workbook = dds.xml.export_mappings(dtf.xml, generic)
     response = HttpResponse(workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename={}'.format("dds_mappings_export.xlsx")
     return response

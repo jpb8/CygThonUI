@@ -99,6 +99,12 @@
                                 {% endfor %}
                                 {% endif %}
                             </select>
+                            <div class="form-group row">
+                                <label for="generic" class="col-sm-4 col-form-label">Generic TLP Data Groups?</label>
+                                <div class="col-sm-8">
+                                    <input type="checkbox" class="form-control" name="generic" id="generic">
+                                </div>
+                            </div>
                             <input hidden name="dds-id" value="{{ dds.pk }}">
                             <button class="btn btn-primary" type="submit">GO</button>
                         </form>

@@ -321,7 +321,6 @@ class DTF(XmlFile):
             if "nice_name" in deids:
                 nicename = deids['nice_name'].iloc[0]
             dg_xml = self.get_data_group(dg)
-            print(dg_xml)
             if dg_xml is None:
                 dg_xml = DataGroup(dg.strip(), nicename.strip(), modbus)
                 dg_xml.add_deids(deids, reg_gap)

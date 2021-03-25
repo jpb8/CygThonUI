@@ -41,6 +41,17 @@ class DeviceDef(XmlFile):
         return self.device_uis_element(device).find(
             "./UisCommand/CommandAttributes/[Name='{}'][Facility='{}']/..".format(cmd_name, fac))
 
+    @staticmethod
+    def get_generic_deid_data(data_group_xml, deid):
+        gen_deid = data_group_xml.find(f"MetaData/DgDataStore/DgDefinition/GenTLP/dgElements/{deid}")
+        if gen_deid is not None:
+            tlp_type = gen_deid.get("tlpType")
+            tlp_log = gen_deid.get("tlpLog")
+            tlp_parm = gen_deid.get("tlpParm")
+        else:
+            tlp_type, tlp_log, tlp_parm = "", "", ""
+        return tlp_type, tlp_log, tlp_parm
+
     def find_command_component(self, device, cmd_name, fac, component):
         if self.find_command(device, cmd_name, fac) is None:
             return None
@@ -248,7 +259,7 @@ class DeviceDef(XmlFile):
             outcome = "Device {} was not found to add facilities".format(device_id)
         return outcome
 
-    def export_data(self, dtf_xml=False):
+    def export_data(self, dtf_xml=False, generic=False):
         """
         Export all UIS mappings for easy validation
         :return: Pandas DF of all UIS mappings
@@ -258,6 +269,7 @@ class DeviceDef(XmlFile):
             "comm_id": [],
             "desc": [],
             "dg_type": [],
+            "dg_ord": [],
             "deid": [],
             "last_char": [],
             "fac": [],
@@ -267,12 +279,17 @@ class DeviceDef(XmlFile):
             "bit2": [],
             "dtype": []
         }
+        if generic:
+            devs_dict["tlp_type"] = []
+            devs_dict["tlp_log"] = []
+            devs_dict["tlp_parm"] = []
         for elem in self.xml:
             dev_id = elem.get("device_id")
             comm_id = elem.find("DeviceAttributes/CommunicationId1").text
             for data_group in elem.find("DataGroups"):
                 desc = data_group.find("DataGroupAttributes/Description").text
                 dg_type = data_group.find("DataGroupAttributes/DataGroupType").text
+                dg_ord = data_group.find("DataGroupAttributes/Ordinal").text
                 for m in data_group.find("UdcMappings"):
                     deid = m.get("data_element_id")
                     dtype = ""
@@ -281,10 +298,13 @@ class DeviceDef(XmlFile):
                         dtype = dtf_xml.deid_datatype(dg_type, deid)
                     else:
                         reg = bit = bit2 = ""
+                    if generic:
+                        tlp_type, tlp_log, tlp_parm = self.get_generic_deid_data(data_group, deid)
                     devs_dict["dev_id"].append(dev_id)
                     devs_dict["comm_id"].append(comm_id)
                     devs_dict["desc"].append(desc)
                     devs_dict["dg_type"].append(dg_type)
+                    devs_dict["dg_ord"].append(dg_ord)
                     devs_dict["deid"].append(deid)
                     devs_dict["last_char"].append(deid[-2:])
                     devs_dict["fac"].append(m.get("facility"))
@@ -293,7 +313,20 @@ class DeviceDef(XmlFile):
                     devs_dict["bit1"].append(bit if bit else "")
                     devs_dict["bit2"].append(bit2 if bit2 else "")
                     devs_dict["dtype"].append(dtype if dtype else "")
+                    if generic:
+                        devs_dict["tlp_type"].append(tlp_type)
+                        devs_dict["tlp_log"].append(tlp_log)
+                        devs_dict["tlp_parm"].append(tlp_parm)
         return pd.DataFrame(data=devs_dict)
+
+    def export_dg_elements(self):
+        for elem in self.xml:
+            dev_id = elem.get("device_id")
+            comm_id = elem.find("DeviceAttributes/CommunicationId1").text
+            for data_group in elem.find("DataGroups"):
+                desc = data_group.find("DataGroupAttributes/Description").text
+                dg_type = data_group.find("DataGroupAttributes/DataGroupType").text
+                dg_ord = data_group.find("DataGroupAttributes/Ordinal").text
 
     @staticmethod
     def _mapping_validator(pnts, point, tag, bit=False, bit2=False):
@@ -684,8 +717,8 @@ class DeviceDef(XmlFile):
         })
         return cls.template_export(sheets)
 
-    def export_mappings(self, dtf_xml=None):
-        df_pnt = self.export_data(dtf_xml)
+    def export_mappings(self, dtf_xml=False, generic=False):
+        df_pnt = self.export_data(dtf_xml, generic)
         df_cmd = self.uis_commands(dtf_xml)
         sio = BytesIO()
         writer = pd.ExcelWriter(sio, engine="xlsxwriter")
