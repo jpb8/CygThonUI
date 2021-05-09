@@ -402,7 +402,7 @@ class DataGroup:
     def _add_bits(dg_elems, ref):
         for i in range(0, 16):
             bit_str = "0{}".format(i) if i < 10 else str(i)
-            attrs = {"desc": "Reg {} bit {}".format(ref, bit_str), "ref": ref, "bPos": str(i), "type": "Boolean"}
+            attrs = {"desc": "Reg {} bit {}".format(ref, bit_str), "ref": ref, "bPos": str(i), "type": "boolean"}
             SubElement(dg_elems, "{}B{}".format(ref, bit_str), attrs)
 
     def _add_digitals_modbus(self, dg_elems, digital_df):
@@ -419,12 +419,12 @@ class DataGroup:
                     desc = bit_row.get("description")
                     udc = bit_row.get("udc") if not pd.isna(bit_row.get("udc")) else None
                     if udc:
-                        attrs = {"desc": desc, "ref": "R{}".format(reg), "bPos": str(i), "type": "Boolean", "udc": udc}
+                        attrs = {"desc": desc, "ref": "R{}".format(reg), "bPos": str(i), "type": "boolean", "udc": udc}
                     else:
-                        attrs = {"desc": desc, "ref": "R{}".format(reg), "bPos": str(i), "type": "Boolean"}
+                        attrs = {"desc": desc, "ref": "R{}".format(reg), "bPos": str(i), "type": "boolean"}
                 else:
                     attrs = {"desc": "Reg {} Bit {}".format(reg, bit_str),
-                             "ref": "R{}".format(reg), "bPos": str(i), "type": "Boolean"}
+                             "ref": "R{}".format(reg), "bPos": str(i), "type": "boolean"}
                 SubElement(dg_elems, "R{}B{}".format(reg, bit_str), attrs)
 
     def _add_digitals(self, dg_elems, digital_df):
