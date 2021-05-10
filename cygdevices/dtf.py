@@ -367,6 +367,7 @@ class DataGroup:
         SubElement(dg, "dgElements", {"type": "r4"})
         if self.modbus:
             SubElement(dg, "modbusReadBlocks")
+            SubElement(dg, "modbusWriteBlocks")
         return dg
 
     def add_deids(self, deids, reg_gap):
@@ -381,6 +382,7 @@ class DataGroup:
             self._add_digitals_modbus(dg_elems, digital_df)
             regs_df = deids[["reg_num", "offset", "func_code", "reg_byte_len"]].drop_duplicates()
             self._add_read_blocks(regs_df, reg_gap)
+            self._add_write_blocks(regs_df, reg_gap)
         else:
             self._add_digitals(dg_elems, digital_df)
 
@@ -410,22 +412,17 @@ class DataGroup:
         for reg in registers:
             attrs = {"desc": "Digital Registers {}".format(reg), "regNum": str(reg), "type": "ui2"}
             SubElement(dg_elems, "R{}".format(reg), attrs)
-            reg_digitals = digital_df[digital_df["reg_num"] == reg]
-            bits = reg_digitals.bit.unique()
-            for i in range(0, 16):
-                bit_str = "0{}".format(i) if i < 10 else str(i)
-                if i in bits:
-                    bit_row = reg_digitals[reg_digitals["bit"] == i].iloc[0]
-                    desc = bit_row.get("description")
-                    udc = bit_row.get("udc") if not pd.isna(bit_row.get("udc")) else None
-                    if udc:
-                        attrs = {"desc": desc, "ref": "R{}".format(reg), "bPos": str(i), "type": "boolean", "udc": udc}
-                    else:
-                        attrs = {"desc": desc, "ref": "R{}".format(reg), "bPos": str(i), "type": "boolean"}
+            reg_digitals = digital_df.loc[digital_df["reg_num"] == reg]
+            for i, bit in reg_digitals.iterrows():
+                desc = bit.get("description")
+                udc = bit.get("udc") if not pd.isna(bit.get("udc")) else None
+                deid = bit.get("deid") if not pd.isna(bit.get("deid")) else None
+                bit_num = bit.get("bit") if not pd.isna(bit.get("bit")) else None
+                if udc:
+                    attrs = {"desc": desc, "ref": "R{}".format(reg), "bPos": str(bit_num), "type": "boolean", "udc": udc}
                 else:
-                    attrs = {"desc": "Reg {} Bit {}".format(reg, bit_str),
-                             "ref": "R{}".format(reg), "bPos": str(i), "type": "boolean"}
-                SubElement(dg_elems, "R{}B{}".format(reg, bit_str), attrs)
+                    attrs = {"desc": desc, "ref": "R{}".format(reg), "bPos": str(bit_num), "type": "boolean"}
+                SubElement(dg_elems, deid, attrs)
 
     def _add_digitals(self, dg_elems, digital_df):
         registers = digital_df.tagname.unique()
@@ -472,6 +469,37 @@ class DataGroup:
         attrs = {
             "regCnt": str(reg_cnt),
             "funcCode": str(register_numbs["func_code"].iloc[-1]),
+            "regNum": str(reg_numb),
+            "regOff": str(register_numbs["offset"].iloc[-1]),
+            "regByteLen": str(register_numbs["reg_byte_len"].iloc[-1])
+        }
+        SubElement(blocks, "block{}".format(block_number), attrs)
+
+    def _add_write_blocks(self, register_numbs, reg_gap):
+        blocks = self.xml.find("modbusWriteBlocks")
+        block_number = 1
+        register_numbs.sort_values(by=["reg_num"], inplace=True, ascending=True)
+        reg_numb = register_numbs["reg_num"].iloc[0]
+        for i in range(1, len(register_numbs.index)):
+            if ((register_numbs["reg_num"].iloc[i] - reg_gap) > register_numbs["reg_num"].iloc[i - 1] or
+                    register_numbs["offset"].iloc[i] != register_numbs["offset"].iloc[i - 1] or
+                    register_numbs["func_code"].iloc[i] != register_numbs["func_code"].iloc[i - 1] or
+                    register_numbs["reg_byte_len"].iloc[i] != register_numbs["reg_byte_len"].iloc[i - 1]):
+                reg_cnt = (register_numbs["reg_num"].iloc[i - 1] - reg_numb) + 1
+                attrs = {
+                    "regCnt": str(reg_cnt),
+                    "funcCode": "16" if str(register_numbs["func_code"].iloc[i - 1]) == "4" else "15",
+                    "regNum": str(reg_numb),
+                    "regOff": str(register_numbs["offset"].iloc[i - 1]),
+                    "regByteLen": str(register_numbs["reg_byte_len"].iloc[i - 1])
+                }
+                SubElement(blocks, "block{}".format(block_number), attrs)
+                reg_numb = register_numbs["reg_num"].iloc[i]
+                block_number += 1
+        reg_cnt = (register_numbs["reg_num"].iloc[-1] - reg_numb) + 1
+        attrs = {
+            "regCnt": str(reg_cnt),
+            "funcCode": "16" if str(register_numbs["func_code"].iloc[-1]) == "4" else "15",
             "regNum": str(reg_numb),
             "regOff": str(register_numbs["offset"].iloc[-1]),
             "regByteLen": str(register_numbs["reg_byte_len"].iloc[-1])
